@@ -1,17 +1,41 @@
-import { Router, type Request, type Response } from 'express';
+import { Router } from 'express';
+import { showAdminLogin, handleAdminLogin } from '../controllers/authController.js';
+import { showDashboard } from '../controllers/adminDashboardController.js';
+import {
+  listProducts, showAddProduct, handleAddProduct,
+  showEditProduct, handleEditProduct, handleDeleteProduct
+} from '../controllers/adminProductController.js';
+import { listOrders, showOrderDetail, handleUpdateStatus } from '../controllers/adminOrderController.js';
+import { listCustomers, showCustomerDetail } from '../controllers/adminUserController.js';
+import { requireAdmin } from '../middleware/adminMiddleware.js';
 
 const router = Router();
 
-router.get('/', (req: Request, res: Response) => {
-  res.render('admin/dashboard', { title: 'Admin Dashboard' });
-});
+// ── Admin Auth ────────────────────────────────────────────────
+router.get('/login',  showAdminLogin);
+router.post('/login', handleAdminLogin);
 
-router.get('/products', (req: Request, res: Response) => {
-  res.render('admin/products', { title: 'Admin Products' });
-});
+// All routes below require admin session
+router.use(requireAdmin);
 
-router.get('/orders', (req: Request, res: Response) => {
-  res.render('admin/orders', { title: 'Admin Orders' });
-});
+// ── Dashboard ─────────────────────────────────────────────────
+router.get('/', showDashboard);
+
+// ── Products ──────────────────────────────────────────────────
+router.get('/products',           listProducts);
+router.get('/products/add',       showAddProduct);
+router.post('/products/add',      handleAddProduct);
+router.get('/products/:id/edit',  showEditProduct);
+router.post('/products/:id/edit', handleEditProduct);
+router.post('/products/:id/delete', handleDeleteProduct);
+
+// ── Orders ────────────────────────────────────────────────────
+router.get('/orders',             listOrders);
+router.get('/orders/:id',         showOrderDetail);
+router.post('/orders/:id/status', handleUpdateStatus);
+
+// ── Customers ─────────────────────────────────────────────────
+router.get('/customers',          listCustomers);
+router.get('/customers/:id',      showCustomerDetail);
 
 export default router;

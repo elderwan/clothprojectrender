@@ -1,9 +1,12 @@
 import express, { Request, Response, NextFunction } from 'express';
+import session from 'express-session';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import dotenv from 'dotenv';
 import clientRouter from './routes/clientRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
+import { injectUser } from './middleware/authMiddleware.js';
+import './types/session.js'; // session type augmentation
 
 dotenv.config();
 
@@ -24,13 +27,24 @@ app.use(express.static(join(__dirname, '../public')));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'maison-secret-change-in-prod',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 }, // 24 hours
+}));
+
+// Inject user into all templates
+app.use(injectUser);
+
 // Routes
 app.use('/', clientRouter);
 app.use('/admin', adminRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
-  res.status(404).send('404 - Page Not Found');
+  res.status(404).render('404', { title: '404' });
 });
 
 // Error handler
