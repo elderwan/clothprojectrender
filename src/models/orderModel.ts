@@ -4,7 +4,7 @@ import type { Order, OrderItem, CreateOrderInput } from '../types/order.js';
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*, products(name, image_url))')
+    .select('*, order_items(*, products(name))')
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
@@ -14,7 +14,7 @@ export async function getOrdersByUser(userId: string): Promise<Order[]> {
 export async function getOrderById(id: string): Promise<Order | null> {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, order_items(*, products(name, image_url)), users(email, full_name)')
+    .select('*, order_items(*, products(name)), users(email, full_name)')
     .eq('id', id)
     .single();
   if (error) return null;
@@ -26,7 +26,6 @@ export async function getOrderById(id: string): Promise<Order | null> {
     items: (row.order_items ?? []).map((i: any) => ({
       ...i,
       product_name:  i.products?.name,
-      product_image: i.products?.image_url,
     })),
   };
 }
@@ -66,7 +65,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 
   const { data: order, error: oErr } = await supabase
     .from('orders')
-    .insert({ user_id: input.user_id, total_amount: total, status: 'pending' })
+    .insert({ user_id: input.user_id, address_id: input.address_id ?? null, total_amount: total, status: 'pending' })
     .select()
     .single();
   if (oErr) throw new Error(oErr.message);

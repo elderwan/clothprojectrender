@@ -7,7 +7,7 @@ import { showCart, postAddToCart, postUpdateQty, postRemoveItem } from '../contr
 import {
   postPlaceOrder, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
-import { showProfile, postUpdateProfile } from '../controllers/userController.js';
+import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 
 const router = Router();
@@ -41,7 +41,12 @@ router.get('/orders',                requireAuth, showOrderHistory);
 router.get('/orders/:id',            requireAuth, showOrderDetail);
 
 // ── Profile ───────────────────────────────────────────────────
-router.get('/profile',   requireAuth, showProfile);
-router.post('/profile',  requireAuth, postUpdateProfile);
+router.get('/profile',                requireAuth, showProfile);
+router.post('/profile',               requireAuth, postUpdateProfile);
+
+// ── Addresses ─────────────────────────────────────────────────
+router.post('/addresses',             requireAuth, postAddAddress);
+router.post('/addresses/:id/edit',    requireAuth, postEditAddress);
+router.post('/addresses/:id/delete',  requireAuth, postDeleteAddress);
 
 export default router;

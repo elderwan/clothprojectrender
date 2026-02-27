@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import {
   adminGetAllProducts, adminGetProductById, createProduct, updateProduct, deleteProduct
 } from '../services/adminProductService.js';
+import { setProductImages } from '../models/productImageModel.js';
 import { supabase } from '../../data/supabaseClient.js';
 
 export async function listProducts(req: Request, res: Response): Promise<void> {
@@ -17,14 +18,25 @@ export async function showAddProduct(req: Request, res: Response): Promise<void>
 
 export async function handleAddProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity, image_url } = req.body;
-    await createProduct({
-      name, description, price: Number(price),
-      category_id: category_id || null,
+    const { name, description, price, category_id, stock_quantity } = req.body;
+    // image_urls is a newline-separated list of URLs
+    const imageUrls: string[] = (req.body.image_urls ?? '')
+      .split('\n')
+      .map((u: string) => u.trim())
+      .filter(Boolean);
+
+    const product = await createProduct({
+      name, description,
+      price:          Number(price),
+      category_id:    category_id || null,
       stock_quantity: Number(stock_quantity) || 0,
-      image_url: image_url || null,
-      is_active: true,
+      is_active:      true,
     });
+
+    if (imageUrls.length > 0) {
+      await setProductImages(product.id, imageUrls);
+    }
+
     res.redirect('/admin/products');
   } catch (err: any) {
     const { data: categories } = await supabase.from('categories').select('*').order('name');
@@ -41,13 +53,22 @@ export async function showEditProduct(req: Request, res: Response): Promise<void
 
 export async function handleEditProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity, image_url } = req.body;
+    const { name, description, price, category_id, stock_quantity } = req.body;
+    const imageUrls: string[] = (req.body.image_urls ?? '')
+      .split('\n')
+      .map((u: string) => u.trim())
+      .filter(Boolean);
+
     await updateProduct(req.params.id, {
-      name, description, price: Number(price),
-      category_id: category_id || null,
+      name, description,
+      price:          Number(price),
+      category_id:    category_id || null,
       stock_quantity: Number(stock_quantity) || 0,
-      image_url: image_url || null,
     });
+
+    // Always overwrite images (empty textarea = remove all)
+    await setProductImages(req.params.id, imageUrls);
+
     res.redirect('/admin/products');
   } catch (err: any) {
     res.redirect('/admin/products?error=' + encodeURIComponent(err.message));
@@ -58,3 +79,4 @@ export async function handleDeleteProduct(req: Request, res: Response): Promise<
   await deleteProduct(req.params.id);
   res.redirect('/admin/products');
 }
+

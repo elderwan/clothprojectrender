@@ -23,3 +23,22 @@ export interface LoginInput {
   email: string;
   password: string;
 }
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  label: string;
+  full_name: string;
+  phone?: string;
+  address_line1: string;
+  address_line2?: string;
+  city: string;
+  state?: string;
+  postal_code: string;
+  country: string;
+  is_default: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type CreateAddressInput = Omit<UserAddress, 'id' | 'created_at' | 'updated_at'>;

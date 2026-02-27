@@ -3,6 +3,7 @@ export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | '
 export interface Order {
   id: string;
   user_id: string;
+  address_id?: string;
   status: OrderStatus;
   total_amount: number;
   created_at?: string;
@@ -28,5 +29,6 @@ export interface OrderItem {
 
 export interface CreateOrderInput {
   user_id: string;
+  address_id?: string;
   items: Array<{ product_id: string; quantity: number; size?: string }>;
 }

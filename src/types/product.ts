@@ -1,13 +1,25 @@
+export interface ProductImage {
+  id: string;
+  product_id: string;
+  url: string;
+  alt_text?: string;
+  sort_order: number;
+  is_primary: boolean;
+  created_at?: string;
+}
+
 export interface Product {
   id: string;
   name: string;
   description?: string;
   price: number;
   category_id?: string;
-  category?: string;    // joined category name
+  category?: string;           // joined category name
   stock_quantity: number;
-  image_url?: string;
   is_active: boolean;
   created_at?: string;
   updated_at?: string;
+  // populated when loaded with images
+  images?: ProductImage[];
+  primary_image?: string;      // convenience: URL of the primary image
 }
