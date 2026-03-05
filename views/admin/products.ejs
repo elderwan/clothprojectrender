@@ -15,7 +15,7 @@
 
     <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
       <div class="flex items-center justify-between">
-        <h1 class="font-serif text-[44px] leading-none">Product Management</h1>
+        <h1 class="font-serif text-[28px] sm:text-[32px] lg:text-[44px] leading-none">Product Management</h1>
         <a class="inline-flex h-10 w-[166px] items-center justify-center border border-black bg-black text-[12px] font-semibold text-white hover:bg-zinc-800" href="/admin/products/add">+ ADD PRODUCT</a>
       </div>
       <div class="mt-3 border-t border-zinc-300"></div>
@@ -26,7 +26,7 @@
           <input
             name="q"
             value="<%= filters?.q || '' %>"
-            class="mt-1 h-11 w-[300px] border border-zinc-300 bg-zinc-100 px-3 text-[13px]"
+            class="mt-1 h-11 w-full sm:w-[300px] border border-zinc-300 bg-zinc-100 px-3 text-[13px]"
             type="text"
             placeholder="Name or description"
           />
@@ -66,10 +66,10 @@
           <thead class="bg-zinc-200 text-left text-[12px] font-semibold">
             <tr>
               <th class="px-4 py-3">Product</th>
-              <th class="px-4 py-3">Category</th>
-              <th class="px-4 py-3">Audience</th>
+              <th class="px-4 py-3 hidden md:table-cell">Category</th>
+              <th class="px-4 py-3 hidden md:table-cell">Audience</th>
               <th class="px-4 py-3">Price</th>
-              <th class="px-4 py-3">Stock</th>
+              <th class="px-4 py-3 hidden md:table-cell">Stock</th>
               <th class="px-4 py-3">Active</th>
               <th class="px-4 py-3 text-right">Actions</th>
             </tr>
@@ -90,10 +90,10 @@
                   <p class="font-medium"><%= p.name %></p>
                 </div>
               </td>
-              <td class="px-4 py-3"><%= p.category || '-' %></td>
-              <td class="px-4 py-3 capitalize"><%= p.audience || '-' %></td>
+              <td class="px-4 py-3 hidden md:table-cell"><%= p.category || '-' %></td>
+              <td class="px-4 py-3 hidden md:table-cell capitalize"><%= p.audience || '-' %></td>
               <td class="px-4 py-3">$<%= Number(p.price || 0).toFixed(2) %></td>
-              <td class="px-4 py-3"><%= p.stock_quantity %></td>
+              <td class="px-4 py-3 hidden md:table-cell"><%= p.stock_quantity %></td>
               <td class="px-4 py-3"><%= p.is_active ? 'Yes' : 'No' %></td>
               <td class="px-4 py-3 text-right">
                 <div class="flex justify-end gap-2">
