@@ -1,3 +1,5 @@
+export type ProductAudience = 'men' | 'women' | 'kids';
+
 export interface ProductImage {
   id: string;
   product_id: string;
@@ -18,6 +20,7 @@ export interface Product {
   category?: string;           // joined category name
   stock_quantity: number;
   is_active: boolean;
+  audience: ProductAudience;
   del_flg: boolean;
   created_at?: string;
   updated_at?: string;

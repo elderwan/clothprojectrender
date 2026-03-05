@@ -19,12 +19,23 @@ function validateProductPayload(body: Record<string, unknown>): { price: number;
   return { price, stock };
 }
 
+function parseAudience(value: unknown): 'men' | 'women' | 'kids' {
+  const audience = String(value ?? '').trim().toLowerCase();
+  if (audience !== 'men' && audience !== 'women' && audience !== 'kids') {
+    throw new Error('Audience is required (men, women, kids).');
+  }
+  return audience;
+}
+
 export async function listProducts(req: Request, res: Response): Promise<void> {
   const activeRaw = String(req.query.active ?? 'all');
   const filters = {
     q: String(req.query.q ?? '').trim(),
     category_id: String(req.query.category_id ?? '').trim(),
     active: (activeRaw === 'true' || activeRaw === 'false' ? activeRaw : 'all') as 'all' | 'true' | 'false',
+    audience: (['men', 'women', 'kids'].includes(String(req.query.audience ?? '').toLowerCase())
+      ? String(req.query.audience).toLowerCase()
+      : 'all') as 'all' | 'men' | 'women' | 'kids',
   };
   const products = await adminSearchProducts(filters);
   const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
@@ -40,6 +51,7 @@ export async function handleAddProduct(req: Request, res: Response): Promise<voi
   try {
     const { name, description, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
+    const audience = parseAudience(req.body.audience);
     // image_urls supports URL list and base64 data URI list (one per line).
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
@@ -48,6 +60,7 @@ export async function handleAddProduct(req: Request, res: Response): Promise<voi
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,
+      audience,
       is_active:      is_active === 'on',
     });
 
@@ -73,6 +86,7 @@ export async function handleEditProduct(req: Request, res: Response): Promise<vo
   try {
     const { name, description, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
+    const audience = parseAudience(req.body.audience);
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
     await updateProduct(req.params.id, {
@@ -80,6 +94,7 @@ export async function handleEditProduct(req: Request, res: Response): Promise<vo
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,
+      audience,
       is_active:      is_active === 'on',
     });
 

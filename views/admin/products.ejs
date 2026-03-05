@@ -48,6 +48,15 @@
             <option value="false" <%= filters?.active === 'false' ? 'selected' : '' %>>No</option>
           </select>
         </div>
+        <div>
+          <label class="block text-[12px] text-zinc-500">Audience</label>
+          <select name="audience" class="mt-1 h-11 w-[140px] border border-zinc-300 bg-zinc-100 px-3 text-[13px]">
+            <option value="all" <%= (filters?.audience || 'all') === 'all' ? 'selected' : '' %>>All</option>
+            <option value="men" <%= filters?.audience === 'men' ? 'selected' : '' %>>Men</option>
+            <option value="women" <%= filters?.audience === 'women' ? 'selected' : '' %>>Women</option>
+            <option value="kids" <%= filters?.audience === 'kids' ? 'selected' : '' %>>Kids</option>
+          </select>
+        </div>
         <button class="inline-flex h-11 items-center border border-black bg-black px-4 text-[12px] font-semibold text-white hover:bg-zinc-800" type="submit">Search</button>
         <a class="inline-flex h-11 items-center border border-zinc-400 px-4 text-[12px] font-semibold text-zinc-700 hover:bg-zinc-200" href="/admin/products">Reset</a>
       </form>
@@ -58,6 +67,7 @@
             <tr>
               <th class="px-4 py-3">Product</th>
               <th class="px-4 py-3">Category</th>
+              <th class="px-4 py-3">Audience</th>
               <th class="px-4 py-3">Price</th>
               <th class="px-4 py-3">Stock</th>
               <th class="px-4 py-3">Active</th>
@@ -66,7 +76,7 @@
           </thead>
           <tbody>
           <% if (!products.length) { %>
-            <tr><td colspan="6" class="px-4 py-6 text-zinc-500">No products found.</td></tr>
+            <tr><td colspan="7" class="px-4 py-6 text-zinc-500">No products found.</td></tr>
           <% } %>
           <% products.forEach((p) => { %>
             <tr class="border-t border-zinc-200">
@@ -81,6 +91,7 @@
                 </div>
               </td>
               <td class="px-4 py-3"><%= p.category || '-' %></td>
+              <td class="px-4 py-3 capitalize"><%= p.audience || '-' %></td>
               <td class="px-4 py-3">$<%= Number(p.price || 0).toFixed(2) %></td>
               <td class="px-4 py-3"><%= p.stock_quantity %></td>
               <td class="px-4 py-3"><%= p.is_active ? 'Yes' : 'No' %></td>
