@@ -1,8 +1,11 @@
 import { getAllProducts, getProductById } from '../models/productModel.js';
 import type { Product } from '../types/product.js';
 
-export async function getAllProductsService(categorySlug?: string): Promise<Product[]> {
-  return getAllProducts(categorySlug, false);
+export async function getAllProductsService(
+  categorySlug?: string,
+  audience?: 'men' | 'women' | 'kids'
+): Promise<Product[]> {
+  return getAllProducts(categorySlug, false, audience);
 }
 
 export async function getProductByIdService(id: string): Promise<Product | null> {

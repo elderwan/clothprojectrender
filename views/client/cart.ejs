@@ -22,7 +22,7 @@
           <% } else { %>
             <a href="/login" class="hover:text-gray-600">Account</a>
           <% } %>
-          <a href="#" class="hover:text-gray-600">Search</a>
+          <a href="/products" class="hover:text-gray-600">Search</a>
         </nav>
       </div>
     </div>
@@ -61,12 +61,22 @@
                   <div class="flex items-center gap-2">
                     <p class="text-[11px] text-[#737373]">Qty:</p>
                     <div class="flex items-center">
-                      <button class="w-[36px] h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[16px]">-</button>
+                      <form method="POST" action="/cart/update" class="inline">
+                        <input type="hidden" name="id" value="<%= item.id %>" />
+                        <input type="hidden" name="quantity" value="<%= Math.max(1, Number(item.quantity || 1) - 1) %>" />
+                        <button type="submit" class="w-[36px] h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[16px]">-</button>
+                      </form>
                       <span class="w-[20px] text-center text-[13px]"><%= item.quantity %></span>
-                      <button class="w-[36px] h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[16px]">+</button>
+                      <form method="POST" action="/cart/update" class="inline">
+                        <input type="hidden" name="id" value="<%= item.id %>" />
+                        <input type="hidden" name="quantity" value="<%= Number(item.quantity || 1) + 1 %>" />
+                        <button type="submit" class="w-[36px] h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[16px]">+</button>
+                      </form>
                     </div>
                   </div>
-                  <a href="#" class="text-[11px] text-[#737373] hover:text-black">Remove</a>
+                  <form method="POST" action="/cart/remove/<%= item.id %>" class="inline">
+                    <button type="submit" class="text-[11px] text-[#737373] hover:text-black">Remove</button>
+                  </form>
                 </div>
               </div>
             </div>
@@ -99,9 +109,11 @@
               </div>
             </div>
 
-            <button class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800 mt-6">
-              CONFIRM ORDER
-            </button>
+            <form method="POST" action="/orders">
+              <button type="submit" class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800 mt-6">
+                CONFIRM ORDER
+              </button>
+            </form>
 
             <p class="text-[11px] text-[#737373] mt-4">Complimentary delivery on orders above $200</p>
           </div>
@@ -154,3 +166,4 @@
   </footer>
 </body>
 </html>
+

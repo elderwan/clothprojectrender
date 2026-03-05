@@ -55,7 +55,11 @@ export async function searchProductsForAdmin(filters: AdminProductSearchFilters)
   return attachPrimaryImages(data ?? []);
 }
 
-export async function getAllProducts(categorySlug?: string, includeInactive = false): Promise<Product[]> {
+export async function getAllProducts(
+  categorySlug?: string,
+  includeInactive = false,
+  audience?: 'men' | 'women' | 'kids'
+): Promise<Product[]> {
   let query = supabase
     .from('products')
     .select('*, categories(name)')
@@ -74,6 +78,10 @@ export async function getAllProducts(categorySlug?: string, includeInactive = fa
       .eq('del_flg', false)
       .single();
     if (cat) query = query.eq('category_id', (cat as any).id) as typeof query;
+  }
+
+  if (audience) {
+    query = query.eq('audience', audience) as typeof query;
   }
 
   const { data, error } = await query;

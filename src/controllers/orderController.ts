@@ -41,13 +41,13 @@ export async function showOrderConfirm(req: Request, res: Response): Promise<voi
   if (!order || order.user_id !== req.session.user.id) {
     return void res.redirect('/');
   }
-  res.render('client/orderConfirm', { title: 'Order Confirmed', order });
+  res.render('client/orderConfirmation', { title: 'Order Confirmed', order });
 }
 
 export async function showOrderHistory(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
   const orders = await getUserOrders(req.session.user.id);
-  res.render('client/orderHistory', { title: 'Order History', orders });
+  res.render('client/orders', { title: 'Order History', orders });
 }
 
 export async function showOrderDetail(req: Request, res: Response): Promise<void> {

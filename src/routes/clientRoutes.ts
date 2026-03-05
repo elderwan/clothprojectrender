@@ -9,12 +9,18 @@ import {
 } from '../controllers/orderController.js';
 import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
+import { getCart } from '../services/cartService.js';
 
 const router = Router();
 
 // ── Home ──────────────────────────────────────────────────────
-router.get('/', (req: Request, res: Response) => {
-  res.render('client/home', { title: 'MAISON' });
+router.get('/', async (req: Request, res: Response) => {
+  let cartCount = 0;
+  if (req.session.user) {
+    const cart = await getCart(req.session.user.id);
+    cartCount = cart.items.length;
+  }
+  res.render('client/home', { title: 'MAISON', cartCount });
 });
 
 // ── Auth ──────────────────────────────────────────────────────

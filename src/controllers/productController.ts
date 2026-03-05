@@ -3,12 +3,21 @@ import { getAllProductsService, getProductByIdService } from '../services/produc
 import { supabase } from '../../data/supabaseClient.js';
 
 export async function getProducts(req: Request, res: Response): Promise<void> {
-  const category = req.query.category as string | undefined;
-  const products = await getAllProductsService(category);
+  const rawCategory = String(req.query.category ?? '').trim().toLowerCase();
+  const isAudience = rawCategory === 'men' || rawCategory === 'women' || rawCategory === 'kids';
+  const audience = isAudience ? (rawCategory as 'men' | 'women' | 'kids') : undefined;
+  const category = isAudience ? undefined : (rawCategory || undefined);
+  const products = await getAllProductsService(category, audience);
 
   const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
 
-  res.render('client/products', { title: 'Shop', products, categories: categories ?? [], category });
+  res.render('client/products', {
+    title: 'Shop',
+    products,
+    categories: categories ?? [],
+    category: rawCategory || undefined,
+    audience,
+  });
 }
 
 export async function getProductDetail(req: Request, res: Response): Promise<void> {

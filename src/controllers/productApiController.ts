@@ -3,8 +3,11 @@ import { getAllProductsService, getProductByIdService } from '../services/produc
 
 export async function getProductsApi(req: Request, res: Response): Promise<void> {
   try {
-    const category = req.query.category as string | undefined;
-    const products = await getAllProductsService(category);
+    const rawCategory = String(req.query.category ?? '').trim().toLowerCase();
+    const isAudience = rawCategory === 'men' || rawCategory === 'women' || rawCategory === 'kids';
+    const audience = isAudience ? (rawCategory as 'men' | 'women' | 'kids') : undefined;
+    const category = isAudience ? undefined : (rawCategory || undefined);
+    const products = await getAllProductsService(category, audience);
     res.status(200).json({ products });
   } catch (err: any) {
     res.status(400).json({ message: err.message });
