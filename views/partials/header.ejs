@@ -1,0 +1,39 @@
+<header class="border-b border-[#e0e0e0] bg-white">
+  <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px] flex items-center justify-between">
+    <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
+
+    <!-- mobile menu button -->
+    <button id="nav-toggle" class="md:hidden" aria-label="Toggle navigation">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+
+    <nav id="main-nav" class="hidden md:flex items-center gap-6 text-[11px] font-bold">
+      <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
+      <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
+      <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
+      <a href="/cart" class="hover:text-gray-600">
+        Cart<% if (cartCount && cartCount > 0) { %> (<%= cartCount %>)<% } %>
+      </a>
+      <% if (user) { %>
+        <a href="/profile" class="hover:text-gray-600">Account</a>
+      <% } else { %>
+        <a href="/login" class="hover:text-gray-600">Account</a>
+      <% } %>
+      <a href="/products" class="hover:text-gray-600">Search</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var toggle = document.getElementById('nav-toggle');
+    var nav = document.getElementById('main-nav');
+    if (toggle && nav) {
+      toggle.addEventListener('click', function () {
+        nav.classList.toggle('hidden');
+      });
+    }
+  });
+</script>

@@ -1,0 +1,63 @@
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // size selection on product detail
+    const sizeButtons = document.querySelectorAll('.size-option');
+    sizeButtons.forEach(btn => {
+      btn.addEventListener('click', function () {
+        sizeButtons.forEach(b => b.classList.remove('border-black', 'bg-black', 'text-white'));
+        btn.classList.add('border-black', 'bg-black', 'text-white');
+        const hidden = document.getElementById('selected-size');
+        if (hidden) hidden.value = btn.dataset.size;
+      });
+    });
+    // pick first size by default
+    if (sizeButtons.length > 0) {
+      sizeButtons[0].click();
+    }
+
+    // handle add to cart form submission if button outside form
+    const addCartBtn = document.getElementById('add-to-cart');
+    if (addCartBtn) {
+      addCartBtn.addEventListener('click', () => {
+        const form = document.getElementById('cart-form');
+        if (form) form.submit();
+      });
+    }
+
+    // wishlist placeholder
+    const wishBtn = document.getElementById('add-to-wishlist');
+    if (wishBtn) {
+      wishBtn.addEventListener('click', () => {
+        alert('Added to wishlist!');
+      });
+    }
+
+    // simple hero slider
+    const slides = document.querySelectorAll('.hero-slide');
+    let current = 0;
+    function showSlide(idx) {
+      slides.forEach((s, i) => s.classList.toggle('hidden', i !== idx));
+    }
+    const prevBtn = document.getElementById('slide-prev');
+    const nextBtn = document.getElementById('slide-next');
+    if (slides.length > 0) {
+      showSlide(0);
+      setInterval(() => {
+        current = (current + 1) % slides.length;
+        showSlide(current);
+      }, 5000);
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          current = (current - 1 + slides.length) % slides.length;
+          showSlide(current);
+        });
+      }
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          current = (current + 1) % slides.length;
+          showSlide(current);
+        });
+      }
+    }
+  });
+</script>

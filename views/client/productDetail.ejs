@@ -8,25 +8,7 @@
 </head>
 <body class="bg-white text-black">
   <!-- Header -->
-  <header class="border-b border-[#e0e0e0] bg-white">
-    <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px]">
-      <div class="flex h-full items-center justify-between">
-        <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
-        <nav class="flex items-center gap-6 text-[11px] font-bold">
-          <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
-          <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
-          <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
-          <a href="/cart" class="hover:text-gray-600">Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %></a>
-          <% if (user) { %>
-            <a href="/profile" class="hover:text-gray-600">Account</a>
-          <% } else { %>
-            <a href="/login" class="hover:text-gray-600">Account</a>
-          <% } %>
-          <a href="/products" class="hover:text-gray-600">Search</a>
-        </nav>
-      </div>
-    </div>
-  </header>
+  <%- include('../partials/header', { user, cartCount }) %>  
 
   <!-- Breadcrumb -->
   <div class="border-b border-[#e0e0e0] bg-white">
@@ -69,33 +51,26 @@
             <p class="text-[11px] text-[#737373]">Size Guide</p>
           </div>
           <div class="grid grid-cols-5 gap-2">
-            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
-              <span class="text-[12px]">XS</span>
-            </div>
-            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
-              <span class="text-[12px]">S</span>
-            </div>
-            <div class="h-[44px] w-[44px] border border-black bg-black flex items-center justify-center">
-              <span class="text-[12px] text-white">M</span>
-            </div>
-            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
-              <span class="text-[12px]">L</span>
-            </div>
-            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
-              <span class="text-[12px]">XL</span>
-            </div>
+            <% ['XS','S','M','L','XL'].forEach(sz => { %>
+              <button type="button" class="size-option h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center" data-size="<%= sz %>">
+                <span class="text-[12px]"><%= sz %></span>
+              </button>
+            <% }) %>
           </div>
         </div>
 
         <!-- Add to Cart -->
-        <div class="space-y-4">
-          <button class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800">
+        <form id="cart-form" method="POST" action="/cart/add" class="space-y-4">
+          <input type="hidden" name="product_id" value="<%= product ? product.id : '' %>" />
+          <input type="hidden" name="size" id="selected-size" value="" />
+          <input type="hidden" name="quantity" value="1" />
+          <button id="add-to-cart" type="button" class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800">
             ADD TO CART
           </button>
-          <button class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
+          <button id="add-to-wishlist" type="button" class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
             ADD TO WISHLIST
           </button>
-        </div>
+        </form>
 
         <!-- Description -->
         <div class="space-y-4">
@@ -195,6 +170,7 @@
       </div>
     </div>
   </footer>
+  <%- include('../partials/clientScripts') %>
 </body>
 </html>
 

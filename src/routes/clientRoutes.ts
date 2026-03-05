@@ -10,6 +10,7 @@ import {
 import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { getCart } from '../services/cartService.js';
+import { getAllProductsService } from '../services/productService.js';
 
 const router = Router();
 
@@ -20,7 +21,12 @@ router.get('/', async (req: Request, res: Response) => {
     const cart = await getCart(req.session.user.id);
     cartCount = cart.items.length;
   }
-  res.render('client/home', { title: 'MAISON', cartCount });
+
+  // fetch a handful of products for the homepage
+  const all = await getAllProductsService();
+  const newArrivals = all.slice(0, 4);
+
+  res.render('client/home', { title: 'MAISON', cartCount, newArrivals });
 });
 
 // ── Auth ──────────────────────────────────────────────────────

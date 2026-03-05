@@ -8,25 +8,7 @@
 </head>
 <body class="bg-white text-black">
   <!-- Header -->
-  <header class="border-b border-[#e0e0e0] bg-white">
-    <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px]">
-      <div class="flex h-full items-center justify-between">
-        <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
-        <nav class="flex items-center gap-6 text-[11px] font-bold">
-          <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
-          <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
-          <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
-          <a href="/cart" class="hover:text-gray-600">Cart<% if (cart && cart.items && cart.items.length > 0) { %> (<%= cart.items.length %>)<% } %></a>
-          <% if (user) { %>
-            <a href="/profile" class="hover:text-gray-600">Account</a>
-          <% } else { %>
-            <a href="/login" class="hover:text-gray-600">Account</a>
-          <% } %>
-          <a href="/products" class="hover:text-gray-600">Search</a>
-        </nav>
-      </div>
-    </div>
-  </header>
+  <%- include('../partials/header', { user, cartCount }) %>  
 
   <!-- Main Content -->
   <main class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
@@ -164,6 +146,7 @@
       </div>
     </div>
   </footer>
+  <%- include('../partials/clientScripts') %>
 </body>
 </html>
 
