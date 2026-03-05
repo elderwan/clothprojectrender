@@ -6,7 +6,8 @@ export async function getCartByUser(userId: string): Promise<CartItem[]> {
   const { data, error } = await supabase
     .from('cart_items')
     .select('*, products(name, price)')
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 
   return Promise.all((data ?? []).map(async (row: any) => {
@@ -30,8 +31,8 @@ export async function upsertCartItem(
   const { data, error } = await supabase
     .from('cart_items')
     .upsert(
-      { user_id: userId, product_id: productId, quantity, size: size ?? null },
-      { onConflict: 'user_id,product_id,size' }
+      { user_id: userId, product_id: productId, quantity, size: size ?? null, del_flg: false },
+      { onConflict: 'user_id,product_id,size,del_flg' }
     )
     .select()
     .single();
@@ -42,13 +43,14 @@ export async function upsertCartItem(
 export async function updateCartItemQty(id: string, userId: string, quantity: number): Promise<CartItem> {
   if (quantity <= 0) {
     await removeCartItem(id, userId);
-    return { id, user_id: '', product_id: '', quantity: 0 };
+    return { id, user_id: '', product_id: '', quantity: 0, del_flg: true };
   }
   const { data, error } = await supabase
     .from('cart_items')
     .update({ quantity })
     .eq('id', id)
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -58,13 +60,18 @@ export async function updateCartItemQty(id: string, userId: string, quantity: nu
 export async function removeCartItem(id: string, userId: string): Promise<void> {
   const { error } = await supabase
     .from('cart_items')
-    .delete()
+    .update({ del_flg: true })
     .eq('id', id)
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 }
 
 export async function clearCart(userId: string): Promise<void> {
-  const { error } = await supabase.from('cart_items').delete().eq('user_id', userId);
+  const { error } = await supabase
+    .from('cart_items')
+    .update({ del_flg: true })
+    .eq('user_id', userId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 }

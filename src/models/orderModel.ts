@@ -2,15 +2,29 @@ import { supabase } from '../../data/supabaseClient.js';
 import type { Order, OrderItem, CreateOrderInput } from '../types/order.js';
 
 const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'shipped', 'delivered', 'cancelled']);
+export type AdminOrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export interface AdminOrderSearchFilters {
+  order_no?: string;
+  customer?: string;
+  status?: AdminOrderStatus;
+  date_from?: string;
+  date_to?: string;
+  min_total?: number;
+  max_total?: number;
+}
 
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
   const { data, error } = await supabase
     .from('orders')
     .select('*, order_items(*, products(name))')
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .order('created_at', { ascending: false });
   if (error) throw new Error(error.message);
-  return (data ?? []) as Order[];
+  return (data ?? []).map((row: any) => ({
+    ...row,
+    order_items: (row.order_items ?? []).filter((i: any) => !i.del_flg),
+  })) as Order[];
 }
 
 export async function getOrderById(id: string): Promise<Order | null> {
@@ -18,6 +32,7 @@ export async function getOrderById(id: string): Promise<Order | null> {
     .from('orders')
     .select('*, order_items(*, products(name)), users(email, full_name)')
     .eq('id', id)
+    .eq('del_flg', false)
     .single();
   if (error) return null;
   const row = data as any;
@@ -25,10 +40,12 @@ export async function getOrderById(id: string): Promise<Order | null> {
     ...row,
     user_email: row.users?.email,
     user_name:  row.users?.full_name,
-    items: (row.order_items ?? []).map((i: any) => ({
+    items: (row.order_items ?? [])
+      .filter((i: any) => !i.del_flg)
+      .map((i: any) => ({
       ...i,
       product_name:  i.products?.name,
-    })),
+      })),
   };
 }
 
@@ -36,6 +53,7 @@ export async function getAllOrders(status?: string): Promise<Order[]> {
   let query = supabase
     .from('orders')
     .select('*, users(email, full_name)')
+    .eq('del_flg', false)
     .order('created_at', { ascending: false });
 
   if (status && status !== 'all') {
@@ -49,6 +67,52 @@ export async function getAllOrders(status?: string): Promise<Order[]> {
     user_email: row.users?.email,
     user_name:  row.users?.full_name,
   }));
+}
+
+export async function searchOrdersForAdmin(filters: AdminOrderSearchFilters): Promise<Order[]> {
+  let query = supabase
+    .from('orders')
+    .select('*, users(email, full_name)')
+    .eq('del_flg', false)
+    .order('created_at', { ascending: false });
+
+  if (filters.status && filters.status !== 'all') {
+    query = query.eq('status', filters.status) as typeof query;
+  }
+  if (filters.order_no) {
+    query = query.ilike('id', `%${filters.order_no}%`) as typeof query;
+  }
+  if (filters.date_from) {
+    query = query.gte('created_at', `${filters.date_from}T00:00:00.000Z`) as typeof query;
+  }
+  if (filters.date_to) {
+    query = query.lte('created_at', `${filters.date_to}T23:59:59.999Z`) as typeof query;
+  }
+  if (typeof filters.min_total === 'number' && Number.isFinite(filters.min_total)) {
+    query = query.gte('total_amount', filters.min_total) as typeof query;
+  }
+  if (typeof filters.max_total === 'number' && Number.isFinite(filters.max_total)) {
+    query = query.lte('total_amount', filters.max_total) as typeof query;
+  }
+
+  const { data, error } = await query;
+  if (error) throw new Error(error.message);
+
+  let rows = (data ?? []).map((row: any) => ({
+    ...row,
+    user_email: row.users?.email,
+    user_name: row.users?.full_name,
+  }));
+
+  const customer = (filters.customer ?? '').trim().toLowerCase();
+  if (customer) {
+    rows = rows.filter((row: any) => {
+      const text = `${row.user_name ?? ''} ${row.user_email ?? ''}`.toLowerCase();
+      return text.includes(customer);
+    });
+  }
+
+  return rows as Order[];
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
@@ -72,7 +136,8 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   const { data: products, error: pErr } = await supabase
     .from('products')
     .select('id, price, stock_quantity, is_active')
-    .in('id', productIds);
+    .in('id', productIds)
+    .eq('del_flg', false);
   if (pErr) throw new Error(pErr.message);
 
   const productRows = products ?? [];
@@ -95,7 +160,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 
   const { data: order, error: oErr } = await supabase
     .from('orders')
-    .insert({ user_id: input.user_id, address_id: input.address_id ?? null, total_amount: total, status: 'pending' })
+    .insert({ user_id: input.user_id, address_id: input.address_id ?? null, total_amount: total, status: 'pending', del_flg: false })
     .select()
     .single();
   if (oErr) throw new Error(oErr.message);
@@ -106,6 +171,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     quantity:   i.quantity,
     unit_price: priceMap.get(i.product_id) ?? 0,
     size:       i.size ?? null,
+    del_flg:    false,
   }));
 
   const { error: liErr } = await supabase.from('order_items').insert(lineItems);
@@ -122,6 +188,7 @@ export async function updateOrderStatus(id: string, status: string): Promise<Ord
     .from('orders')
     .update({ status })
     .eq('id', id)
+    .eq('del_flg', false)
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -131,7 +198,8 @@ export async function updateOrderStatus(id: string, status: string): Promise<Ord
 export async function countOrders(): Promise<number> {
   const { count, error } = await supabase
     .from('orders')
-    .select('*', { count: 'exact', head: true });
+    .select('*', { count: 'exact', head: true })
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
   return count ?? 0;
 }

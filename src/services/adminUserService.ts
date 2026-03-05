@@ -1,3 +1,3 @@
-import { getAllUsers, findUserById, updateUser, countUsers } from '../models/userModel.js';
+import { getAllUsers, findUserById, updateUser, countUsers, searchUsers } from '../models/userModel.js';
 
-export { getAllUsers, findUserById, updateUser, countUsers };
+export { getAllUsers, findUserById, updateUser, countUsers, searchUsers };

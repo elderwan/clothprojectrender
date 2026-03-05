@@ -7,6 +7,7 @@ export async function getImagesByProduct(productId: string): Promise<ProductImag
     .from('product_images')
     .select('*')
     .eq('product_id', productId)
+    .eq('del_flg', false)
     .order('sort_order', { ascending: true });
   if (error) throw new Error(error.message);
   return (data ?? []) as ProductImage[];
@@ -18,6 +19,7 @@ export async function getPrimaryImage(productId: string): Promise<string | null>
     .from('product_images')
     .select('url')
     .eq('product_id', productId)
+    .eq('del_flg', false)
     .order('is_primary', { ascending: false })
     .order('sort_order',  { ascending: true })
     .limit(1)
@@ -31,7 +33,7 @@ export async function addProductImage(
 ): Promise<ProductImage> {
   const { data, error } = await supabase
     .from('product_images')
-    .insert(input)
+    .insert({ ...input, del_flg: false })
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -43,8 +45,12 @@ export async function setProductImages(
   productId: string,
   urls: string[]
 ): Promise<void> {
-  // Delete existing images first, then re-insert
-  await supabase.from('product_images').delete().eq('product_id', productId);
+  // Soft-delete existing images first, then re-insert
+  await supabase
+    .from('product_images')
+    .update({ del_flg: true })
+    .eq('product_id', productId)
+    .eq('del_flg', false);
   if (urls.length === 0) return;
   const rows = urls
     .filter(u => u.trim())
@@ -53,6 +59,7 @@ export async function setProductImages(
       url:        url.trim(),
       sort_order: i,
       is_primary: i === 0,  // first URL is the cover image
+      del_flg:    false,
     }));
   const { error } = await supabase.from('product_images').insert(rows);
   if (error) throw new Error(error.message);
@@ -60,16 +67,25 @@ export async function setProductImages(
 
 /** Set a specific image as primary (unsets others for same product) */
 export async function setPrimaryImage(imageId: string, productId: string): Promise<void> {
-  await supabase.from('product_images').update({ is_primary: false }).eq('product_id', productId);
+  await supabase
+    .from('product_images')
+    .update({ is_primary: false })
+    .eq('product_id', productId)
+    .eq('del_flg', false);
   const { error } = await supabase
     .from('product_images')
     .update({ is_primary: true })
-    .eq('id', imageId);
+    .eq('id', imageId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 }
 
 /** Delete a single image by id */
 export async function deleteProductImage(imageId: string): Promise<void> {
-  const { error } = await supabase.from('product_images').delete().eq('id', imageId);
+  const { error } = await supabase
+    .from('product_images')
+    .update({ del_flg: true })
+    .eq('id', imageId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 }

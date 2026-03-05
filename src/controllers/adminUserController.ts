@@ -1,11 +1,10 @@
 import type { Request, Response } from 'express';
-import { getAllUsers, findUserById } from '../services/adminUserService.js';
+import { searchUsers, findUserById } from '../services/adminUserService.js';
 
 export async function listCustomers(req: Request, res: Response): Promise<void> {
-  const customers = await getAllUsers();
-  // Only client users
-  const clients = customers.filter(u => u.role === 'client');
-  res.render('admin/customers', { title: 'Customer Management', customers: clients });
+  const q = String(req.query.q ?? '').trim();
+  const customers = await searchUsers({ role: 'client', q });
+  res.render('admin/customers', { title: 'Customer Management', customers, filters: { q } });
 }
 
 export async function showCustomerDetail(req: Request, res: Response): Promise<void> {

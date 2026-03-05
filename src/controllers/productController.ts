@@ -6,7 +6,7 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
   const category = req.query.category as string | undefined;
   const products = await getAllProductsService(category);
 
-  const { data: categories } = await supabase.from('categories').select('*').order('name');
+  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
 
   res.render('client/products', { title: 'Shop', products, categories: categories ?? [], category });
 }

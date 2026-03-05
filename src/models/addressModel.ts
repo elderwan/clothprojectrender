@@ -7,6 +7,7 @@ export async function getAddressesByUser(userId: string): Promise<UserAddress[]>
     .from('user_addresses')
     .select('*')
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .order('is_default', { ascending: false })
     .order('created_at',  { ascending: true });
   if (error) throw new Error(error.message);
@@ -20,6 +21,7 @@ export async function getAddressById(id: string, userId: string): Promise<UserAd
     .select('*')
     .eq('id', id)
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .single();
   return (data as UserAddress) ?? null;
 }
@@ -30,6 +32,7 @@ export async function getDefaultAddress(userId: string): Promise<UserAddress | n
     .from('user_addresses')
     .select('*')
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .eq('is_default', true)
     .limit(1)
     .single();
@@ -42,11 +45,12 @@ export async function createAddress(input: CreateAddressInput): Promise<UserAddr
     await supabase
       .from('user_addresses')
       .update({ is_default: false })
-      .eq('user_id', input.user_id);
+      .eq('user_id', input.user_id)
+      .eq('del_flg', false);
   }
   const { data, error } = await supabase
     .from('user_addresses')
-    .insert(input)
+    .insert({ ...input, del_flg: false })
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -63,13 +67,15 @@ export async function updateAddress(
     await supabase
       .from('user_addresses')
       .update({ is_default: false })
-      .eq('user_id', userId);
+      .eq('user_id', userId)
+      .eq('del_flg', false);
   }
   const { data, error } = await supabase
     .from('user_addresses')
     .update(input)
     .eq('id', id)
     .eq('user_id', userId)
+    .eq('del_flg', false)
     .select()
     .single();
   if (error) throw new Error(error.message);
@@ -80,8 +86,9 @@ export async function updateAddress(
 export async function deleteAddress(id: string, userId: string): Promise<void> {
   const { error } = await supabase
     .from('user_addresses')
-    .delete()
+    .update({ del_flg: true })
     .eq('id', id)
-    .eq('user_id', userId);
+    .eq('user_id', userId)
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
 }

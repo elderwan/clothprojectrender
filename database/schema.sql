@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS categories (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name       TEXT NOT NULL UNIQUE,          -- e.g. "Coats"
   slug       TEXT NOT NULL UNIQUE,          -- e.g. "coats"
+  del_flg    BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -35,6 +36,7 @@ CREATE TABLE IF NOT EXISTS products (
   category_id    UUID REFERENCES categories(id) ON DELETE SET NULL,
   stock_quantity INT         NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
   is_active      BOOLEAN     NOT NULL DEFAULT TRUE,
+  del_flg        BOOLEAN     NOT NULL DEFAULT FALSE,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -48,6 +50,7 @@ CREATE TABLE IF NOT EXISTS product_images (
   alt_text    TEXT,
   sort_order  INT  NOT NULL DEFAULT 0,      -- lower = shown first
   is_primary  BOOLEAN NOT NULL DEFAULT FALSE,
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -62,6 +65,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone         TEXT,
   role          TEXT NOT NULL DEFAULT 'client' CHECK (role IN ('client', 'admin')),
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+  del_flg       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -81,6 +85,7 @@ CREATE TABLE IF NOT EXISTS user_addresses (
   postal_code   TEXT NOT NULL,
   country       TEXT NOT NULL DEFAULT 'MY',
   is_default    BOOLEAN NOT NULL DEFAULT FALSE,
+  del_flg       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -94,6 +99,7 @@ CREATE TABLE IF NOT EXISTS orders (
   status       TEXT NOT NULL DEFAULT 'pending'
                CHECK (status IN ('pending','processing','shipped','delivered','cancelled')),
   total_amount NUMERIC(10,2) NOT NULL CHECK (total_amount >= 0),
+  del_flg      BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -106,6 +112,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity    INT  NOT NULL CHECK (quantity > 0),
   unit_price  NUMERIC(10,2) NOT NULL CHECK (unit_price >= 0),  -- snapshot at purchase time
   size        TEXT,                                             -- 'XS','S','M','L','XL'
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -117,22 +124,31 @@ CREATE TABLE IF NOT EXISTS cart_items (
   product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   quantity    INT  NOT NULL DEFAULT 1 CHECK (quantity > 0),
   size        TEXT,
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (user_id, product_id, size)   -- one row per user+product+size combo
+  UNIQUE (user_id, product_id, size, del_flg)   -- one active row per user+product+size combo
 );
 
 -- ── INDEXES ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category       ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active      ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_del_flg      ON categories(del_flg);
+CREATE INDEX IF NOT EXISTS idx_products_del_flg        ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_product_images_product  ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_primary  ON product_images(product_id, is_primary);
+CREATE INDEX IF NOT EXISTS idx_product_images_del_flg  ON product_images(del_flg);
+CREATE INDEX IF NOT EXISTS idx_users_del_flg           ON users(del_flg);
 CREATE INDEX IF NOT EXISTS idx_user_addresses_user     ON user_addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_addresses_default  ON user_addresses(user_id, is_default);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_del_flg  ON user_addresses(del_flg);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id          ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status           ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_del_flg          ON orders(del_flg);
 CREATE INDEX IF NOT EXISTS idx_order_items_order       ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_del_flg     ON order_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_cart_items_user         ON cart_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg      ON cart_items(del_flg);
 
 -- ── AUTO-UPDATE updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -194,6 +210,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone         TEXT,
   role          TEXT NOT NULL DEFAULT 'client' CHECK (role IN ('client', 'admin')),
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
+  del_flg       BOOLEAN NOT NULL DEFAULT FALSE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -206,6 +223,7 @@ CREATE TABLE IF NOT EXISTS orders (
   status       TEXT NOT NULL DEFAULT 'pending'
                CHECK (status IN ('pending','processing','shipped','delivered','cancelled')),
   total_amount NUMERIC(10,2) NOT NULL CHECK (total_amount >= 0),
+  del_flg      BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -218,6 +236,7 @@ CREATE TABLE IF NOT EXISTS order_items (
   quantity    INT  NOT NULL CHECK (quantity > 0),
   unit_price  NUMERIC(10,2) NOT NULL CHECK (unit_price >= 0),  -- snapshot at purchase time
   size        TEXT,                                             -- 'XS','S','M','L','XL'
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -229,18 +248,25 @@ CREATE TABLE IF NOT EXISTS cart_items (
   product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
   quantity    INT  NOT NULL DEFAULT 1 CHECK (quantity > 0),
   size        TEXT,
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (user_id, product_id, size)   -- one row per user+product+size combo
+  UNIQUE (user_id, product_id, size, del_flg)   -- one active row per user+product+size combo
 );
 
 -- ── INDEXES ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category   ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active  ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_categories_del_flg  ON categories(del_flg);
+CREATE INDEX IF NOT EXISTS idx_products_del_flg    ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id      ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status       ON orders(status);
+CREATE INDEX IF NOT EXISTS idx_users_del_flg       ON users(del_flg);
+CREATE INDEX IF NOT EXISTS idx_orders_del_flg      ON orders(del_flg);
 CREATE INDEX IF NOT EXISTS idx_order_items_order   ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_order_items_del_flg ON order_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_cart_items_user     ON cart_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg  ON cart_items(del_flg);
 
 -- ── AUTO-UPDATE updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()

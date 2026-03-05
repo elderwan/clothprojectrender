@@ -11,6 +11,7 @@ export async function findUserByEmail(email: string): Promise<User | null> {
     .from('users')
     .select('*')
     .eq('email', email.toLowerCase())
+    .eq('del_flg', false)
     .single();
   if (error) return null;
   return data as User;
@@ -19,8 +20,9 @@ export async function findUserByEmail(email: string): Promise<User | null> {
 export async function findUserById(id: string): Promise<PublicUser | null> {
   const { data, error } = await supabase
     .from('users')
-    .select('id, email, full_name, phone, role, is_active, created_at, updated_at')
+    .select('id, email, full_name, phone, role, is_active, del_flg, created_at, updated_at')
     .eq('id', id)
+    .eq('del_flg', false)
     .single();
   if (error) return null;
   return data as PublicUser;
@@ -37,8 +39,9 @@ export async function createUser(
       full_name: input.full_name,
       phone: input.phone ?? null,
       role: 'client',
+      del_flg: false,
     })
-    .select('id, email, full_name, phone, role, is_active, created_at, updated_at')
+    .select('id, email, full_name, phone, role, is_active, del_flg, created_at, updated_at')
     .single();
   if (error) throw new Error(error.message);
   return data as PublicUser;
@@ -52,7 +55,8 @@ export async function updateUser(
     .from('users')
     .update(input)
     .eq('id', id)
-    .select('id, email, full_name, phone, role, is_active, created_at, updated_at')
+    .eq('del_flg', false)
+    .select('id, email, full_name, phone, role, is_active, del_flg, created_at, updated_at')
     .single();
   if (error) throw new Error(error.message);
   return data as PublicUser;
@@ -61,8 +65,30 @@ export async function updateUser(
 export async function getAllUsers(): Promise<PublicUser[]> {
   const { data, error } = await supabase
     .from('users')
-    .select('id, email, full_name, phone, role, is_active, created_at, updated_at')
+    .select('id, email, full_name, phone, role, is_active, del_flg, created_at, updated_at')
+    .eq('del_flg', false)
     .order('created_at', { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as PublicUser[];
+}
+
+export async function searchUsers(filters: { role?: 'client' | 'admin'; q?: string }): Promise<PublicUser[]> {
+  let query = supabase
+    .from('users')
+    .select('id, email, full_name, phone, role, is_active, del_flg, created_at, updated_at')
+    .eq('del_flg', false)
+    .order('created_at', { ascending: false });
+
+  if (filters.role) {
+    query = query.eq('role', filters.role) as typeof query;
+  }
+
+  const q = (filters.q ?? '').trim();
+  if (q) {
+    query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%,phone.ilike.%${q}%`) as typeof query;
+  }
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data ?? []) as PublicUser[];
 }
@@ -71,7 +97,8 @@ export async function countUsers(): Promise<number> {
   const { count, error } = await supabase
     .from('users')
     .select('*', { count: 'exact', head: true })
-    .eq('role', 'client');
+    .eq('role', 'client')
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
   return count ?? 0;
 }

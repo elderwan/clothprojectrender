@@ -6,6 +6,7 @@ export interface Order {
   address_id?: string;
   status: OrderStatus;
   total_amount: number;
+  del_flg: boolean;
   created_at?: string;
   updated_at?: string;
   // joined
@@ -21,6 +22,7 @@ export interface OrderItem {
   quantity: number;
   unit_price: number;
   size?: string;
+  del_flg: boolean;
   created_at?: string;
   // joined
   product_name?: string;

@@ -6,6 +6,7 @@ export interface User {
   phone?: string;
   role: 'client' | 'admin';
   is_active: boolean;
+  del_flg: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -37,8 +38,9 @@ export interface UserAddress {
   postal_code: string;
   country: string;
   is_default: boolean;
+  del_flg: boolean;
   created_at?: string;
   updated_at?: string;
 }
 
-export type CreateAddressInput = Omit<UserAddress, 'id' | 'created_at' | 'updated_at'>;
+export type CreateAddressInput = Omit<UserAddress, 'id' | 'created_at' | 'updated_at' | 'del_flg'>;

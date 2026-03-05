@@ -5,6 +5,7 @@ export interface ProductImage {
   alt_text?: string;
   sort_order: number;
   is_primary: boolean;
+  del_flg: boolean;
   created_at?: string;
 }
 
@@ -17,6 +18,7 @@ export interface Product {
   category?: string;           // joined category name
   stock_quantity: number;
   is_active: boolean;
+  del_flg: boolean;
   created_at?: string;
   updated_at?: string;
   // populated when loaded with images

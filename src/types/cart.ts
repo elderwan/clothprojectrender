@@ -4,6 +4,7 @@ export interface CartItem {
   product_id: string;
   quantity: number;
   size?: string;
+  del_flg: boolean;
   created_at?: string;
   updated_at?: string;
   // joined

@@ -70,7 +70,7 @@
             <input id="upload-input" type="file" accept="image/*" multiple class="hidden" />
           </div>
           <div id="upload-status" class="mt-2 text-[12px] text-zinc-500">No files uploaded.</div>
-          <div id="upload-preview" class="mt-2 flex flex-wrap gap-2"></div>
+          <div id="upload-preview" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3"></div>
           <textarea id="image-urls" class="sr-only" name="image_urls" placeholder="One image per line."><% if (product?.images?.length) { %><%= product.images.map((i) => i.url).join('\n') %><% } %></textarea>
         </div>
 
@@ -109,17 +109,35 @@
         uploadPreview.innerHTML = '';
         urls.forEach((url, idx) => {
           const item = document.createElement('div');
-          item.className = 'relative h-16 w-16 overflow-hidden border border-zinc-300 bg-white';
+          item.className = 'group relative overflow-hidden rounded border border-zinc-300 bg-white';
+          item.setAttribute('draggable', 'true');
+          item.dataset.index = String(idx);
 
           const img = document.createElement('img');
           img.src = url;
           img.alt = 'Uploaded ' + (idx + 1);
-          img.className = 'h-full w-full object-cover';
+          img.className = 'h-28 w-full object-cover';
           item.appendChild(img);
+
+          const topBar = document.createElement('div');
+          topBar.className = 'flex items-center justify-between border-t border-zinc-200 bg-white px-2 py-1';
+
+          const badge = document.createElement('span');
+          badge.className = idx === 0
+            ? 'inline-flex rounded border border-black bg-black px-1.5 py-0.5 text-[10px] font-semibold text-white'
+            : 'inline-flex rounded border border-zinc-300 bg-zinc-100 px-1.5 py-0.5 text-[10px] font-semibold text-zinc-600';
+          badge.textContent = idx === 0 ? 'main image' : 'sub image';
+          topBar.appendChild(badge);
+
+          const dragHint = document.createElement('span');
+          dragHint.className = 'text-[10px] text-zinc-500';
+          dragHint.textContent = 'drag to reorder';
+          topBar.appendChild(dragHint);
+          item.appendChild(topBar);
 
           const removeBtn = document.createElement('button');
           removeBtn.type = 'button';
-          removeBtn.className = 'absolute right-0 top-0 bg-black/70 px-1 text-[10px] text-white';
+          removeBtn.className = 'absolute right-1 top-1 rounded bg-black/70 px-1.5 text-[10px] text-white';
           removeBtn.textContent = '×';
           removeBtn.addEventListener('click', () => {
             urls = urls.filter((_, i) => i !== idx);
@@ -128,6 +146,33 @@
             renderStatus('');
           });
           item.appendChild(removeBtn);
+
+          item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', String(idx));
+            item.classList.add('opacity-50');
+          });
+          item.addEventListener('dragend', () => {
+            item.classList.remove('opacity-50');
+          });
+          item.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            item.classList.add('ring-1', 'ring-black');
+          });
+          item.addEventListener('dragleave', () => {
+            item.classList.remove('ring-1', 'ring-black');
+          });
+          item.addEventListener('drop', (e) => {
+            e.preventDefault();
+            item.classList.remove('ring-1', 'ring-black');
+            const from = Number(e.dataTransfer.getData('text/plain'));
+            const to = idx;
+            if (!Number.isInteger(from) || from === to) return;
+            const [moved] = urls.splice(from, 1);
+            urls.splice(to, 0, moved);
+            syncField();
+            renderPreview();
+            renderStatus('Updated image order.');
+          });
 
           uploadPreview.appendChild(item);
         });
