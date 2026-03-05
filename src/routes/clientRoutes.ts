@@ -5,7 +5,7 @@ import {
 } from '../controllers/authController.js';
 import { showCart, postAddToCart, postUpdateQty, postRemoveItem } from '../controllers/cartController.js';
 import {
-  postPlaceOrder, showOrderConfirm, showOrderHistory, showOrderDetail
+  postPlaceOrder, postSimulatePayment, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
 import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
@@ -18,35 +18,36 @@ router.get('/', (req: Request, res: Response) => {
 });
 
 // ── Auth ──────────────────────────────────────────────────────
-router.get('/login',         showLogin);
-router.post('/login',        handleLogin);
-router.get('/register',      showRegister);
-router.post('/register',     handleRegister);
-router.get('/logout',        handleLogout);
+router.get('/login', showLogin);
+router.post('/login', handleLogin);
+router.get('/register', showRegister);
+router.post('/register', handleRegister);
+router.get('/logout', handleLogout);
 
 // ── Products ──────────────────────────────────────────────────
-router.get('/products',      getProducts);
-router.get('/products/:id',  getProductDetail);
+router.get('/products', getProducts);
+router.get('/products/:id', getProductDetail);
 
 // ── Cart ──────────────────────────────────────────────────────
-router.get('/cart',               showCart);
-router.post('/cart/add',          postAddToCart);
-router.post('/cart/update',       postUpdateQty);
-router.post('/cart/remove/:id',   postRemoveItem);
+router.get('/cart', showCart);
+router.post('/cart/add', requireAuth, postAddToCart);
+router.post('/cart/update', requireAuth, postUpdateQty);
+router.post('/cart/remove/:id', requireAuth, postRemoveItem);
 
 // ── Orders ────────────────────────────────────────────────────
-router.post('/orders',                requireAuth, postPlaceOrder);
-router.get('/order-confirm/:id',     requireAuth, showOrderConfirm);
-router.get('/orders',                requireAuth, showOrderHistory);
-router.get('/orders/:id',            requireAuth, showOrderDetail);
+router.post('/orders', requireAuth, postPlaceOrder);
+router.post('/orders/:id/simulate-payment', requireAuth, postSimulatePayment);
+router.get('/order-confirm/:id', requireAuth, showOrderConfirm);
+router.get('/orders', requireAuth, showOrderHistory);
+router.get('/orders/:id', requireAuth, showOrderDetail);
 
 // ── Profile ───────────────────────────────────────────────────
-router.get('/profile',                requireAuth, showProfile);
-router.post('/profile',               requireAuth, postUpdateProfile);
+router.get('/profile', requireAuth, showProfile);
+router.post('/profile', requireAuth, postUpdateProfile);
 
 // ── Addresses ─────────────────────────────────────────────────
-router.post('/addresses',             requireAuth, postAddAddress);
-router.post('/addresses/:id/edit',    requireAuth, postEditAddress);
-router.post('/addresses/:id/delete',  requireAuth, postDeleteAddress);
+router.post('/addresses', requireAuth, postAddAddress);
+router.post('/addresses/:id/edit', requireAuth, postEditAddress);
+router.post('/addresses/:id/delete', requireAuth, postDeleteAddress);
 
 export default router;

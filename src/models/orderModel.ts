@@ -1,6 +1,8 @@
 import { supabase } from '../../data/supabaseClient.js';
 import type { Order, OrderItem, CreateOrderInput } from '../types/order.js';
 
+const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'shipped', 'delivered', 'cancelled']);
+
 export async function getOrdersByUser(userId: string): Promise<Order[]> {
   const { data, error } = await supabase
     .from('orders')
@@ -50,16 +52,44 @@ export async function getAllOrders(status?: string): Promise<Order[]> {
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<Order> {
+  if (!input.items.length) throw new Error('Order items cannot be empty.');
+
+  const normalizedItems = input.items.map((i) => ({
+    ...i,
+    quantity: Number(i.quantity),
+  }));
+  if (normalizedItems.some(i => !Number.isInteger(i.quantity) || i.quantity <= 0)) {
+    throw new Error('Invalid item quantity.');
+  }
+
+  const requestedQty = new Map<string, number>();
+  for (const item of normalizedItems) {
+    requestedQty.set(item.product_id, (requestedQty.get(item.product_id) ?? 0) + item.quantity);
+  }
+
   // Fetch current prices for snapshot
-  const productIds = input.items.map(i => i.product_id);
+  const productIds = Array.from(requestedQty.keys());
   const { data: products, error: pErr } = await supabase
     .from('products')
-    .select('id, price')
+    .select('id, price, stock_quantity, is_active')
     .in('id', productIds);
   if (pErr) throw new Error(pErr.message);
 
-  const priceMap = new Map((products ?? []).map((p: any) => [p.id, p.price]));
-  const total = input.items.reduce((sum, i) => {
+  const productRows = products ?? [];
+  const productMap = new Map(productRows.map((p: any) => [p.id, p]));
+
+  for (const productId of productIds) {
+    const product = productMap.get(productId);
+    if (!product) throw new Error('Some products no longer exist.');
+    if (!product.is_active) throw new Error('Some products are no longer available.');
+    const needed = requestedQty.get(productId) ?? 0;
+    if ((product.stock_quantity ?? 0) < needed) {
+      throw new Error('Some products are out of stock.');
+    }
+  }
+
+  const priceMap = new Map(productRows.map((p: any) => [p.id, p.price]));
+  const total = normalizedItems.reduce((sum, i) => {
     return sum + (priceMap.get(i.product_id) ?? 0) * i.quantity;
   }, 0);
 
@@ -70,7 +100,7 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
     .single();
   if (oErr) throw new Error(oErr.message);
 
-  const lineItems = input.items.map(i => ({
+  const lineItems = normalizedItems.map(i => ({
     order_id:   order.id,
     product_id: i.product_id,
     quantity:   i.quantity,
@@ -85,6 +115,9 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
 }
 
 export async function updateOrderStatus(id: string, status: string): Promise<Order> {
+  if (!VALID_ORDER_STATUS.has(status)) {
+    throw new Error('Invalid order status.');
+  }
   const { data, error } = await supabase
     .from('orders')
     .update({ status })

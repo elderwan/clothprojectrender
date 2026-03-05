@@ -4,6 +4,20 @@ import {
 } from '../services/adminProductService.js';
 import { setProductImages } from '../models/productImageModel.js';
 import { supabase } from '../../data/supabaseClient.js';
+import { normalizeProductImageInputs, uploadImageToCloudinary } from '../services/cloudinaryService.js';
+
+function validateProductPayload(body: Record<string, unknown>): { price: number; stock: number } {
+  const name = String(body.name ?? '').trim();
+  if (!name) throw new Error('Product name is required.');
+
+  const price = Number(body.price);
+  if (!Number.isFinite(price) || price < 0) throw new Error('Invalid product price.');
+
+  const stock = Number(body.stock_quantity);
+  if (!Number.isFinite(stock) || stock < 0) throw new Error('Invalid stock quantity.');
+
+  return { price, stock };
+}
 
 export async function listProducts(req: Request, res: Response): Promise<void> {
   const products = await adminGetAllProducts();
@@ -19,17 +33,15 @@ export async function showAddProduct(req: Request, res: Response): Promise<void>
 export async function handleAddProduct(req: Request, res: Response): Promise<void> {
   try {
     const { name, description, price, category_id, stock_quantity } = req.body;
-    // image_urls is a newline-separated list of URLs
-    const imageUrls: string[] = (req.body.image_urls ?? '')
-      .split('\n')
-      .map((u: string) => u.trim())
-      .filter(Boolean);
+    const parsed = validateProductPayload(req.body);
+    // image_urls supports URL list and base64 data URI list (one per line).
+    const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
     const product = await createProduct({
       name, description,
-      price:          Number(price),
+      price:          parsed.price,
       category_id:    category_id || null,
-      stock_quantity: Number(stock_quantity) || 0,
+      stock_quantity: parsed.stock,
       is_active:      true,
     });
 
@@ -54,16 +66,14 @@ export async function showEditProduct(req: Request, res: Response): Promise<void
 export async function handleEditProduct(req: Request, res: Response): Promise<void> {
   try {
     const { name, description, price, category_id, stock_quantity } = req.body;
-    const imageUrls: string[] = (req.body.image_urls ?? '')
-      .split('\n')
-      .map((u: string) => u.trim())
-      .filter(Boolean);
+    const parsed = validateProductPayload(req.body);
+    const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
     await updateProduct(req.params.id, {
       name, description,
-      price:          Number(price),
+      price:          parsed.price,
       category_id:    category_id || null,
-      stock_quantity: Number(stock_quantity) || 0,
+      stock_quantity: parsed.stock,
     });
 
     // Always overwrite images (empty textarea = remove all)
@@ -78,5 +88,19 @@ export async function handleEditProduct(req: Request, res: Response): Promise<vo
 export async function handleDeleteProduct(req: Request, res: Response): Promise<void> {
   await deleteProduct(req.params.id);
   res.redirect('/admin/products');
+}
+
+export async function uploadProductImage(req: Request, res: Response): Promise<void> {
+  try {
+    const file = String(req.body?.file ?? '');
+    if (!file) {
+      return void res.status(400).json({ error: 'file is required.' });
+    }
+
+    const url = await uploadImageToCloudinary(file);
+    return void res.json({ ok: true, url });
+  } catch (err: any) {
+    return void res.status(400).json({ ok: false, error: err.message });
+  }
 }
 

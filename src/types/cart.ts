@@ -11,4 +11,5 @@ export interface CartItem {
   product_price?: number;
   product_image?: string;
   subtotal?: number;
+
 }

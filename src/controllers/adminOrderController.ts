@@ -14,7 +14,11 @@ export async function showOrderDetail(req: Request, res: Response): Promise<void
 }
 
 export async function handleUpdateStatus(req: Request, res: Response): Promise<void> {
-  const { status } = req.body;
-  await updateOrderStatus(req.params.id, status);
-  res.redirect('/admin/orders/' + req.params.id);
+  try {
+    const { status } = req.body;
+    await updateOrderStatus(req.params.id, status);
+    res.redirect('/admin/orders/' + req.params.id);
+  } catch (err: any) {
+    res.redirect('/admin/orders/' + req.params.id + '?error=' + encodeURIComponent(err.message));
+  }
 }

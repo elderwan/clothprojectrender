@@ -1,18 +1,23 @@
 import { supabase } from '../../data/supabaseClient.js';
 import type { CartItem } from '../types/cart.js';
+import { getPrimaryImage } from './productImageModel.js';
 
 export async function getCartByUser(userId: string): Promise<CartItem[]> {
   const { data, error } = await supabase
     .from('cart_items')
-    .select('*, products(name, price, image_url)')
+    .select('*, products(name, price)')
     .eq('user_id', userId);
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row: any) => ({
-    ...row,
-    product_name:  row.products?.name,
-    product_price: row.products?.price,
-    product_image: row.products?.image_url,
-    subtotal:      (row.products?.price ?? 0) * row.quantity,
+
+  return Promise.all((data ?? []).map(async (row: any) => {
+    const product_image = await getPrimaryImage(row.product_id);
+    return {
+      ...row,
+      product_name:  row.products?.name,
+      product_price: row.products?.price,
+      product_image,
+      subtotal:      (row.products?.price ?? 0) * row.quantity,
+    };
   }));
 }
 
@@ -34,23 +39,28 @@ export async function upsertCartItem(
   return data as CartItem;
 }
 
-export async function updateCartItemQty(id: string, quantity: number): Promise<CartItem> {
+export async function updateCartItemQty(id: string, userId: string, quantity: number): Promise<CartItem> {
   if (quantity <= 0) {
-    await removeCartItem(id);
+    await removeCartItem(id, userId);
     return { id, user_id: '', product_id: '', quantity: 0 };
   }
   const { data, error } = await supabase
     .from('cart_items')
     .update({ quantity })
     .eq('id', id)
+    .eq('user_id', userId)
     .select()
     .single();
   if (error) throw new Error(error.message);
   return data as CartItem;
 }
 
-export async function removeCartItem(id: string): Promise<void> {
-  const { error } = await supabase.from('cart_items').delete().eq('id', id);
+export async function removeCartItem(id: string, userId: string): Promise<void> {
+  const { error } = await supabase
+    .from('cart_items')
+    .delete()
+    .eq('id', id)
+    .eq('user_id', userId);
   if (error) throw new Error(error.message);
 }
 

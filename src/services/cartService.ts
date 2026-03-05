@@ -21,12 +21,12 @@ export async function addToCart(
   return upsertCartItem(userId, productId, quantity, size);
 }
 
-export async function updateQty(id: string, quantity: number): Promise<CartItem> {
-  return updateCartItemQty(id, quantity);
+export async function updateQty(userId: string, id: string, quantity: number): Promise<CartItem> {
+  return updateCartItemQty(id, userId, quantity);
 }
 
-export async function removeItem(id: string): Promise<void> {
-  return removeCartItem(id);
+export async function removeItem(userId: string, id: string): Promise<void> {
+  return removeCartItem(id, userId);
 }
 
 export async function emptyCart(userId: string): Promise<void> {
