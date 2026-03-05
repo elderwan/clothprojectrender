@@ -24,7 +24,14 @@ export async function adminLoginApi(req: Request, res: Response): Promise<void> 
   }
 }
 
-function parseProductPayload(body: Record<string, unknown>): { name: string; description: string; price: number; category_id?: string; stock_quantity: number } {
+function parseProductPayload(body: Record<string, unknown>): {
+  name: string;
+  description: string;
+  price: number;
+  category_id?: string;
+  stock_quantity: number;
+  audience: 'men' | 'women' | 'kids';
+} {
   const name = String(body.name ?? '').trim();
   if (!name) throw new Error('Product name is required.');
   const description = String(body.description ?? '');
@@ -33,7 +40,18 @@ function parseProductPayload(body: Record<string, unknown>): { name: string; des
   const stock_quantity = Number(body.stock_quantity);
   if (!Number.isFinite(stock_quantity) || stock_quantity < 0) throw new Error('Invalid stock quantity.');
   const category = String(body.category_id ?? '').trim();
-  return { name, description, price, category_id: category || undefined, stock_quantity };
+  const audience = String(body.audience ?? '').trim().toLowerCase();
+  if (audience !== 'men' && audience !== 'women' && audience !== 'kids') {
+    throw new Error('Audience is required (men, women, kids).');
+  }
+  return {
+    name,
+    description,
+    price,
+    category_id: category || undefined,
+    stock_quantity,
+    audience,
+  };
 }
 
 export function adminLogoutApi(req: Request, res: Response): void {

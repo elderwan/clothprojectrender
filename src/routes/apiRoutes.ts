@@ -34,8 +34,8 @@ router.post('/api/admin/login', adminLoginApi);
 router.use('/api', requireAuthApi);
 router.get('/api/cart', getCartApi);
 router.post('/api/cart/items', addCartItemApi);
-router.patch('/api/cart/items/:id', updateCartItemApi);
-router.delete('/api/cart/items/:id', deleteCartItemApi);
+router.post('/api/cart/items/:id/update', updateCartItemApi);
+router.post('/api/cart/items/:id/delete', deleteCartItemApi);
 
 router.post('/api/orders', createOrderApi);
 router.get('/api/orders', getMyOrdersApi);
@@ -43,11 +43,11 @@ router.get('/api/orders/:id', getMyOrderDetailApi);
 router.post('/api/orders/:id/simulate-payment', simulatePaymentApi);
 
 router.get('/api/profile', getProfileApi);
-router.patch('/api/profile', updateProfileApi);
+router.post('/api/profile/update', updateProfileApi);
 router.get('/api/addresses', getAddressesApi);
 router.post('/api/addresses', createAddressApi);
-router.patch('/api/addresses/:id', updateAddressApi);
-router.delete('/api/addresses/:id', deleteAddressApi);
+router.post('/api/addresses/:id/update', updateAddressApi);
+router.post('/api/addresses/:id/delete', deleteAddressApi);
 
 // Admin auth + protected
 router.post('/api/admin/logout', requireAdminApi, adminLogoutApi);
@@ -57,13 +57,13 @@ router.get('/api/admin/dashboard', adminDashboardApi);
 router.get('/api/admin/products', adminListProductsApi);
 router.get('/api/admin/products/:id', adminGetProductApi);
 router.post('/api/admin/products', adminCreateProductApi);
-router.patch('/api/admin/products/:id', adminUpdateProductApi);
-router.delete('/api/admin/products/:id', adminDeleteProductApi);
+router.post('/api/admin/products/:id/update', adminUpdateProductApi);
+router.post('/api/admin/products/:id/delete', adminDeleteProductApi);
 router.post('/api/admin/uploads/product-image', adminUploadProductImageApi);
 
 router.get('/api/admin/orders', adminListOrdersApi);
 router.get('/api/admin/orders/:id', adminGetOrderApi);
-router.patch('/api/admin/orders/:id/status', adminUpdateOrderStatusApi);
+router.post('/api/admin/orders/:id/status', adminUpdateOrderStatusApi);
 
 router.get('/api/admin/customers', adminListCustomersApi);
 router.get('/api/admin/customers/:id', adminGetCustomerApi);

@@ -6,6 +6,7 @@ export interface AdminProductSearchFilters {
   q?: string;
   category_id?: string;
   active?: 'all' | 'true' | 'false';
+  audience?: 'all' | 'men' | 'women' | 'kids';
 }
 
 /** Attach the primary_image URL to each product row */
@@ -43,6 +44,10 @@ export async function searchProductsForAdmin(filters: AdminProductSearchFilters)
     query = query.eq('is_active', true) as typeof query;
   } else if (filters.active === 'false') {
     query = query.eq('is_active', false) as typeof query;
+  }
+
+  if (filters.audience && filters.audience !== 'all') {
+    query = query.eq('audience', filters.audience) as typeof query;
   }
 
   const { data, error } = await query;

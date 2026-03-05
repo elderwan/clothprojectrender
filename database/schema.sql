@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS products (
   description    TEXT,
   price          NUMERIC(10,2) NOT NULL CHECK (price >= 0),
   category_id    UUID REFERENCES categories(id) ON DELETE SET NULL,
+  audience       TEXT        NOT NULL DEFAULT 'women' CHECK (audience IN ('men', 'women', 'kids')),
   stock_quantity INT         NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
   is_active      BOOLEAN     NOT NULL DEFAULT TRUE,
   del_flg        BOOLEAN     NOT NULL DEFAULT FALSE,
@@ -133,6 +134,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 -- ── INDEXES ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category       ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active      ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_audience       ON products(audience);
 CREATE INDEX IF NOT EXISTS idx_categories_del_flg      ON categories(del_flg);
 CREATE INDEX IF NOT EXISTS idx_products_del_flg        ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_product_images_product  ON product_images(product_id);
@@ -257,6 +259,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 -- ── INDEXES ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category   ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active  ON products(is_active);
+CREATE INDEX IF NOT EXISTS idx_products_audience   ON products(audience);
 CREATE INDEX IF NOT EXISTS idx_categories_del_flg  ON categories(del_flg);
 CREATE INDEX IF NOT EXISTS idx_products_del_flg    ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id      ON orders(user_id);
