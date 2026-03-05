@@ -1,0 +1,94 @@
+{
+  "info": {
+    "name": "Clothes Shop API Only",
+    "_postman_id": "58e67d81-8f0c-4999-af6c-e8e857ff9f77",
+    "description": "JSON-only endpoints under /api/* for automated testing.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        { "name": "Login", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{clientEmail}}\",\n  \"password\": \"{{clientPassword}}\"\n}" }, "url": "{{baseUrl}}/api/auth/login" } },
+        { "name": "Register", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"{{newUserName}}\",\n  \"email\": \"{{newUserEmail}}\",\n  \"password\": \"{{newUserPassword}}\"\n}" }, "url": "{{baseUrl}}/api/auth/register" } },
+        { "name": "Me", "request": { "method": "GET", "url": "{{baseUrl}}/api/auth/me" } },
+        { "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/api/auth/logout" } }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        { "name": "List", "request": { "method": "GET", "url": "{{baseUrl}}/api/products?category={{categorySlug}}" } },
+        { "name": "Detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/products/{{productId}}" } }
+      ]
+    },
+    {
+      "name": "Cart",
+      "item": [
+        { "name": "Get Cart", "request": { "method": "GET", "url": "{{baseUrl}}/api/cart" } },
+        { "name": "Add Item", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"product_id\": \"{{productId}}\",\n  \"quantity\": 1,\n  \"size\": \"M\"\n}" }, "url": "{{baseUrl}}/api/cart/items" } },
+        { "name": "Update Item", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"quantity\": 2\n}" }, "url": "{{baseUrl}}/api/cart/items/{{cartItemId}}" } },
+        { "name": "Delete Item", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/cart/items/{{cartItemId}}" } }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        { "name": "Create Order", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"address_id\": \"{{addressId}}\"\n}" }, "url": "{{baseUrl}}/api/orders" } },
+        { "name": "List Orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/orders" } },
+        { "name": "Order Detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/orders/{{orderId}}" } },
+        { "name": "Simulate Payment", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"result\": \"success\"\n}" }, "url": "{{baseUrl}}/api/orders/{{orderId}}/simulate-payment" } }
+      ]
+    },
+    {
+      "name": "Profile & Address",
+      "item": [
+        { "name": "Get Profile", "request": { "method": "GET", "url": "{{baseUrl}}/api/profile" } },
+        { "name": "Update Profile", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"full_name\": \"{{clientName}}\",\n  \"phone\": \"0123456789\"\n}" }, "url": "{{baseUrl}}/api/profile" } },
+        { "name": "List Addresses", "request": { "method": "GET", "url": "{{baseUrl}}/api/addresses" } },
+        { "name": "Create Address", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"label\": \"Home\",\n  \"full_name\": \"{{clientName}}\",\n  \"address_line1\": \"123 Main Street\",\n  \"city\": \"Chiang Mai\",\n  \"postal_code\": \"50000\",\n  \"country\": \"TH\",\n  \"is_default\": true\n}" }, "url": "{{baseUrl}}/api/addresses" } },
+        { "name": "Update Address", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"label\": \"Office\",\n  \"full_name\": \"{{clientName}}\",\n  \"address_line1\": \"456 Business Road\",\n  \"city\": \"Chiang Mai\",\n  \"postal_code\": \"50000\",\n  \"country\": \"TH\"\n}" }, "url": "{{baseUrl}}/api/addresses/{{addressId}}" } },
+        { "name": "Delete Address", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/addresses/{{addressId}}" } }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        { "name": "Admin Login", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}" }, "url": "{{baseUrl}}/api/admin/login" } },
+        { "name": "Admin Logout", "request": { "method": "POST", "url": "{{baseUrl}}/api/admin/logout" } },
+        { "name": "Dashboard", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/dashboard" } },
+        { "name": "Products List", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/products" } },
+        { "name": "Product Detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/products/{{productId}}" } },
+        { "name": "Create Product", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"New Product\",\n  \"description\": \"Sample\",\n  \"price\": 199,\n  \"category_id\": \"{{categoryId}}\",\n  \"stock_quantity\": 10,\n  \"image_urls\": \"https://example.com/a.jpg\"\n}" }, "url": "{{baseUrl}}/api/admin/products" } },
+        { "name": "Update Product", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Product\",\n  \"description\": \"Updated\",\n  \"price\": 299,\n  \"category_id\": \"{{categoryId}}\",\n  \"stock_quantity\": 20,\n  \"image_urls\": \"https://example.com/updated.jpg\"\n}" }, "url": "{{baseUrl}}/api/admin/products/{{productId}}" } },
+        { "name": "Delete Product", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/admin/products/{{productId}}" } },
+        { "name": "Upload Product Image", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"file\": \"{{imageDataUri}}\"\n}" }, "url": "{{baseUrl}}/api/admin/uploads/product-image" } },
+        { "name": "Orders List", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/orders?status={{orderStatus}}" } },
+        { "name": "Order Detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/orders/{{orderId}}" } },
+        { "name": "Update Order Status", "request": { "method": "PATCH", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"processing\"\n}" }, "url": "{{baseUrl}}/api/admin/orders/{{orderId}}/status" } },
+        { "name": "Customers List", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/customers" } },
+        { "name": "Customer Detail", "request": { "method": "GET", "url": "{{baseUrl}}/api/admin/customers/{{userId}}" } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "clientEmail", "value": "client@example.com" },
+    { "key": "clientPassword", "value": "password123" },
+    { "key": "clientName", "value": "Client User" },
+    { "key": "newUserName", "value": "New User" },
+    { "key": "newUserEmail", "value": "newuser@example.com" },
+    { "key": "newUserPassword", "value": "password123" },
+    { "key": "adminEmail", "value": "admin@maison.com" },
+    { "key": "adminPassword", "value": "admin123" },
+    { "key": "productId", "value": "" },
+    { "key": "cartItemId", "value": "" },
+    { "key": "orderId", "value": "" },
+    { "key": "addressId", "value": "" },
+    { "key": "categoryId", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "categorySlug", "value": "" },
+    { "key": "orderStatus", "value": "all" },
+    { "key": "imageDataUri", "value": "data:image/png;base64,REPLACE_WITH_BASE64" }
+  ]
+}

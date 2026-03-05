@@ -48,27 +48,3 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 export function handleLogout(req: Request, res: Response): void {
   req.session.destroy(() => res.redirect('/'));
 }
-
-export function handleAdminLogout(req: Request, res: Response): void {
-  req.session.destroy(() => res.redirect('/admin/login'));
-}
-
-// Admin login
-export async function showAdminLogin(req: Request, res: Response): Promise<void> {
-  if (req.session.user?.role === 'admin') return void res.redirect('/admin');
-  res.render('admin/login', { title: 'Admin Login', error: null });
-}
-
-export async function handleAdminLogin(req: Request, res: Response): Promise<void> {
-  try {
-    if (!req.body?.email || !req.body?.password) {
-      throw new Error('Email and password are required.');
-    }
-    const user = await login(req.body);
-    if (user.role !== 'admin') throw new Error('Access denied.');
-    req.session.user = user;
-    res.redirect('/admin');
-  } catch (err: any) {
-    res.render('admin/login', { title: 'Admin Login', error: err.message });
-  }
-}

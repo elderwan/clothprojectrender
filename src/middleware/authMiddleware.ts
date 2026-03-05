@@ -9,6 +9,15 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
   }
 }
 
+/** API variant: returns JSON instead of redirecting. */
+export function requireAuthApi(req: Request, res: Response, next: NextFunction): void {
+  if (req.session?.user) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Authentication required.' });
+  }
+}
+
 /** Attaches user to res.locals for use in all EJS templates. */
 export function injectUser(req: Request, res: Response, next: NextFunction): void {
   res.locals.user = req.session?.user ?? null;

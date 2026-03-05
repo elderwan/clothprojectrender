@@ -23,3 +23,21 @@ export async function login(input: LoginInput): Promise<PublicUser> {
   const { password_hash: _, ...pub } = user;
   return pub;
 }
+
+export async function adminLoginUsecase(body: unknown): Promise<PublicUser> {
+  const payload = body as Partial<LoginInput> | null | undefined;
+  if (!payload?.email || !payload?.password) {
+    throw new Error('Email and password are required.');
+  }
+
+  const user = await login({
+    email: payload.email,
+    password: payload.password,
+  });
+
+  if (user.role !== 'admin') {
+    throw new Error('Access denied.');
+  }
+
+  return user;
+}

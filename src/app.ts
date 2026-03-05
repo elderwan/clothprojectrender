@@ -5,6 +5,7 @@ import { dirname, join } from 'path';
 import dotenv from 'dotenv';
 import clientRouter from './routes/clientRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
+import apiRouter from './routes/apiRoutes.js';
 import { injectUser } from './middleware/authMiddleware.js';
 import './types/session.js'; // session type augmentation
 
@@ -14,7 +15,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
 // View engine
 app.set('view engine', 'ejs');
@@ -39,8 +39,9 @@ app.use(session({
 app.use(injectUser);
 
 // Routes
+app.use('/', apiRouter);
 app.use('/', clientRouter);
-app.use('/admin', adminRouter);
+app.use('/', adminRouter);
 
 // 404 handler
 app.use((_req: Request, res: Response) => {
@@ -51,10 +52,6 @@ app.use((_req: Request, res: Response) => {
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
   res.status(500).send('500 - Internal Server Error');
-});
-
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
 });
 
 export default app;

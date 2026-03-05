@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { showAdminLogin, handleAdminLogin, handleAdminLogout } from '../controllers/authController.js';
+import { adminLoginPage, adminLoginSubmitPage, adminLogoutPage } from '../controllers/adminController.js';
 import { showDashboard } from '../controllers/adminDashboardController.js';
 import {
   listProducts, showAddProduct, handleAddProduct,
-  showEditProduct, handleEditProduct, handleDeleteProduct, uploadProductImage
+  showEditProduct, handleEditProduct, handleDeleteProduct
 } from '../controllers/adminProductController.js';
 import { listOrders, showOrderDetail, handleUpdateStatus } from '../controllers/adminOrderController.js';
 import { listCustomers, showCustomerDetail } from '../controllers/adminUserController.js';
@@ -12,32 +12,31 @@ import { requireAdmin } from '../middleware/adminMiddleware.js';
 const router = Router();
 
 // ── Admin Auth ────────────────────────────────────────────────
-router.get('/login', showAdminLogin);
-router.post('/login', handleAdminLogin);
+router.get('/admin/login', adminLoginPage);
+router.post('/admin/login', adminLoginSubmitPage);
 
-// All routes below require admin session
-router.use(requireAdmin);
-router.get('/logout', handleAdminLogout);
+// All admin page routes below require admin session
+router.use('/admin', requireAdmin);
+router.get('/admin/logout', adminLogoutPage);
 
 // ── Dashboard ─────────────────────────────────────────────────
-router.get('/', showDashboard);
+router.get('/admin', showDashboard);
 
 // ── Products ──────────────────────────────────────────────────
-router.get('/products', listProducts);
-router.get('/products/add', showAddProduct);
-router.post('/products/add', handleAddProduct);
-router.get('/products/:id/edit', showEditProduct);
-router.post('/products/:id/edit', handleEditProduct);
-router.post('/products/:id/delete', handleDeleteProduct);
-router.post('/uploads/product-image', uploadProductImage);
+router.get('/admin/products', listProducts);
+router.get('/admin/products/add', showAddProduct);
+router.post('/admin/products/add', handleAddProduct);
+router.get('/admin/products/:id/edit', showEditProduct);
+router.post('/admin/products/:id/edit', handleEditProduct);
+router.post('/admin/products/:id/delete', handleDeleteProduct);
 
 // ── Orders ────────────────────────────────────────────────────
-router.get('/orders', listOrders);
-router.get('/orders/:id', showOrderDetail);
-router.post('/orders/:id/status', handleUpdateStatus);
+router.get('/admin/orders', listOrders);
+router.get('/admin/orders/:id', showOrderDetail);
+router.post('/admin/orders/:id/status', handleUpdateStatus);
 
 // ── Customers ─────────────────────────────────────────────────
-router.get('/customers', listCustomers);
-router.get('/customers/:id', showCustomerDetail);
+router.get('/admin/customers', listCustomers);
+router.get('/admin/customers/:id', showCustomerDetail);
 
 export default router;

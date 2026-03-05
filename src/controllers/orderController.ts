@@ -59,20 +59,11 @@ export async function showOrderDetail(req: Request, res: Response): Promise<void
   res.render('client/orderDetail', { title: 'Order ' + order.id, order });
 }
 
-function wantsJson(req: Request): boolean {
-  const accept = req.headers.accept ?? '';
-  return accept.includes('application/json') || req.xhr;
-}
-
 export async function postSimulatePayment(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) {
-    if (wantsJson(req)) return void res.status(401).json({ error: 'Authentication required.' });
-    return void res.redirect('/login');
-  }
+  if (!req.session.user) return void res.redirect('/login');
 
   const order = await getOrderDetail(req.params.id);
   if (!order || order.user_id !== req.session.user.id) {
-    if (wantsJson(req)) return void res.status(404).json({ error: 'Order not found.' });
     return void res.status(404).render('404', { title: 'Not Found' });
   }
 
@@ -80,19 +71,10 @@ export async function postSimulatePayment(req: Request, res: Response): Promise<
   const result = rawResult === 'fail' ? 'fail' : 'success';
 
   try {
-    const updated = await simulatePayment(order.id, result);
-    if (wantsJson(req)) {
-      return void res.json({
-        ok: true,
-        simulated: true,
-        result,
-        order: { id: updated.id, status: updated.status, total_amount: updated.total_amount },
-      });
-    }
+    await simulatePayment(order.id, result);
     const paymentFlag = result === 'success' ? 'success' : 'failed';
     return void res.redirect(`/order-confirm/${order.id}?payment=${paymentFlag}`);
   } catch (err: any) {
-    if (wantsJson(req)) return void res.status(400).json({ error: err.message });
     return void res.redirect('/order-confirm/' + order.id + '?payment=failed');
   }
 }

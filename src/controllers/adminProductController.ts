@@ -4,7 +4,7 @@ import {
 } from '../services/adminProductService.js';
 import { setProductImages } from '../models/productImageModel.js';
 import { supabase } from '../../data/supabaseClient.js';
-import { normalizeProductImageInputs, uploadImageToCloudinary } from '../services/cloudinaryService.js';
+import { normalizeProductImageInputs } from '../services/cloudinaryService.js';
 
 function validateProductPayload(body: Record<string, unknown>): { price: number; stock: number } {
   const name = String(body.name ?? '').trim();
@@ -88,19 +88,5 @@ export async function handleEditProduct(req: Request, res: Response): Promise<vo
 export async function handleDeleteProduct(req: Request, res: Response): Promise<void> {
   await deleteProduct(req.params.id);
   res.redirect('/admin/products');
-}
-
-export async function uploadProductImage(req: Request, res: Response): Promise<void> {
-  try {
-    const file = String(req.body?.file ?? '');
-    if (!file) {
-      return void res.status(400).json({ error: 'file is required.' });
-    }
-
-    const url = await uploadImageToCloudinary(file);
-    return void res.json({ ok: true, url });
-  } catch (err: any) {
-    return void res.status(400).json({ ok: false, error: err.message });
-  }
 }
 
