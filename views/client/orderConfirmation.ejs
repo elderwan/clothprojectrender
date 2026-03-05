@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black">
+  <!-- Header -->
+  <header class="border-b border-[#e0e0e0] bg-white">
+    <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px]">
+      <div class="flex h-full items-center justify-between">
+        <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
+        <nav class="flex items-center gap-6 text-[11px] font-bold">
+          <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
+          <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
+          <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
+          <a href="/cart" class="hover:text-gray-600">Cart<% if (cart && cart.items && cart.items.length > 0) { %> (<%= cart.items.length %>)<% } %></a>
+          <% if (user) { %>
+            <a href="/profile" class="hover:text-gray-600">Account</a>
+          <% } else { %>
+            <a href="/login" class="hover:text-gray-600">Account</a>
+          <% } %>
+          <a href="#" class="hover:text-gray-600">Search</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="mx-auto max-w-[1440px] px-4 py-16 lg:px-[140px]">
+    <div class="text-center max-w-[600px] mx-auto">
+      <div class="w-[80px] h-[80px] border-2 border-black rounded-full flex items-center justify-center mx-auto mb-8">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+      </div>
+
+      <h1 class="font-serif text-[36px] font-normal mb-4">THANK YOU FOR YOUR ORDER</h1>
+      <p class="text-[14px] text-[#737373] mb-8">
+        Your order has been confirmed and will be shipped within 2-3 business days.
+      </p>
+
+      <div class="bg-[#f9f9f9] p-8 mb-8">
+        <div class="text-left">
+          <p class="text-[11px] font-bold mb-4">ORDER DETAILS</p>
+          <div class="h-px w-full bg-[#e0e0e0] mb-4"></div>
+
+          <div class="space-y-3">
+            <div class="flex justify-between">
+              <span class="text-[12px]">Order Number</span>
+              <span class="text-[12px] font-bold">#<%= order.id %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[12px]">Order Date</span>
+              <span class="text-[12px]"><%= new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[12px]">Total Amount</span>
+              <span class="text-[12px] font-bold">$<%= Number(order.total).toFixed(2) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[12px]">Payment Method</span>
+              <span class="text-[12px]">Credit Card ****<%= order.payment_last4 || '1234' %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items Summary -->
+      <div class="text-left mb-8">
+        <p class="text-[11px] font-bold mb-4">ORDER SUMMARY</p>
+        <div class="h-px w-full bg-[#e0e0e0] mb-4"></div>
+
+        <div class="space-y-4">
+          <% if (order.items && order.items.length > 0) { %>
+            <% order.items.forEach(item => { %>
+              <div class="flex gap-4">
+                <div class="w-[60px] h-[80px] bg-[#f5f5f5] flex-shrink-0">
+                  <% if (item.product_image) { %>
+                    <img src="<%= item.product_image %>" alt="<%= item.product_name %>" class="w-full h-full object-cover" />
+                  <% } %>
+                </div>
+                <div class="flex-1">
+                  <p class="text-[12px] font-bold mb-1"><%= item.product_name %></p>
+                  <p class="text-[11px] text-[#737373] mb-1">Size: <%= item.size || 'M' %>   Qty: <%= item.quantity %></p>
+                  <p class="text-[12px]">$<%= Number(item.price || 0).toFixed(2) %></p>
+                </div>
+              </div>
+            <% }) %>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Shipping Information -->
+      <% if (order.shipping_address) { %>
+        <div class="text-left mb-8">
+          <p class="text-[11px] font-bold mb-4">SHIPPING TO</p>
+          <div class="h-px w-full bg-[#e0e0e0] mb-4"></div>
+
+          <div class="text-[12px]">
+            <p class="font-bold mb-1"><%= order.shipping_address.full_name %></p>
+            <p class="text-[#737373] mb-1"><%= order.shipping_address.street_address %></p>
+            <p class="text-[#737373]"><%= order.shipping_address.city %>, <%= order.shipping_address.state %> <%= order.shipping_address.zip_code %></p>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a href="/orders/<%= order.id %>" class="border border-black px-8 py-4 text-[11px] font-bold text-black hover:bg-black hover:text-white">
+          VIEW ORDER DETAILS
+        </a>
+        <a href="/products" class="border border-black px-8 py-4 text-[11px] font-bold text-black hover:bg-black hover:text-white">
+          CONTINUE SHOPPING
+        </a>
+      </div>
+
+      <p class="text-[11px] text-[#737373] mt-8">
+        A confirmation email has been sent to your email address with all order details.
+      </p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[#e0e0e0] bg-white mt-16">
+    <div class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+      <div class="grid gap-8 md:grid-cols-3">
+        <div>
+          <p class="font-serif text-[16px] font-normal">MAISON</p>
+          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">EXPLORE</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/products?category=women" class="block hover:text-black">Women</a>
+            <a href="/products?category=men" class="block hover:text-black">Men</a>
+            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">ACCOUNT</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <% if (user) { %>
+              <a href="/profile" class="block hover:text-black">My Account</a>
+              <a href="/orders" class="block hover:text-black">Orders</a>
+              <a href="/logout" class="block hover:text-black">Sign Out</a>
+            <% } else { %>
+              <a href="/login" class="block hover:text-black">Sign In</a>
+              <a href="/register" class="block hover:text-black">Register</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-[#e0e0e0] pt-6">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

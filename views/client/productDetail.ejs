@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black">
+  <!-- Header -->
+  <header class="border-b border-[#e0e0e0] bg-white">
+    <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px]">
+      <div class="flex h-full items-center justify-between">
+        <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
+        <nav class="flex items-center gap-6 text-[11px] font-bold">
+          <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
+          <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
+          <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
+          <a href="/cart" class="hover:text-gray-600">Cart<% if (cartCount > 0) { %> (<%= cartCount %>)<% } %></a>
+          <% if (user) { %>
+            <a href="/profile" class="hover:text-gray-600">Account</a>
+          <% } else { %>
+            <a href="/login" class="hover:text-gray-600">Account</a>
+          <% } %>
+          <a href="#" class="hover:text-gray-600">Search</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="border-b border-[#e0e0e0] bg-white">
+    <div class="mx-auto max-w-[1440px] px-4 py-4 lg:px-[140px]">
+      <p class="text-[11px] text-[#737373]">Home / Women / Coats</p>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <!-- Product Images -->
+      <div class="space-y-4">
+        <div class="aspect-square bg-[#f5f5f5] relative">
+          <% if (product && product.primary_image) { %>
+            <img src="<%= product.primary_image %>" alt="<%= product.name %>" class="w-full h-full object-cover" />
+          <% } %>
+          <p class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-[#737373]">Product Image</p>
+        </div>
+        <div class="grid grid-cols-4 gap-4">
+          <div class="aspect-square bg-[#f5f5f5]"></div>
+          <div class="aspect-square bg-[#f5f5f5]"></div>
+          <div class="aspect-square bg-[#f5f5f5]"></div>
+          <div class="aspect-square bg-[#f5f5f5]"></div>
+        </div>
+      </div>
+
+      <!-- Product Info -->
+      <div class="space-y-6">
+        <div>
+          <p class="text-[10px] font-bold text-[#737373] mb-2">MAISON</p>
+          <h1 class="font-serif text-[28px] font-normal mb-4"><%= product ? product.name : 'Oversized Wool Coat' %></h1>
+          <p class="text-[20px] font-normal">$<%= product ? Number(product.price || 0).toFixed(2) : '285.00' %></p>
+        </div>
+
+        <!-- Size Selection -->
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <p class="text-[11px] font-bold">SIZE</p>
+            <p class="text-[11px] text-[#737373]">Size Guide</p>
+          </div>
+          <div class="grid grid-cols-5 gap-2">
+            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
+              <span class="text-[12px]">XS</span>
+            </div>
+            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
+              <span class="text-[12px]">S</span>
+            </div>
+            <div class="h-[44px] w-[44px] border border-black bg-black flex items-center justify-center">
+              <span class="text-[12px] text-white">M</span>
+            </div>
+            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
+              <span class="text-[12px]">L</span>
+            </div>
+            <div class="h-[44px] w-[44px] border border-[#e0e0e0] flex items-center justify-center">
+              <span class="text-[12px]">XL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add to Cart -->
+        <div class="space-y-4">
+          <button class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800">
+            ADD TO CART
+          </button>
+          <button class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
+            ADD TO WISHLIST
+          </button>
+        </div>
+
+        <!-- Description -->
+        <div class="space-y-4">
+          <div>
+            <p class="text-[11px] font-bold mb-2">DESCRIPTION</p>
+            <p class="text-[13px] text-[#737373] leading-relaxed">
+              <%= product ? product.description : 'A relaxed oversized silhouette in Italian wool blend. Drop shoulders, single-button closure, full lining.' %>
+            </p>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold mb-2">COMPOSITION & CARE</p>
+            <p class="text-[13px] text-[#737373]">90% Wool  10% Polyamide  —  Dry clean only.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- You May Also Like -->
+    <section class="mt-16">
+      <div class="mb-8">
+        <p class="text-[11px] font-bold text-[#737373]">YOU MAY ALSO LIKE</p>
+        <div class="mt-2 h-px w-full bg-[#e0e0e0]"></div>
+      </div>
+
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <% if (related && related.length > 0) { %>
+          <% related.forEach(product => { %>
+            <a href="/products/<%= product.id %>" class="group">
+              <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
+                <% if (product.primary_image) { %>
+                  <img src="<%= product.primary_image %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <% } %>
+              </div>
+              <p class="text-[13px] font-normal mb-1"><%= product.name %></p>
+              <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %></p>
+            </a>
+          <% }) %>
+        <% } else { %>
+          <!-- Placeholder related products -->
+          <div class="group">
+            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
+            <p class="text-[13px] font-normal mb-1">Related Product 1</p>
+            <p class="text-[13px] text-[#737373]">$95.00</p>
+          </div>
+          <div class="group">
+            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
+            <p class="text-[13px] font-normal mb-1">Related Product 2</p>
+            <p class="text-[13px] text-[#737373]">$190.00</p>
+          </div>
+          <div class="group">
+            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
+            <p class="text-[13px] font-normal mb-1">Related Product 3</p>
+            <p class="text-[13px] text-[#737373]">$285.00</p>
+          </div>
+          <div class="group">
+            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
+            <p class="text-[13px] font-normal mb-1">Related Product 4</p>
+            <p class="text-[13px] text-[#737373]">$380.00</p>
+          </div>
+        <% } %>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[#e0e0e0] bg-white mt-16">
+    <div class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+      <div class="grid gap-8 md:grid-cols-3">
+        <div>
+          <p class="font-serif text-[16px] font-normal">MAISON</p>
+          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">EXPLORE</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/products?category=women" class="block hover:text-black">Women</a>
+            <a href="/products?category=men" class="block hover:text-black">Men</a>
+            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">ACCOUNT</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <% if (user) { %>
+              <a href="/profile" class="block hover:text-black">My Account</a>
+              <a href="/orders" class="block hover:text-black">Orders</a>
+              <a href="/logout" class="block hover:text-black">Sign Out</a>
+            <% } else { %>
+              <a href="/login" class="block hover:text-black">Sign In</a>
+              <a href="/register" class="block hover:text-black">Register</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-[#e0e0e0] pt-6">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
