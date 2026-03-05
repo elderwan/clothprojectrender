@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 text-zinc-900">
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
+  <%- include('../partials/adminSidebar', { activePage: 'products' }) %>
+
+  <div class="lg:pl-[260px]">
+    <%- include('../partials/adminTopbar', { title: product ? 'Edit Product' : 'Add New Product' }) %>
+
+    <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
+      <h1 class="font-serif text-[44px] leading-none"><%= product ? 'Edit Product' : 'Add New Product' %></h1>
+      <div class="mt-3 border-t border-zinc-300"></div>
+      <% if (error) { %>
+        <div class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></div>
+      <% } %>
+
+      <form method="POST" action="<%= product ? ('/admin/products/' + product.id + '/edit') : '/admin/products/add' %>" class="mt-4 w-full max-w-[520px] space-y-3">
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Product Name *</label>
+          <input class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" type="text" name="name" value="<%= product?.name || '' %>" required />
+        </div>
+
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Description *</label>
+          <textarea class="h-[108px] w-full border border-zinc-300 bg-zinc-100 px-3 py-2 text-[13px]" name="description" required><%= product?.description || '' %></textarea>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Price ($) *</label>
+          <input class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" type="number" step="0.01" min="0" name="price" value="<%= product?.price ?? '' %>" required />
+        </div>
+
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Category *</label>
+          <select class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" name="category_id" required>
+            <option value="">Select category</option>
+            <% categories.forEach((c) => { %>
+              <option value="<%= c.id %>" <%= product?.category_id === c.id ? 'selected' : '' %>><%= c.name %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Stock Quantity *</label>
+          <input class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" type="number" min="0" name="stock_quantity" value="<%= product?.stock_quantity ?? 0 %>" required />
+        </div>
+
+        <div class="flex items-center justify-between border border-zinc-300 bg-zinc-100 px-3 py-2">
+          <label for="is_active" class="text-[12px] font-medium text-zinc-700">Product Active</label>
+          <label class="relative inline-flex cursor-pointer items-center">
+            <input id="is_active" type="checkbox" name="is_active" class="peer sr-only" <%= (product ? product.is_active : true) ? 'checked' : '' %> />
+            <span class="h-6 w-11 rounded-full bg-zinc-300 transition peer-checked:bg-black"></span>
+            <span class="absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+          </label>
+        </div>
+
+        <div>
+          <label class="mb-1 block text-[12px] text-zinc-500">Product Image *</label>
+          <div id="upload-zone" class="relative h-[188px] w-full border border-zinc-300 bg-zinc-100">
+            <div class="absolute left-1/2 top-[38px] h-[88px] w-[144px] -translate-x-1/2 border border-zinc-200 bg-zinc-200">
+              <button id="upload-trigger" type="button" class="h-full w-full text-[12px] text-zinc-500">[ Upload Image ]</button>
+            </div>
+            <p class="absolute bottom-8 left-1/2 -translate-x-1/2 text-[12px] text-zinc-500">Click to upload or drag and drop</p>
+            <input id="upload-input" type="file" accept="image/*" multiple class="hidden" />
+          </div>
+          <div id="upload-status" class="mt-2 text-[12px] text-zinc-500">No files uploaded.</div>
+          <div id="upload-preview" class="mt-2 flex flex-wrap gap-2"></div>
+          <textarea id="image-urls" class="sr-only" name="image_urls" placeholder="One image per line."><% if (product?.images?.length) { %><%= product.images.map((i) => i.url).join('\n') %><% } %></textarea>
+        </div>
+
+        <div class="flex flex-wrap gap-3 pt-2">
+          <button class="inline-flex h-12 w-[200px] items-center justify-center border border-black bg-black text-[12px] font-semibold text-white hover:bg-zinc-800" type="submit"><%= product ? 'SAVE CHANGES' : 'SAVE PRODUCT' %></button>
+          <a class="inline-flex h-12 w-[120px] items-center justify-center border border-zinc-800 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/products">CANCEL</a>
+        </div>
+      </form>
+    </main>
+  </div>
+  <%- include('../partials/adminScripts') %>
+  <script>
+    (function () {
+      const uploadZone = document.getElementById('upload-zone');
+      const uploadTrigger = document.getElementById('upload-trigger');
+      const uploadInput = document.getElementById('upload-input');
+      const uploadStatus = document.getElementById('upload-status');
+      const uploadPreview = document.getElementById('upload-preview');
+      const imageUrlsInput = document.getElementById('image-urls');
+
+      let urls = (imageUrlsInput.value || '')
+        .split('\n')
+        .map((v) => v.trim())
+        .filter(Boolean);
+
+      function renderStatus(message) {
+        const countText = urls.length ? `${urls.length} image(s) ready.` : 'No files uploaded.';
+        uploadStatus.textContent = message ? `${message} ${countText}` : countText;
+      }
+
+      function syncField() {
+        imageUrlsInput.value = urls.join('\n');
+      }
+
+      function renderPreview() {
+        uploadPreview.innerHTML = '';
+        urls.forEach((url, idx) => {
+          const item = document.createElement('div');
+          item.className = 'relative h-16 w-16 overflow-hidden border border-zinc-300 bg-white';
+
+          const img = document.createElement('img');
+          img.src = url;
+          img.alt = 'Uploaded ' + (idx + 1);
+          img.className = 'h-full w-full object-cover';
+          item.appendChild(img);
+
+          const removeBtn = document.createElement('button');
+          removeBtn.type = 'button';
+          removeBtn.className = 'absolute right-0 top-0 bg-black/70 px-1 text-[10px] text-white';
+          removeBtn.textContent = '×';
+          removeBtn.addEventListener('click', () => {
+            urls = urls.filter((_, i) => i !== idx);
+            syncField();
+            renderPreview();
+            renderStatus('');
+          });
+          item.appendChild(removeBtn);
+
+          uploadPreview.appendChild(item);
+        });
+      }
+
+      function fileToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      async function uploadFiles(fileList) {
+        const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+        if (!files.length) {
+          renderStatus('Please select image files.');
+          return;
+        }
+
+        renderStatus('Uploading...');
+        for (const file of files) {
+          try {
+            const dataUrl = await fileToDataUrl(file);
+            const resp = await fetch('/api/admin/uploads/product-image', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+              },
+              body: JSON.stringify({ file: dataUrl }),
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data.url) {
+              throw new Error(data.message || 'Upload failed');
+            }
+            urls.push(data.url);
+            syncField();
+            renderPreview();
+            renderStatus(`Uploaded: ${file.name}`);
+          } catch (err) {
+            renderStatus(`Failed: ${file.name}`);
+          }
+        }
+      }
+
+      uploadTrigger.addEventListener('click', () => uploadInput.click());
+      uploadInput.addEventListener('change', (e) => uploadFiles(e.target.files));
+
+      uploadZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('ring-1', 'ring-zinc-500');
+      });
+      uploadZone.addEventListener('dragleave', () => {
+        uploadZone.classList.remove('ring-1', 'ring-zinc-500');
+      });
+      uploadZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('ring-1', 'ring-zinc-500');
+        uploadFiles(e.dataTransfer.files);
+      });
+
+      renderStatus('');
+      renderPreview();
+    })();
+  </script>
+</body>
+</html>

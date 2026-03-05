@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 text-zinc-900">
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
+  <%- include('../partials/adminSidebar', { activePage: 'dashboard' }) %>
+
+  <div class="lg:pl-[260px]">
+    <%- include('../partials/adminTopbar', { title }) %>
+
+    <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
+      <h1 class="font-serif text-[44px] leading-none">Dashboard</h1>
+      <div class="mt-3 border-t border-zinc-300"></div>
+
+      <section class="mt-4 grid gap-4 lg:grid-cols-4">
+        <article class="border border-zinc-300 bg-zinc-100 p-4">
+          <p class="text-[11px] uppercase text-zinc-500">Total Products</p>
+          <p class="mt-2 font-serif text-[42px] leading-none"><%= stats.totalProducts %></p>
+        </article>
+        <article class="border border-zinc-300 bg-zinc-100 p-4">
+          <p class="text-[11px] uppercase text-zinc-500">Total Orders</p>
+          <p class="mt-2 font-serif text-[42px] leading-none"><%= stats.totalOrders %></p>
+        </article>
+        <article class="border border-zinc-300 bg-zinc-100 p-4">
+          <p class="text-[11px] uppercase text-zinc-500">Total Users</p>
+          <p class="mt-2 font-serif text-[42px] leading-none"><%= stats.totalUsers %></p>
+        </article>
+        <article class="border border-zinc-300 bg-zinc-100 p-4">
+          <p class="text-[11px] uppercase text-zinc-500">Revenue</p>
+          <p class="mt-2 font-serif text-[42px] leading-none">$<%= Number(recentOrders.reduce((s,o)=>s+Number(o.total_amount||0),0)).toLocaleString() %></p>
+        </article>
+      </section>
+
+      <section class="mt-6">
+        <h2 class="text-[13px] font-semibold uppercase tracking-wide">Recent Orders</h2>
+        <div class="mt-2 border-t border-zinc-300"></div>
+        <div class="mt-2 overflow-x-auto">
+          <table class="min-w-full text-[13px]">
+            <thead class="bg-zinc-200 text-left text-[12px] font-semibold text-zinc-900">
+              <tr>
+                <th class="px-3 py-2">Order #</th>
+                <th class="px-3 py-2">Customer</th>
+                <th class="px-3 py-2">Date</th>
+                <th class="px-3 py-2">Total</th>
+                <th class="px-3 py-2">Status</th>
+                <th class="px-3 py-2 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            <% if (!recentOrders.length) { %>
+              <tr><td colspan="6" class="px-4 py-6 text-zinc-500">No orders yet.</td></tr>
+            <% } %>
+            <% recentOrders.forEach((o) => { %>
+              <tr class="border-t border-zinc-200">
+                <td class="px-3 py-3">#<%= String(o.id).slice(0, 6) %></td>
+                <td class="px-3 py-3"><%= o.user_name || o.user_email || 'Jane Doe' %></td>
+                <td class="px-3 py-3"><%= o.created_at ? new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026' %></td>
+                <td class="px-3 py-3">$<%= Number(o.total_amount || 0).toFixed(2) %></td>
+                <td class="px-3 py-3"><%= o.status %></td>
+                <td class="px-3 py-2 text-right"><a class="inline-flex h-7 w-[56px] items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/orders/<%= o.id %>">View</a></td>
+              </tr>
+            <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <%- include('../partials/adminScripts') %>
+</body>
+</html>

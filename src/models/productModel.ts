@@ -9,7 +9,7 @@ async function attachPrimaryImages(rows: any[]): Promise<Product[]> {
       const primary_image = await getPrimaryImage(row.id);
       return {
         ...row,
-        category:      row.categories?.name ?? null,
+        category: row.categories?.name ?? null,
         primary_image: primary_image ?? undefined,
       } as Product;
     })
@@ -20,7 +20,7 @@ export async function getAllProducts(categorySlug?: string): Promise<Product[]> 
   let query = supabase
     .from('products')
     .select('*, categories(name)')
-    .eq('is_active', true)
+    // .eq('is_active', true)
     .order('created_at', { ascending: false });
 
   if (categorySlug) {
@@ -50,7 +50,7 @@ export async function getProductById(id: string): Promise<Product | null> {
   const primary = images.find(i => i.is_primary) ?? images[0];
   return {
     ...(data as any),
-    category:      (data as any).categories?.name ?? null,
+    category: (data as any).categories?.name ?? null,
     images,
     primary_image: primary?.url ?? undefined,
   } as Product;

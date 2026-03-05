@@ -32,7 +32,7 @@ export async function showAddProduct(req: Request, res: Response): Promise<void>
 
 export async function handleAddProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity } = req.body;
+    const { name, description, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
     // image_urls supports URL list and base64 data URI list (one per line).
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
@@ -42,7 +42,7 @@ export async function handleAddProduct(req: Request, res: Response): Promise<voi
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,
-      is_active:      true,
+      is_active:      is_active === 'on',
     });
 
     if (imageUrls.length > 0) {
@@ -65,7 +65,7 @@ export async function showEditProduct(req: Request, res: Response): Promise<void
 
 export async function handleEditProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity } = req.body;
+    const { name, description, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
@@ -74,6 +74,7 @@ export async function handleEditProduct(req: Request, res: Response): Promise<vo
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,
+      is_active:      is_active === 'on',
     });
 
     // Always overwrite images (empty textarea = remove all)

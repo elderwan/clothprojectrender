@@ -1,0 +1,23 @@
+<script>
+  (function () {
+    const sidebar = document.getElementById('admin-sidebar');
+    const openBtn = document.getElementById('sidebar-open');
+    const closeBtn = document.getElementById('sidebar-close');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function openSidebar() {
+      sidebar?.classList.remove('-translate-x-full');
+      overlay?.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+      if (window.matchMedia('(min-width: 1024px)').matches) return;
+      sidebar?.classList.add('-translate-x-full');
+      overlay?.classList.add('hidden');
+    }
+
+    openBtn?.addEventListener('click', openSidebar);
+    closeBtn?.addEventListener('click', closeSidebar);
+    overlay?.addEventListener('click', closeSidebar);
+  })();
+</script>

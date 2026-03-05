@@ -1,0 +1,24 @@
+<aside id="admin-sidebar"
+  class="fixed inset-y-0 left-0 z-40 w-[260px] -translate-x-full border-r border-zinc-800 bg-[#0b0d12] text-zinc-200 transition-transform duration-200 lg:translate-x-0">
+  <div class="border-b border-zinc-600 px-6 pt-7 pb-2 text-center">
+    <div class="font-serif text-[26px] tracking-wide text-white">MAISON</div>
+    <div class="mt-1 text-[11px] uppercase tracking-wide text-zinc-400">Back Office</div>
+    <button id="sidebar-close" type="button"
+      class="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded border border-zinc-600 text-zinc-300 lg:hidden"
+      aria-label="Close sidebar">×</button>
+  </div>
+  <nav class="pt-3 text-[12px] leading-none">
+    <a href="/admin"
+      class="block px-7 py-[14px] <%= activePage === 'dashboard' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Dashboard</a>
+    <a href="/admin/products"
+      class="block px-7 py-[14px] <%= activePage === 'products' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Products</a>
+    <a href="/admin/orders"
+      class="block px-7 py-[14px] <%= activePage === 'orders' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Orders</a>
+    <a href="/admin/customers"
+      class="block px-7 py-[14px] <%= activePage === 'customers' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Customers</a>
+    <span class="block px-7 py-[14px] text-zinc-400">Settings</span>
+  </nav>
+  <div class="absolute inset-x-0 bottom-0 border-t border-zinc-700 p-4">
+    <a href="/admin/logout" class="block px-3 py-2 text-[14px] text-zinc-300 hover:bg-zinc-800">Logout</a>
+  </div>
+</aside>

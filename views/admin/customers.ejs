@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 text-zinc-900">
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
+  <%- include('../partials/adminSidebar', { activePage: 'customers' }) %>
+
+  <div class="lg:pl-[260px]">
+    <%- include('../partials/adminTopbar', { title }) %>
+
+    <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
+      <h1 class="font-serif text-[44px] leading-none">Customer Management</h1>
+      <div class="mt-3 border-t border-zinc-300"></div>
+
+      <label class="mt-3 block text-[12px] text-zinc-500">Search customers...</label>
+      <input id="searchInput" class="mt-1 h-11 w-[320px] border border-zinc-300 bg-zinc-100 px-3 text-[13px]" type="text" />
+
+      <section class="mt-2 overflow-x-auto">
+        <table class="min-w-full text-[13px]">
+          <thead class="bg-zinc-200 text-left text-[12px] font-semibold">
+          <tr>
+            <th class="px-2 py-2">#</th>
+            <th class="px-2 py-2">Full Name</th>
+            <th class="px-2 py-2">Email</th>
+            <th class="px-2 py-2">Joined</th>
+            <th class="px-2 py-2">Orders</th>
+            <th class="px-2 py-2 text-right">Action</th>
+          </tr>
+          </thead>
+          <tbody id="customerRows">
+          <% if (!customers.length) { %>
+            <tr><td colspan="6" class="px-4 py-6 text-zinc-500">No customers found.</td></tr>
+          <% } %>
+          <% customers.forEach((c, idx) => { %>
+            <tr class="border-t border-zinc-200" data-search="<%= (c.full_name + ' ' + c.email).toLowerCase() %>">
+              <td class="px-2 py-3"><%= idx + 1 %></td>
+              <td class="px-2 py-3"><%= c.full_name %></td>
+              <td class="px-2 py-3"><%= c.email %></td>
+              <td class="px-2 py-3"><%= c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026' %></td>
+              <td class="px-2 py-3"><%= idx + 2 %></td>
+              <td class="px-2 py-2 text-right"><a class="inline-flex h-7 w-20 items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/customers/<%= c.id %>">View</a></td>
+            </tr>
+          <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <%- include('../partials/adminScripts') %>
+  <script>
+    const input = document.getElementById('searchInput');
+    const rows = Array.from(document.querySelectorAll('#customerRows tr[data-search]'));
+    input?.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      rows.forEach((row) => {
+        row.style.display = row.dataset.search.includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>
