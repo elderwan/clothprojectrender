@@ -27,6 +27,19 @@ function parseAudience(value: unknown): 'men' | 'women' | 'kids' {
   return audience;
 }
 
+async function getCategoryAudienceOrThrow(categoryId: string): Promise<'men' | 'women' | 'kids'> {
+  const id = String(categoryId ?? '').trim();
+  if (!id) throw new Error('Category is required.');
+  const { data, error } = await supabase
+    .from('categories')
+    .select('audience')
+    .eq('id', id)
+    .eq('del_flg', false)
+    .single();
+  if (error || !data) throw new Error('Invalid category.');
+  return parseAudience((data as any).audience);
+}
+
 export async function listProducts(req: Request, res: Response): Promise<void> {
   const activeRaw = String(req.query.active ?? 'all');
   const filters = {
@@ -38,25 +51,25 @@ export async function listProducts(req: Request, res: Response): Promise<void> {
       : 'all') as 'all' | 'men' | 'women' | 'kids',
   };
   const products = await adminSearchProducts(filters);
-  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
+  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('audience').order('name');
   res.render('admin/products', { title: 'Product Management', products, categories: categories ?? [], filters });
 }
 
 export async function showAddProduct(req: Request, res: Response): Promise<void> {
-  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
+  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('audience').order('name');
   res.render('admin/productAdd', { title: 'Add Product', categories: categories ?? [], error: null, product: null });
 }
 
 export async function handleAddProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity, is_active } = req.body;
+    const { name, description, composition_care, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
-    const audience = parseAudience(req.body.audience);
+    const audience = await getCategoryAudienceOrThrow(String(category_id ?? ''));
     // image_urls supports URL list and base64 data URI list (one per line).
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
     const product = await createProduct({
-      name, description,
+      name, description, composition_care,
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,
@@ -70,7 +83,7 @@ export async function handleAddProduct(req: Request, res: Response): Promise<voi
 
     res.redirect('/admin/products');
   } catch (err: any) {
-    const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
+    const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('audience').order('name');
     res.render('admin/productAdd', { title: 'Add Product', categories: categories ?? [], error: err.message, product: null });
   }
 }
@@ -78,19 +91,19 @@ export async function handleAddProduct(req: Request, res: Response): Promise<voi
 export async function showEditProduct(req: Request, res: Response): Promise<void> {
   const product = await adminGetProductById(req.params.id);
   if (!product) return void res.redirect('/admin/products');
-  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
+  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('audience').order('name');
   res.render('admin/productAdd', { title: 'Edit Product', product, categories: categories ?? [], error: null });
 }
 
 export async function handleEditProduct(req: Request, res: Response): Promise<void> {
   try {
-    const { name, description, price, category_id, stock_quantity, is_active } = req.body;
+    const { name, description, composition_care, price, category_id, stock_quantity, is_active } = req.body;
     const parsed = validateProductPayload(req.body);
-    const audience = parseAudience(req.body.audience);
+    const audience = await getCategoryAudienceOrThrow(String(category_id ?? ''));
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
 
     await updateProduct(req.params.id, {
-      name, description,
+      name, description, composition_care,
       price:          parsed.price,
       category_id:    category_id || null,
       stock_quantity: parsed.stock,

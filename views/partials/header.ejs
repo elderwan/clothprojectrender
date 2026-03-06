@@ -1,5 +1,5 @@
 <header class="relative border-b border-[#e0e0e0] bg-white">
-  <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px] flex items-center justify-between">
+  <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-[140px] flex items-center justify-between space-x-4">
     <a href="/" class="font-serif text-[20px] font-normal">MAISON</a>
 
     <!-- mobile menu button -->
@@ -9,19 +9,20 @@
       </svg>
     </button>
 
-    <nav id="main-nav" class="hidden absolute z-10 top-full right-0 w-full bg-white flex flex-col gap-4 p-4 text-[11px] font-bold md:static md:flex md:flex-row md:gap-6 md:p-0">
+    <nav id="main-nav"
+      class="hidden absolute z-10 top-full right-0 w-full bg-white flex flex-col gap-4 p-4 text-[11px] font-bold md:static md:flex md:flex-row md:gap-6 md:p-0">
       <a href="/products?category=women" class="hover:text-gray-600">WOMEN</a>
       <a href="/products?category=men" class="hover:text-gray-600">MEN</a>
       <a href="/products?category=kids" class="hover:text-gray-600">KIDS</a>
       <a href="/cart" class="hover:text-gray-600">
-        Cart<% if (cartCount && cartCount > 0) { %> (<%= cartCount %>)<% } %>
+        Cart<% if (cartCount && cartCount> 0) { %> (<%= cartCount %>)<% } %>
       </a>
       <% if (user) { %>
         <a href="/profile" class="hover:text-gray-600">Account</a>
-      <% } else { %>
-        <a href="/login" class="hover:text-gray-600">Account</a>
-      <% } %>
-      <a href="/products" class="hover:text-gray-600">Search</a>
+        <% } else { %>
+          <a href="/login" class="hover:text-gray-600">Account</a>
+          <% } %>
+            <a href="/products" class="hover:text-gray-600">Search</a>
     </nav>
   </div>
 </header>
@@ -43,5 +44,6 @@
           }
         });
       });
-    }  });
+    }
+  });
 </script>

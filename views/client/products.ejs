@@ -13,29 +13,37 @@
   <!-- Breadcrumb -->
   <div class="border-b border-[#e0e0e0] bg-white">
     <div class="mx-auto max-w-[1440px] px-4 py-4 lg:px-[140px]">
-      <p class="text-[11px] text-[#737373]">Home / <%= category ? category.charAt(0).toUpperCase() + category.slice(1) : 'All' %></p>
+      <p class="text-[11px] text-[#737373]">Home / <%= audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : 'All' %><%= category ? (' / ' + category.charAt(0).toUpperCase() + category.slice(1)) : '' %></p>
     </div>
   </div>
 
   <!-- Main Content -->
   <main class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
-    <h1 class="font-serif text-[36px] font-normal mb-6"><%= category ? category.toUpperCase() : 'ALL' %></h1>
+    <h1 class="font-serif text-[36px] font-normal mb-6"><%= audience ? audience.toUpperCase() : 'ALL' %></h1>
 
     <!-- Filters -->
     <div class="mb-6">
       <div class="flex flex-wrap items-center gap-4">
         <div class="flex items-center gap-2">
-          <div class="h-[32px] w-[52px] border border-black bg-black flex items-center justify-center">
-            <span class="text-[11px] font-bold text-white">All</span>
-          </div>
-          <span class="text-[11px] font-normal text-black">Coats</span>
-          <span class="text-[11px] font-normal text-black">Dresses</span>
-          <span class="text-[11px] font-normal text-black">Tops</span>
-          <span class="text-[11px] font-normal text-black">Trousers</span>
-          <span class="text-[11px] font-normal text-black">Accessories</span>
+          <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %>sort=<%= sort || 'time_desc' %>"
+             class="inline-flex h-[32px] items-center justify-center border px-3 text-[11px] font-bold <%= !category ? 'border-black bg-black text-white' : 'border-[#e0e0e0] text-black' %>">All</a>
+          <% (categories || []).forEach((c) => { %>
+            <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %>category=<%= c.slug %>&sort=<%= sort || 'time_desc' %>"
+               class="text-[11px] font-normal <%= category === c.slug ? 'text-black font-bold' : 'text-black' %> hover:underline"><%= c.name %></a>
+          <% }) %>
         </div>
         <div class="ml-auto">
-          <span class="text-[11px] text-[#737373]">Sort: Newest</span>
+          <form method="GET" action="/products" class="flex items-center gap-2">
+            <% if (audience) { %><input type="hidden" name="audience" value="<%= audience %>" /><% } %>
+            <% if (category) { %><input type="hidden" name="category" value="<%= category %>" /><% } %>
+            <label class="text-[11px] text-[#737373]" for="sort-select">Sorted:</label>
+            <select id="sort-select" name="sort" class="h-[32px] border border-[#e0e0e0] px-2 text-[11px]" onchange="this.form.submit()">
+              <option value="sales_desc" <%= sort === 'sales_desc' ? 'selected' : '' %>>Sales (high to low)</option>
+              <option value="sales_asc" <%= sort === 'sales_asc' ? 'selected' : '' %>>Sales (low to high)</option>
+              <option value="time_desc" <%= (sort || 'time_desc') === 'time_desc' ? 'selected' : '' %>>Time (new to old)</option>
+              <option value="time_asc" <%= sort === 'time_asc' ? 'selected' : '' %>>Time (old to new)</option>
+            </select>
+          </form>
         </div>
       </div>
       <div class="mt-4 h-px w-full bg-[#e0e0e0]"></div>

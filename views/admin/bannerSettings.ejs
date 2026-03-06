@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-100 text-zinc-900">
+  <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
+  <%- include('../partials/adminSidebar', { activePage: 'banner' }) %>
+
+  <div class="lg:pl-[260px]">
+    <%- include('../partials/adminTopbar', { title }) %>
+
+    <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
+      <div class="flex items-center justify-between">
+        <h1 class="font-serif text-[44px] leading-none">Banner Settings</h1>
+        <a class="inline-flex h-10 w-[166px] items-center justify-center border border-black bg-black text-[12px] font-semibold text-white hover:bg-zinc-800" href="/admin/settings/banner/add">+ ADD BANNER</a>
+      </div>
+      <div class="mt-3 border-t border-zinc-300"></div>
+
+      <% if (success) { %>
+        <div class="mt-4 rounded border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700"><%= success %></div>
+      <% } %>
+
+      <section class="mt-2 overflow-x-auto">
+        <table class="min-w-full text-[13px]">
+          <thead class="bg-zinc-200 text-left text-[12px] font-semibold">
+            <tr>
+              <th class="px-3 py-2">Preview</th>
+              <th class="px-3 py-2">Title</th>
+              <th class="px-3 py-2">Date Range</th>
+              <th class="px-3 py-2">Product</th>
+              <th class="px-3 py-2">Status</th>
+              <th class="px-3 py-2 text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!banners || banners.length === 0) { %>
+              <tr><td colspan="6" class="px-3 py-4 text-zinc-500">No banners yet.</td></tr>
+            <% } %>
+            <% (banners || []).forEach((b) => { %>
+              <tr class="border-t border-zinc-200">
+                <td class="px-3 py-2"><img src="<%= b.image_url %>" alt="<%= b.title %>" class="h-12 w-24 object-cover" /></td>
+                <td class="px-3 py-2"><%= b.title %></td>
+                <td class="px-3 py-2">
+                  <div><%= b.active_from ? new Date(b.active_from).toLocaleString() : '-' %></div>
+                  <div class="text-zinc-500"><%= b.active_to ? new Date(b.active_to).toLocaleString() : '-' %></div>
+                </td>
+                <td class="px-3 py-2"><%= b.product_name || '-' %></td>
+                <td class="px-3 py-2"><%= b.is_active ? 'Enabled' : 'Disabled' %></td>
+                <td class="px-3 py-2 text-right">
+                  <div class="flex justify-end gap-2">
+                    <a class="inline-flex h-[30px] w-16 items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/settings/banner/<%= b.id %>/edit">Edit</a>
+                    <form method="POST" action="/admin/settings/banner/<%= b.id %>/delete" data-confirm="Delete this banner?">
+                      <button class="inline-flex h-[30px] w-[72px] items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" type="submit">Delete</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+  <%- include('../partials/adminScripts') %>
+</body>
+</html>

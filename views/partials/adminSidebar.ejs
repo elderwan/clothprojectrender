@@ -16,7 +16,10 @@
       class="block px-7 py-[14px] <%= activePage === 'orders' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Orders</a>
     <a href="/admin/customers"
       class="block px-7 py-[14px] <%= activePage === 'customers' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Customers</a>
-    <span class="block px-7 py-[14px] text-zinc-400">Settings</span>
+    <a href="/admin/settings/banner"
+      class="block px-7 py-[14px] <%= activePage === 'banner' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Banner Settings</a>
+    <a href="/admin/settings/categories"
+      class="block px-7 py-[14px] <%= activePage === 'categories' ? 'border-y border-zinc-700 bg-zinc-800 text-white' : 'text-zinc-200 hover:bg-zinc-800' %>">Category Settings</a>
   </nav>
   <div class="absolute inset-x-0 bottom-0 border-t border-zinc-700 p-4">
     <a href="/admin/logout" class="block px-3 py-2 text-[14px] text-zinc-300 hover:bg-zinc-800">Logout</a>

@@ -5,6 +5,7 @@ import { countOrders, getAllOrders, getOrderById, updateOrderStatus } from '../s
 import { countUsers, getAllUsers, findUserById } from '../services/adminUserService.js';
 import { setProductImages } from '../models/productImageModel.js';
 import { normalizeProductImageInputs, uploadImageToCloudinary } from '../services/cloudinaryService.js';
+import { supabase } from '../../data/supabaseClient.js';
 
 export async function adminLoginApi(req: Request, res: Response): Promise<void> {
   try {
@@ -27,31 +28,44 @@ export async function adminLoginApi(req: Request, res: Response): Promise<void> 
 function parseProductPayload(body: Record<string, unknown>): {
   name: string;
   description: string;
+  composition_care?: string;
   price: number;
-  category_id?: string;
+  category_id: string;
   stock_quantity: number;
-  audience: 'men' | 'women' | 'kids';
 } {
   const name = String(body.name ?? '').trim();
   if (!name) throw new Error('Product name is required.');
   const description = String(body.description ?? '');
+  const composition_care = String(body.composition_care ?? '').trim();
   const price = Number(body.price);
   if (!Number.isFinite(price) || price < 0) throw new Error('Invalid product price.');
   const stock_quantity = Number(body.stock_quantity);
   if (!Number.isFinite(stock_quantity) || stock_quantity < 0) throw new Error('Invalid stock quantity.');
   const category = String(body.category_id ?? '').trim();
-  const audience = String(body.audience ?? '').trim().toLowerCase();
-  if (audience !== 'men' && audience !== 'women' && audience !== 'kids') {
-    throw new Error('Audience is required (men, women, kids).');
-  }
+  if (!category) throw new Error('Category is required.');
   return {
     name,
     description,
+    composition_care: composition_care || undefined,
     price,
-    category_id: category || undefined,
+    category_id: category,
     stock_quantity,
-    audience,
   };
+}
+
+async function getCategoryAudienceOrThrow(categoryId: string): Promise<'men' | 'women' | 'kids'> {
+  const { data, error } = await supabase
+    .from('categories')
+    .select('audience')
+    .eq('id', categoryId)
+    .eq('del_flg', false)
+    .single();
+  if (error || !data) throw new Error('Invalid category.');
+  const audience = String((data as any).audience ?? '').toLowerCase();
+  if (audience !== 'men' && audience !== 'women' && audience !== 'kids') {
+    throw new Error('Invalid category audience.');
+  }
+  return audience;
 }
 
 export function adminLogoutApi(req: Request, res: Response): void {
@@ -103,7 +117,8 @@ export async function adminCreateProductApi(req: Request, res: Response): Promis
   try {
     const payload = parseProductPayload(req.body);
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
-    const product = await createProduct({ ...payload, is_active: true });
+    const audience = await getCategoryAudienceOrThrow(payload.category_id);
+    const product = await createProduct({ ...payload, audience, is_active: true });
     if (imageUrls.length > 0) await setProductImages(product.id, imageUrls);
     res.status(201).json({ message: 'product created', product });
   } catch (err: any) {
@@ -115,7 +130,8 @@ export async function adminUpdateProductApi(req: Request, res: Response): Promis
   try {
     const payload = parseProductPayload(req.body);
     const imageUrls = await normalizeProductImageInputs(String(req.body.image_urls ?? ''));
-    const product = await updateProduct(req.params.id, payload);
+    const audience = await getCategoryAudienceOrThrow(payload.category_id);
+    const product = await updateProduct(req.params.id, { ...payload, audience });
     await setProductImages(req.params.id, imageUrls);
     res.status(200).json({ message: 'product updated', product });
   } catch (err: any) {

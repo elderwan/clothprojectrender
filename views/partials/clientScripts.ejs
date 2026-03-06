@@ -32,20 +32,44 @@
       });
     }
 
+    // product gallery: click sub image to switch main image
+    const mainProductImage = document.getElementById('main-product-image');
+    const thumbs = document.querySelectorAll('.product-thumb');
+    if (mainProductImage && thumbs.length > 0) {
+      thumbs.forEach((thumb) => {
+        thumb.addEventListener('click', () => {
+          const url = thumb.getAttribute('data-image-url');
+          if (!url) return;
+          mainProductImage.setAttribute('src', url);
+          thumbs.forEach((t) => t.classList.remove('ring-2', 'ring-black'));
+          thumb.classList.add('ring-2', 'ring-black');
+        });
+      });
+    }
+
     // simple hero slider
     const slides = document.querySelectorAll('.hero-slide');
     let current = 0;
     function showSlide(idx) {
-      slides.forEach((s, i) => s.classList.toggle('hidden', i !== idx));
+      slides.forEach((s, i) => {
+        const active = i === idx;
+        s.classList.toggle('opacity-100', active);
+        s.classList.toggle('z-10', active);
+        s.classList.toggle('opacity-0', !active);
+        s.classList.toggle('pointer-events-none', !active);
+        s.classList.toggle('z-0', !active);
+      });
     }
     const prevBtn = document.getElementById('slide-prev');
     const nextBtn = document.getElementById('slide-next');
     if (slides.length > 0) {
       showSlide(0);
-      setInterval(() => {
-        current = (current + 1) % slides.length;
-        showSlide(current);
-      }, 5000);
+      if (slides.length > 1) {
+        setInterval(() => {
+          current = (current + 1) % slides.length;
+          showSlide(current);
+        }, 5000);
+      }
       if (prevBtn) {
         prevBtn.addEventListener('click', () => {
           current = (current - 1 + slides.length) % slides.length;

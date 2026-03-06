@@ -3,20 +3,38 @@ import { getAllProductsService, getProductByIdService } from '../services/produc
 import { supabase } from '../../data/supabaseClient.js';
 
 export async function getProducts(req: Request, res: Response): Promise<void> {
-  const rawCategory = String(req.query.category ?? '').trim().toLowerCase();
-  const isAudience = rawCategory === 'men' || rawCategory === 'women' || rawCategory === 'kids';
-  const audience = isAudience ? (rawCategory as 'men' | 'women' | 'kids') : undefined;
-  const category = isAudience ? undefined : (rawCategory || undefined);
-  const products = await getAllProductsService(category, audience);
+  const categoryQuery = String(req.query.category ?? '').trim().toLowerCase();
+  const audienceQuery = String(req.query.audience ?? '').trim().toLowerCase();
+  const sortQuery = String(req.query.sort ?? 'time_desc').trim().toLowerCase();
+  const validSort = ['time_desc', 'time_asc', 'sales_desc', 'sales_asc'].includes(sortQuery)
+    ? (sortQuery as 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc')
+    : 'time_desc';
 
-  const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('name');
+  const categoryAsAudience = categoryQuery === 'men' || categoryQuery === 'women' || categoryQuery === 'kids';
+  const audience = (audienceQuery === 'men' || audienceQuery === 'women' || audienceQuery === 'kids'
+    ? audienceQuery
+    : (categoryAsAudience ? categoryQuery : '')) as '' | 'men' | 'women' | 'kids';
+  const categorySlug = categoryAsAudience ? undefined : (categoryQuery || undefined);
+
+  const products = await getAllProductsService(categorySlug, audience || undefined, validSort);
+
+  let categoryQueryBuilder = supabase
+    .from('categories')
+    .select('*')
+    .eq('del_flg', false)
+    .order('name');
+  if (audience) {
+    categoryQueryBuilder = categoryQueryBuilder.eq('audience', audience) as typeof categoryQueryBuilder;
+  }
+  const { data: categories } = await categoryQueryBuilder;
 
   res.render('client/products', {
     title: 'Shop',
     products,
     categories: categories ?? [],
-    category: rawCategory || undefined,
-    audience,
+    category: categorySlug,
+    audience: audience || undefined,
+    sort: validSort,
   });
 }
 

@@ -7,6 +7,15 @@ import {
 } from '../controllers/adminProductController.js';
 import { listOrders, showOrderDetail, handleUpdateStatus } from '../controllers/adminOrderController.js';
 import { listCustomers, showCustomerDetail } from '../controllers/adminUserController.js';
+import {
+  listBanners,
+  showAddBanner,
+  handleAddBanner,
+  showEditBanner,
+  handleEditBanner,
+  handleDeleteBanner,
+} from '../controllers/adminBannerController.js';
+import { showCategorySettings, showEditCategory, handleAddCategory, handleEditCategory, handleDeleteCategory } from '../controllers/adminCategoryController.js';
 import { requireAdmin } from '../middleware/adminMiddleware.js';
 
 const router = Router();
@@ -38,5 +47,18 @@ router.post('/admin/orders/:id/status', handleUpdateStatus);
 // ── Customers ─────────────────────────────────────────────────
 router.get('/admin/customers', listCustomers);
 router.get('/admin/customers/:id', showCustomerDetail);
+
+// ── Settings ──────────────────────────────────────────────────
+router.get('/admin/settings/banner', listBanners);
+router.get('/admin/settings/banner/add', showAddBanner);
+router.post('/admin/settings/banner/add', handleAddBanner);
+router.get('/admin/settings/banner/:id/edit', showEditBanner);
+router.post('/admin/settings/banner/:id/edit', handleEditBanner);
+router.post('/admin/settings/banner/:id/delete', handleDeleteBanner);
+router.get('/admin/settings/categories', showCategorySettings);
+router.post('/admin/settings/categories', handleAddCategory);
+router.get('/admin/settings/categories/:id/edit', showEditCategory);
+router.post('/admin/settings/categories/:id/edit', handleEditCategory);
+router.post('/admin/settings/categories/:id/delete', handleDeleteCategory);
 
 export default router;

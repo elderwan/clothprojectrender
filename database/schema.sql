@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS cart_items      CASCADE;
 DROP TABLE IF EXISTS order_items     CASCADE;
 DROP TABLE IF EXISTS orders          CASCADE;
 DROP TABLE IF EXISTS user_addresses  CASCADE;
+DROP TABLE IF EXISTS home_banners    CASCADE;
 DROP TABLE IF EXISTS product_images  CASCADE;
 DROP TABLE IF EXISTS products        CASCADE;
 DROP TABLE IF EXISTS categories      CASCADE;
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS categories (
   id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name       TEXT NOT NULL UNIQUE,          -- e.g. "Coats"
   slug       TEXT NOT NULL UNIQUE,          -- e.g. "coats"
+  audience   TEXT NOT NULL DEFAULT 'women' CHECK (audience IN ('men', 'women', 'kids')),
   del_flg    BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -32,6 +34,7 @@ CREATE TABLE IF NOT EXISTS products (
   id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name           TEXT        NOT NULL,
   description    TEXT,
+  composition_care TEXT,
   price          NUMERIC(10,2) NOT NULL CHECK (price >= 0),
   category_id    UUID REFERENCES categories(id) ON DELETE SET NULL,
   audience       TEXT        NOT NULL DEFAULT 'women' CHECK (audience IN ('men', 'women', 'kids')),
@@ -131,11 +134,27 @@ CREATE TABLE IF NOT EXISTS cart_items (
   UNIQUE (user_id, product_id, size, del_flg)   -- one active row per user+product+size combo
 );
 
+-- ── 9. HOMEPAGE BANNERS ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS home_banners (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title       TEXT NOT NULL,
+  description TEXT,
+  image_url   TEXT NOT NULL,
+  product_id  UUID REFERENCES products(id) ON DELETE SET NULL,
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE,
+  active_from TIMESTAMPTZ,
+  active_to   TIMESTAMPTZ,
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
 -- ── INDEXES ──────────────────────────────────────────────────
 CREATE INDEX IF NOT EXISTS idx_products_category       ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active      ON products(is_active);
 CREATE INDEX IF NOT EXISTS idx_products_audience       ON products(audience);
 CREATE INDEX IF NOT EXISTS idx_categories_del_flg      ON categories(del_flg);
+CREATE INDEX IF NOT EXISTS idx_categories_audience     ON categories(audience);
 CREATE INDEX IF NOT EXISTS idx_products_del_flg        ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_product_images_product  ON product_images(product_id);
 CREATE INDEX IF NOT EXISTS idx_product_images_primary  ON product_images(product_id, is_primary);
@@ -151,6 +170,8 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order       ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_del_flg     ON order_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_cart_items_user         ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg      ON cart_items(del_flg);
+CREATE INDEX IF NOT EXISTS idx_home_banners_active     ON home_banners(is_active);
+CREATE INDEX IF NOT EXISTS idx_home_banners_del_flg    ON home_banners(del_flg);
 
 -- ── AUTO-UPDATE updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -179,6 +200,10 @@ CREATE OR REPLACE TRIGGER trg_cart_items_updated_at
 
 CREATE OR REPLACE TRIGGER trg_user_addresses_updated_at
   BEFORE UPDATE ON user_addresses
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE OR REPLACE TRIGGER trg_home_banners_updated_at
+  BEFORE UPDATE ON home_banners
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ── SEED: CATEGORIES ─────────────────────────────────────────
@@ -261,6 +286,7 @@ CREATE INDEX IF NOT EXISTS idx_products_category   ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active  ON products(is_active);
 CREATE INDEX IF NOT EXISTS idx_products_audience   ON products(audience);
 CREATE INDEX IF NOT EXISTS idx_categories_del_flg  ON categories(del_flg);
+CREATE INDEX IF NOT EXISTS idx_categories_audience ON categories(audience);
 CREATE INDEX IF NOT EXISTS idx_products_del_flg    ON products(del_flg);
 CREATE INDEX IF NOT EXISTS idx_orders_user_id      ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status       ON orders(status);
@@ -270,6 +296,8 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order   ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_del_flg ON order_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_cart_items_user     ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg  ON cart_items(del_flg);
+CREATE INDEX IF NOT EXISTS idx_home_banners_active ON home_banners(is_active);
+CREATE INDEX IF NOT EXISTS idx_home_banners_del_flg ON home_banners(del_flg);
 
 -- ── AUTO-UPDATE updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -294,6 +322,10 @@ CREATE OR REPLACE TRIGGER trg_orders_updated_at
 
 CREATE OR REPLACE TRIGGER trg_cart_items_updated_at
   BEFORE UPDATE ON cart_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE OR REPLACE TRIGGER trg_home_banners_updated_at
+  BEFORE UPDATE ON home_banners
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 -- ── SEED: CATEGORIES ─────────────────────────────────────────

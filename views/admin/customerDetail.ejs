@@ -40,6 +40,46 @@
           <p class="mt-1"><%= customer.created_at ? new Date(customer.created_at).toLocaleString() : '-' %></p>
         </article>
       </section>
+
+      <section class="mt-6 rounded border border-zinc-200 bg-white p-4">
+        <div class="mb-3 flex items-center justify-between">
+          <h2 class="text-sm font-semibold">Orders</h2>
+          <span class="text-xs text-zinc-500"><%= orders?.length || 0 %> total</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead class="bg-zinc-100 text-left text-xs font-semibold text-zinc-600">
+              <tr>
+                <th class="px-3 py-2">Order ID</th>
+                <th class="px-3 py-2">Status</th>
+                <th class="px-3 py-2">Amount</th>
+                <th class="px-3 py-2">Items</th>
+                <th class="px-3 py-2">Created</th>
+                <th class="px-3 py-2 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!orders || orders.length === 0) { %>
+                <tr>
+                  <td colspan="6" class="px-3 py-4 text-center text-zinc-500">No orders yet.</td>
+                </tr>
+              <% } %>
+              <% (orders || []).forEach((o) => { %>
+                <tr class="border-t border-zinc-200">
+                  <td class="px-3 py-2 font-mono text-xs"><%= o.id %></td>
+                  <td class="px-3 py-2 capitalize"><%= o.status %></td>
+                  <td class="px-3 py-2">$<%= Number(o.total_amount || 0).toFixed(2) %></td>
+                  <td class="px-3 py-2"><%= o.order_items?.length ?? 0 %></td>
+                  <td class="px-3 py-2"><%= o.created_at ? new Date(o.created_at).toLocaleString() : '-' %></td>
+                  <td class="px-3 py-2 text-right">
+                    <a href="/admin/orders/<%= o.id %>" class="inline-flex h-7 items-center border border-zinc-900 px-3 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white">View</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   </div>
   <%- include('../partials/adminScripts') %>

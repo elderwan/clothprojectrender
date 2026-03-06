@@ -15,6 +15,7 @@ export interface Product {
   id: string;
   name: string;
   description?: string;
+  composition_care?: string;
   price: number;
   category_id?: string;
   category?: string;           // joined category name

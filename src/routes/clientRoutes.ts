@@ -11,6 +11,7 @@ import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDe
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { getCart } from '../services/cartService.js';
 import { getAllProductsService } from '../services/productService.js';
+import { getActiveHomeBanners } from '../models/homeBannerModel.js';
 
 const router = Router();
 
@@ -23,10 +24,13 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   // fetch a handful of products for the homepage
-  const all = await getAllProductsService();
+  const [all, banners] = await Promise.all([
+    getAllProductsService(),
+    getActiveHomeBanners(),
+  ]);
   const newArrivals = all.slice(0, 4);
 
-  res.render('client/home', { title: 'MAISON', cartCount, newArrivals });
+  res.render('client/home', { title: 'MAISON', cartCount, newArrivals, banners });
 });
 
 // ── Auth ──────────────────────────────────────────────────────

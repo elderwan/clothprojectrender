@@ -54,7 +54,7 @@
               <td class="px-2 py-3"><%= c.full_name %></td>
               <td class="px-2 py-3"><%= c.email %></td>
               <td class="px-2 py-3"><%= c.created_at ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026' %></td>
-              <td class="px-2 py-3"><%= idx + 2 %></td>
+              <td class="px-2 py-3"><%= c.order_count ?? 0 %></td>
               <td class="px-2 py-2 text-right"><a class="inline-flex h-7 w-20 items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/customers/<%= c.id %>">View</a></td>
             </tr>
           <% }) %>
