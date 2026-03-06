@@ -13,7 +13,7 @@
   <!-- Breadcrumb -->
   <div class="border-b border-[#e0e0e0] bg-white">
     <div class="mx-auto max-w-[1440px] px-4 py-4 lg:px-[140px]">
-      <p class="text-[11px] text-[#737373]">Home / <%= audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : 'All' %><%= category ? (' / ' + category.charAt(0).toUpperCase() + category.slice(1)) : '' %></p>
+      <p class="text-[11px] text-[#737373]">Home / <%= audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : 'All' %><%= categoryName ? (' / ' + categoryName) : '' %></p>
     </div>
   </div>
 
@@ -23,19 +23,41 @@
 
     <!-- Filters -->
     <div class="mb-6">
-      <div class="flex flex-wrap items-center gap-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4 text-[11px] font-bold">
+          <a href="/products?<%= categoryName ? ('category_name=' + encodeURIComponent(categoryName) + '&') : '' %><%= q ? ('q=' + encodeURIComponent(q) + '&') : '' %>sort=<%= sort || 'time_desc' %>"
+             class="<%= !audience ? 'text-black underline underline-offset-4' : 'text-[#737373]' %> hover:text-black">ALL</a>
+          <a href="/products?audience=men<%= categoryName ? ('&category_name=' + encodeURIComponent(categoryName)) : '' %><%= q ? ('&q=' + encodeURIComponent(q)) : '' %>&sort=<%= sort || 'time_desc' %>"
+             class="<%= audience === 'men' ? 'text-black underline underline-offset-4' : 'text-[#737373]' %> hover:text-black">MEN</a>
+          <a href="/products?audience=women<%= categoryName ? ('&category_name=' + encodeURIComponent(categoryName)) : '' %><%= q ? ('&q=' + encodeURIComponent(q)) : '' %>&sort=<%= sort || 'time_desc' %>"
+             class="<%= audience === 'women' ? 'text-black underline underline-offset-4' : 'text-[#737373]' %> hover:text-black">WOMEN</a>
+          <a href="/products?audience=kids<%= categoryName ? ('&category_name=' + encodeURIComponent(categoryName)) : '' %><%= q ? ('&q=' + encodeURIComponent(q)) : '' %>&sort=<%= sort || 'time_desc' %>"
+             class="<%= audience === 'kids' ? 'text-black underline underline-offset-4' : 'text-[#737373]' %> hover:text-black">KIDS</a>
+        </div>
+        <form method="GET" action="/products" class="flex items-center gap-2">
+          <% if (audience) { %><input type="hidden" name="audience" value="<%= audience %>" /><% } %>
+          <% if (categoryName) { %><input type="hidden" name="category_name" value="<%= categoryName %>" /><% } %>
+          <% if (sort) { %><input type="hidden" name="sort" value="<%= sort %>" /><% } %>
+          <input type="text" name="q" value="<%= q || '' %>" placeholder="Search products..."
+                 class="h-[32px] w-[220px] border border-[#e0e0e0] px-2 text-[11px]" />
+          <button type="submit" class="h-[32px] border border-black bg-black px-3 text-[11px] font-bold text-white">Search</button>
+        </form>
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center gap-4">
         <div class="flex items-center gap-2">
-          <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %>sort=<%= sort || 'time_desc' %>"
-             class="inline-flex h-[32px] items-center justify-center border px-3 text-[11px] font-bold <%= !category ? 'border-black bg-black text-white' : 'border-[#e0e0e0] text-black' %>">All</a>
-          <% (categories || []).forEach((c) => { %>
-            <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %>category=<%= c.slug %>&sort=<%= sort || 'time_desc' %>"
-               class="text-[11px] font-normal <%= category === c.slug ? 'text-black font-bold' : 'text-black' %> hover:underline"><%= c.name %></a>
+          <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %><%= q ? ('q=' + encodeURIComponent(q) + '&') : '' %>sort=<%= sort || 'time_desc' %>"
+             class="inline-flex h-[32px] items-center justify-center border px-3 text-[11px] font-bold <%= !categoryName ? 'border-black bg-black text-white' : 'border-[#e0e0e0] text-black' %>">All</a>
+          <% (categoryNames || []).forEach((name) => { %>
+            <a href="/products?<%= audience ? ('audience=' + audience + '&') : '' %>category_name=<%= encodeURIComponent(name) %><%= q ? ('&q=' + encodeURIComponent(q)) : '' %>&sort=<%= sort || 'time_desc' %>"
+               class="inline-flex h-[32px] items-center justify-center border px-3 text-[11px] <%= categoryName === name ? 'border-black bg-black font-bold text-white' : 'border-transparent text-black hover:underline' %>"><%= name %></a>
           <% }) %>
         </div>
         <div class="ml-auto">
           <form method="GET" action="/products" class="flex items-center gap-2">
             <% if (audience) { %><input type="hidden" name="audience" value="<%= audience %>" /><% } %>
-            <% if (category) { %><input type="hidden" name="category" value="<%= category %>" /><% } %>
+            <% if (categoryName) { %><input type="hidden" name="category_name" value="<%= categoryName %>" /><% } %>
+            <% if (q) { %><input type="hidden" name="q" value="<%= q %>" /><% } %>
             <label class="text-[11px] text-[#737373]" for="sort-select">Sorted:</label>
             <select id="sort-select" name="sort" class="h-[32px] border border-[#e0e0e0] px-2 text-[11px]" onchange="this.form.submit()">
               <option value="sales_desc" <%= sort === 'sales_desc' ? 'selected' : '' %>>Sales (high to low)</option>
@@ -79,7 +101,8 @@
         const endPage = Math.min(totalPages, currentPage + 2);
         const qp = new URLSearchParams();
         if (audience) qp.set('audience', audience);
-        if (category) qp.set('category', category);
+        if (categoryName) qp.set('category_name', categoryName);
+        if (q) qp.set('q', q);
         if (sort) qp.set('sort', sort);
         const makeLink = (targetPage) => {
           const next = new URLSearchParams(qp.toString());

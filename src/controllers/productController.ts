@@ -29,42 +29,60 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
   const pageRaw = Number(req.query.page ?? 1);
   const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
   const pageSize = 16;
-  const categoryQuery = String(req.query.category ?? '').trim().toLowerCase();
+  const legacyCategoryQuery = String(req.query.category ?? '').trim().toLowerCase();
+  const categoryNameQuery = String(req.query.category_name ?? '').trim();
+  const keywordQuery = String(req.query.q ?? '').trim();
   const audienceQuery = String(req.query.audience ?? '').trim().toLowerCase();
   const sortQuery = String(req.query.sort ?? 'time_desc').trim().toLowerCase();
   const validSort = ['time_desc', 'time_asc', 'sales_desc', 'sales_asc'].includes(sortQuery)
     ? (sortQuery as 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc')
     : 'time_desc';
 
-  const categoryAsAudience = categoryQuery === 'men' || categoryQuery === 'women' || categoryQuery === 'kids';
+  const categoryAsAudience = legacyCategoryQuery === 'men' || legacyCategoryQuery === 'women' || legacyCategoryQuery === 'kids';
   const audience = (audienceQuery === 'men' || audienceQuery === 'women' || audienceQuery === 'kids'
     ? audienceQuery
-    : (categoryAsAudience ? categoryQuery : '')) as '' | 'men' | 'women' | 'kids';
-  const categorySlug = categoryAsAudience ? undefined : (categoryQuery || undefined);
+    : (categoryAsAudience ? legacyCategoryQuery : '')) as '' | 'men' | 'women' | 'kids';
 
-  const allProducts = await getAllProductsService(categorySlug, audience || undefined, validSort);
-  const totalItems = allProducts.length;
+  const allProducts = await getAllProductsService(undefined, audience || undefined, validSort);
+
+  let filteredProducts = allProducts;
+  if (categoryNameQuery) {
+    const wantedCategory = categoryNameQuery.toLowerCase();
+    filteredProducts = filteredProducts.filter((p) => String(p.category ?? '').toLowerCase() === wantedCategory);
+  }
+  if (keywordQuery) {
+    const kw = keywordQuery.toLowerCase();
+    filteredProducts = filteredProducts.filter((p) =>
+      `${p.name ?? ''} ${p.description ?? ''}`.toLowerCase().includes(kw)
+    );
+  }
+
+  const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
   const safePage = Math.min(page, totalPages);
   const start = (safePage - 1) * pageSize;
-  const products = allProducts.slice(start, start + pageSize);
+  const products = filteredProducts.slice(start, start + pageSize);
 
   let categoryQueryBuilder = supabase
     .from('categories')
-    .select('*')
+    .select('name')
     .eq('del_flg', false)
     .order('name');
   if (audience) {
     categoryQueryBuilder = categoryQueryBuilder.eq('audience', audience) as typeof categoryQueryBuilder;
   }
-  const { data: categories } = await categoryQueryBuilder;
+  const { data: categoryRows } = await categoryQueryBuilder;
+  const categoryNames = Array.from(
+    new Set((categoryRows ?? []).map((c: any) => String(c.name ?? '').trim()).filter(Boolean))
+  );
 
   res.render('client/products', {
     title: 'Shop',
     products,
-    categories: categories ?? [],
-    category: categorySlug,
+    categoryNames,
+    categoryName: categoryNameQuery || undefined,
     audience: audience || undefined,
+    q: keywordQuery,
     sort: validSort,
     pagination: {
       page: safePage,
