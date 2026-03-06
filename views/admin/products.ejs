@@ -108,6 +108,41 @@
           </tbody>
         </table>
       </section>
+
+      <% if (pagination && pagination.totalPages > 1) { %>
+        <%
+          const currentPage = pagination.page || 1;
+          const totalPages = pagination.totalPages || 1;
+          const startPage = Math.max(1, currentPage - 2);
+          const endPage = Math.min(totalPages, currentPage + 2);
+          const qp = new URLSearchParams();
+          if (filters?.q) qp.set('q', filters.q);
+          if (filters?.category_id) qp.set('category_id', filters.category_id);
+          if (filters?.active && filters.active !== 'all') qp.set('active', filters.active);
+          if (filters?.audience && filters.audience !== 'all') qp.set('audience', filters.audience);
+          const makeLink = (targetPage) => {
+            const next = new URLSearchParams(qp.toString());
+            if (targetPage > 1) next.set('page', String(targetPage));
+            return '/admin/products' + (next.toString() ? ('?' + next.toString()) : '');
+          };
+        %>
+        <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-[12px] text-zinc-600">
+            Showing page <%= currentPage %> / <%= totalPages %> (<%= pagination.totalItems %> products)
+          </p>
+          <div class="flex items-center gap-1">
+            <% if (pagination.hasPrev) { %>
+              <a href="<%= makeLink(currentPage - 1) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">Prev</a>
+            <% } %>
+            <% for (let p = startPage; p <= endPage; p++) { %>
+              <a href="<%= makeLink(p) %>" class="inline-flex h-9 min-w-9 items-center justify-center border px-3 text-[12px] <%= p === currentPage ? 'border-black bg-black text-white' : 'border-zinc-300 hover:bg-zinc-200' %>"><%= p %></a>
+            <% } %>
+            <% if (pagination.hasNext) { %>
+              <a href="<%= makeLink(currentPage + 1) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">Next</a>
+            <% } %>
+          </div>
+        </div>
+      <% } %>
     </main>
   </div>
   <%- include('../partials/adminScripts') %>

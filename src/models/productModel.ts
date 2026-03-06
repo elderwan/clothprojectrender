@@ -9,6 +9,16 @@ export interface AdminProductSearchFilters {
   audience?: 'all' | 'men' | 'women' | 'kids';
 }
 
+export interface PaginatedProductsResult {
+  items: Product[];
+  total: number;
+}
+
+export async function incrementProductClickCount(productId: string): Promise<void> {
+  const { error } = await supabase.rpc('increment_product_click_count', { p_product_id: productId });
+  if (error) throw new Error(error.message);
+}
+
 /** Attach the primary_image URL to each product row */
 async function attachPrimaryImages(rows: any[]): Promise<Product[]> {
   return Promise.all(
@@ -53,6 +63,49 @@ export async function searchProductsForAdmin(filters: AdminProductSearchFilters)
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   return attachPrimaryImages(data ?? []);
+}
+
+export async function searchProductsForAdminPaginated(
+  filters: AdminProductSearchFilters,
+  page: number,
+  pageSize: number
+): Promise<PaginatedProductsResult> {
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const safePageSize = Number.isFinite(pageSize) && pageSize > 0 ? Math.floor(pageSize) : 20;
+  const from = (safePage - 1) * safePageSize;
+  const to = from + safePageSize - 1;
+
+  let query = supabase
+    .from('products')
+    .select('*, categories(name)', { count: 'exact' })
+    .eq('del_flg', false)
+    .order('created_at', { ascending: false })
+    .range(from, to);
+
+  const q = (filters.q ?? '').trim();
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`) as typeof query;
+  }
+
+  const categoryId = (filters.category_id ?? '').trim();
+  if (categoryId) {
+    query = query.eq('category_id', categoryId) as typeof query;
+  }
+
+  if (filters.active === 'true') {
+    query = query.eq('is_active', true) as typeof query;
+  } else if (filters.active === 'false') {
+    query = query.eq('is_active', false) as typeof query;
+  }
+
+  if (filters.audience && filters.audience !== 'all') {
+    query = query.eq('audience', filters.audience) as typeof query;
+  }
+
+  const { data, error, count } = await query;
+  if (error) throw new Error(error.message);
+  const items = await attachPrimaryImages(data ?? []);
+  return { items, total: count ?? 0 };
 }
 
 export async function getAllProducts(
@@ -129,6 +182,24 @@ export async function getAllProducts(
   return products;
 }
 
+export async function getTopProductsByAudience(
+  audience: 'men' | 'women' | 'kids',
+  limit = 4
+): Promise<Product[]> {
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 4;
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, categories(name)')
+    .eq('del_flg', false)
+    .eq('is_active', true)
+    .eq('audience', audience)
+    .order('click_count', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+  if (error) throw new Error(error.message);
+  return attachPrimaryImages(data ?? []);
+}
+
 export async function getProductById(id: string, includeInactive = false): Promise<Product | null> {
   let query = supabase
     .from('products')
@@ -154,7 +225,7 @@ export async function getProductById(id: string, includeInactive = false): Promi
 }
 
 export async function createProduct(
-  input: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category' | 'images' | 'primary_image' | 'del_flg'>
+  input: Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category' | 'images' | 'primary_image' | 'del_flg' | 'click_count'>
 ): Promise<Product> {
   const { data, error } = await supabase
     .from('products')
@@ -167,7 +238,7 @@ export async function createProduct(
 
 export async function updateProduct(
   id: string,
-  input: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category' | 'images' | 'primary_image' | 'del_flg'>>
+  input: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at' | 'category' | 'images' | 'primary_image' | 'del_flg' | 'click_count'>>
 ): Promise<Product> {
   const { data, error } = await supabase
     .from('products')

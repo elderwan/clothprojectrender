@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS products (
   category_id    UUID REFERENCES categories(id) ON DELETE SET NULL,
   audience       TEXT        NOT NULL DEFAULT 'women' CHECK (audience IN ('men', 'women', 'kids')),
   stock_quantity INT         NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+  click_count    INT         NOT NULL DEFAULT 0 CHECK (click_count >= 0),
   is_active      BOOLEAN     NOT NULL DEFAULT TRUE,
   del_flg        BOOLEAN     NOT NULL DEFAULT FALSE,
   created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -153,6 +154,7 @@ CREATE TABLE IF NOT EXISTS home_banners (
 CREATE INDEX IF NOT EXISTS idx_products_category       ON products(category_id);
 CREATE INDEX IF NOT EXISTS idx_products_is_active      ON products(is_active);
 CREATE INDEX IF NOT EXISTS idx_products_audience       ON products(audience);
+CREATE INDEX IF NOT EXISTS idx_products_click_count    ON products(click_count DESC);
 CREATE INDEX IF NOT EXISTS idx_categories_del_flg      ON categories(del_flg);
 CREATE INDEX IF NOT EXISTS idx_categories_audience     ON categories(audience);
 CREATE INDEX IF NOT EXISTS idx_products_del_flg        ON products(del_flg);
@@ -179,6 +181,16 @@ RETURNS TRIGGER AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION increment_product_click_count(p_product_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE products
+  SET click_count = click_count + 1
+  WHERE id = p_product_id
+    AND del_flg = FALSE;
 END;
 $$ LANGUAGE plpgsql;
 

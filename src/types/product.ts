@@ -20,6 +20,7 @@ export interface Product {
   category_id?: string;
   category?: string;           // joined category name
   stock_quantity: number;
+  click_count: number;
   is_active: boolean;
   audience: ProductAudience;
   del_flg: boolean;

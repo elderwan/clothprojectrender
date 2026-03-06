@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 import {
-  adminSearchProducts, adminGetProductById, createProduct, updateProduct, deleteProduct
+  adminSearchProductsPaginated, adminGetProductById, createProduct, updateProduct, deleteProduct
 } from '../services/adminProductService.js';
 import { setProductImages } from '../models/productImageModel.js';
 import { supabase } from '../../data/supabaseClient.js';
@@ -41,6 +41,9 @@ async function getCategoryAudienceOrThrow(categoryId: string): Promise<'men' | '
 }
 
 export async function listProducts(req: Request, res: Response): Promise<void> {
+  const pageRaw = Number(req.query.page ?? 1);
+  const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
+  const pageSize = 20;
   const activeRaw = String(req.query.active ?? 'all');
   const filters = {
     q: String(req.query.q ?? '').trim(),
@@ -50,9 +53,23 @@ export async function listProducts(req: Request, res: Response): Promise<void> {
       ? String(req.query.audience).toLowerCase()
       : 'all') as 'all' | 'men' | 'women' | 'kids',
   };
-  const products = await adminSearchProducts(filters);
+  const { items: products, total } = await adminSearchProductsPaginated(filters, page, pageSize);
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const { data: categories } = await supabase.from('categories').select('*').eq('del_flg', false).order('audience').order('name');
-  res.render('admin/products', { title: 'Product Management', products, categories: categories ?? [], filters });
+  res.render('admin/products', {
+    title: 'Product Management',
+    products,
+    categories: categories ?? [],
+    filters,
+    pagination: {
+      page,
+      pageSize,
+      totalItems: total,
+      totalPages,
+      hasPrev: page > 1,
+      hasNext: page < totalPages,
+    },
+  });
 }
 
 export async function showAddProduct(req: Request, res: Response): Promise<void> {

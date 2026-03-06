@@ -10,7 +10,7 @@ import {
 import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { getCart } from '../services/cartService.js';
-import { getAllProductsService } from '../services/productService.js';
+import { getAllProductsService, getTopProductsByAudienceService } from '../services/productService.js';
 import { getActiveHomeBanners } from '../models/homeBannerModel.js';
 
 const router = Router();
@@ -24,13 +24,24 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   // fetch a handful of products for the homepage
-  const [all, banners] = await Promise.all([
+  const [all, banners, manTrends, womanTrends, kidTrends] = await Promise.all([
     getAllProductsService(),
     getActiveHomeBanners(),
+    getTopProductsByAudienceService('men', 4),
+    getTopProductsByAudienceService('women', 4),
+    getTopProductsByAudienceService('kids', 4),
   ]);
   const newArrivals = all.slice(0, 4);
 
-  res.render('client/home', { title: 'MAISON', cartCount, newArrivals, banners });
+  res.render('client/home', {
+    title: 'MAISON',
+    cartCount,
+    newArrivals,
+    banners,
+    manTrends,
+    womanTrends,
+    kidTrends,
+  });
 });
 
 // ── Auth ──────────────────────────────────────────────────────

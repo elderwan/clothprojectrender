@@ -104,6 +104,96 @@
       </div>
     </section>
 
+    <section class="pb-16">
+      <div class="mx-auto max-w-[1440px] px-4 lg:px-[140px]">
+        <div class="mb-8">
+          <p class="text-[11px] font-bold text-[#737373]">MAN TRENDS</p>
+          <div class="mt-2 h-px w-[1160px] bg-[#e0e0e0]"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <% if (manTrends && manTrends.length> 0) { %>
+            <% manTrends.forEach(product=> { %>
+              <a href="/products/<%= product.id %>" class="group cursor-pointer">
+                <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
+                  <% if (product.primary_image) { %>
+                    <img src="<%= product.primary_image %>" alt="<%= product.name %>"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <% } %>
+                </div>
+                <p class="text-[13px] font-normal mb-1">
+                  <%= product.name %>
+                </p>
+                <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %>
+                </p>
+              </a>
+              <% }) %>
+                <% } else { %>
+                  <p class="text-[13px] text-[#737373]">No items to show.</p>
+                  <% } %>
+        </div>
+      </div>
+    </section>
+
+    <section class="pb-16">
+      <div class="mx-auto max-w-[1440px] px-4 lg:px-[140px]">
+        <div class="mb-8">
+          <p class="text-[11px] font-bold text-[#737373]">WOMAN TRENDS</p>
+          <div class="mt-2 h-px w-[1160px] bg-[#e0e0e0]"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <% if (womanTrends && womanTrends.length> 0) { %>
+            <% womanTrends.forEach(product=> { %>
+              <a href="/products/<%= product.id %>" class="group cursor-pointer">
+                <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
+                  <% if (product.primary_image) { %>
+                    <img src="<%= product.primary_image %>" alt="<%= product.name %>"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <% } %>
+                </div>
+                <p class="text-[13px] font-normal mb-1">
+                  <%= product.name %>
+                </p>
+                <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %>
+                </p>
+              </a>
+              <% }) %>
+                <% } else { %>
+                  <p class="text-[13px] text-[#737373]">No items to show.</p>
+                  <% } %>
+        </div>
+      </div>
+    </section>
+
+    <section class="pb-16">
+      <div class="mx-auto max-w-[1440px] px-4 lg:px-[140px]">
+        <div class="mb-8">
+          <p class="text-[11px] font-bold text-[#737373]">KID TRENDS</p>
+          <div class="mt-2 h-px w-[1160px] bg-[#e0e0e0]"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <% if (kidTrends && kidTrends.length> 0) { %>
+            <% kidTrends.forEach(product=> { %>
+              <a href="/products/<%= product.id %>" class="group cursor-pointer">
+                <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
+                  <% if (product.primary_image) { %>
+                    <img src="<%= product.primary_image %>" alt="<%= product.name %>"
+                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <% } %>
+                </div>
+                <p class="text-[13px] font-normal mb-1">
+                  <%= product.name %>
+                </p>
+                <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %>
+                </p>
+              </a>
+              <% }) %>
+                <% } else { %>
+                  <p class="text-[13px] text-[#737373]">No items to show.</p>
+                  <% } %>
+        </div>
+      </div>
+    </section>
+
     <!-- The Edit Section -->
     <section class="bg-[#f5f5f5] py-16">
       <div class="mx-auto max-w-[1440px] px-4 lg:px-[140px]">
