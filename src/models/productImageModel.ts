@@ -13,6 +13,33 @@ export async function getImagesByProduct(productId: string): Promise<ProductImag
   return (data ?? []) as ProductImage[];
 }
 
+/** Fetch primary image URLs for multiple products in one query */
+export async function getPrimaryImagesBulk(productIds: string[]): Promise<Map<string, string>> {
+  if (!productIds.length) return new Map();
+  const { data, error } = await supabase
+    .from('product_images')
+    .select('product_id, url, is_primary, sort_order')
+    .in('product_id', productIds)
+    .eq('del_flg', false);
+  if (error) throw new Error(error.message);
+
+  const resultMap = new Map<string, string>();
+  // Group by product and find the best one
+  const grouped = (data ?? []).reduce((acc: any, row: any) => {
+    if (!acc[row.product_id]) acc[row.product_id] = [];
+    acc[row.product_id].push(row);
+    return acc;
+  }, {});
+
+  for (const pid in grouped) {
+    const images = grouped[pid];
+    const primary = images.find((i: any) => i.is_primary) || 
+                    images.sort((a: any, b: any) => a.sort_order - b.sort_order)[0];
+    if (primary) resultMap.set(pid, primary.url);
+  }
+  return resultMap;
+}
+
 /** Fetch the primary image URL for a product (first by sort_order if none marked primary) */
 export async function getPrimaryImage(productId: string): Promise<string | null> {
   const { data } = await supabase
@@ -23,7 +50,7 @@ export async function getPrimaryImage(productId: string): Promise<string | null>
     .order('is_primary', { ascending: false })
     .order('sort_order',  { ascending: true })
     .limit(1)
-    .single();
+    .maybeSingle();
   return (data as any)?.url ?? null;
 }
 

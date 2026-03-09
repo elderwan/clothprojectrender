@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
 import {
-  getAllProductsService,
+  getFilteredProductsPaginatedService,
   getProductByIdService,
   incrementProductClickCountService,
+  getAllProductsService,
 } from '../services/productService.js';
 import { supabase } from '../../data/supabaseClient.js';
 
@@ -29,40 +30,35 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
   const pageRaw = Number(req.query.page ?? 1);
   const page = Number.isFinite(pageRaw) && pageRaw > 0 ? Math.floor(pageRaw) : 1;
   const pageSize = 16;
+  
   const legacyCategoryQuery = String(req.query.category ?? '').trim().toLowerCase();
   const categoryNameQuery = String(req.query.category_name ?? '').trim();
   const keywordQuery = String(req.query.q ?? '').trim();
   const audienceQuery = String(req.query.audience ?? '').trim().toLowerCase();
   const sortQuery = String(req.query.sort ?? 'time_desc').trim().toLowerCase();
+  
   const validSort = ['time_desc', 'time_asc', 'sales_desc', 'sales_asc', 'price_asc', 'price_desc'].includes(sortQuery)
-    ? (sortQuery as 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc' | 'price_asc' | 'price_desc')
+    ? (sortQuery as any)
     : 'time_desc';
 
   const categoryAsAudience = legacyCategoryQuery === 'men' || legacyCategoryQuery === 'women' || legacyCategoryQuery === 'kids';
   const audience = (audienceQuery === 'men' || audienceQuery === 'women' || audienceQuery === 'kids'
     ? audienceQuery
-    : (categoryAsAudience ? legacyCategoryQuery : '')) as '' | 'men' | 'women' | 'kids';
+    : (categoryAsAudience ? legacyCategoryQuery : '')) as string;
 
-  const allProducts = await getAllProductsService(undefined, audience || undefined, validSort);
+  // Use the new paginated service which filters in DB
+  const { items: products, total: totalItems } = await getFilteredProductsPaginatedService({
+    audience: audience || undefined,
+    categoryName: categoryNameQuery || undefined,
+    q: keywordQuery || undefined,
+    sort: validSort,
+    page,
+    pageSize
+  });
 
-  let filteredProducts = allProducts;
-  if (categoryNameQuery) {
-    const wantedCategory = categoryNameQuery.toLowerCase();
-    filteredProducts = filteredProducts.filter((p) => String(p.category ?? '').toLowerCase() === wantedCategory);
-  }
-  if (keywordQuery) {
-    const kw = keywordQuery.toLowerCase();
-    filteredProducts = filteredProducts.filter((p) =>
-      `${p.name ?? ''} ${p.description ?? ''}`.toLowerCase().includes(kw)
-    );
-  }
-
-  const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const start = (safePage - 1) * pageSize;
-  const products = filteredProducts.slice(start, start + pageSize);
 
+  // Fetch categories for the sidebar/filter
   let categoryQueryBuilder = supabase
     .from('categories')
     .select('name')
@@ -85,12 +81,12 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
     q: keywordQuery,
     sort: validSort,
     pagination: {
-      page: safePage,
+      page,
       pageSize,
       totalItems,
       totalPages,
-      hasPrev: safePage > 1,
-      hasNext: safePage < totalPages,
+      hasPrev: page > 1,
+      hasNext: page < totalPages,
     },
   });
 }
@@ -114,4 +110,3 @@ export async function getProductDetail(req: Request, res: Response): Promise<voi
   const related = await getAllProductsService();
   res.render('client/productDetail', { title: product.name, product, related: related.slice(0, 4) });
 }
-
