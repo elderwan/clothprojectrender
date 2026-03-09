@@ -1,4 +1,85 @@
 <script>
+  (function () {
+    if (window.ClientModal) return;
+
+    const root = document.createElement('div');
+    root.id = 'client-modal-root';
+    root.className = 'fixed inset-0 z-[110] hidden items-center justify-center bg-black/45 p-4';
+    root.innerHTML = `
+      <div class="w-full max-w-[420px] border border-[#e0e0e0] bg-white shadow-[0_24px_80px_rgba(0,0,0,0.16)]">
+        <div class="border-b border-[#e0e0e0] px-5 py-4">
+          <h3 id="client-modal-title" class="font-serif text-[28px] leading-none text-black">Notice</h3>
+        </div>
+        <div class="px-5 py-5">
+          <p id="client-modal-message" class="text-[13px] leading-6 text-[#5f5f5f]"></p>
+        </div>
+        <div class="flex items-center justify-end gap-3 border-t border-[#e0e0e0] px-5 py-4">
+          <button id="client-modal-cancel" type="button" class="hidden h-[42px] border border-[#d6d6d6] px-5 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a4a4a] hover:border-black hover:text-black">Cancel</button>
+          <button id="client-modal-ok" type="button" class="h-[42px] border border-black bg-black px-5 text-[11px] font-bold uppercase tracking-[0.18em] text-white hover:bg-zinc-800">OK</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(root);
+
+    const titleEl = root.querySelector('#client-modal-title');
+    const messageEl = root.querySelector('#client-modal-message');
+    const okBtn = root.querySelector('#client-modal-ok');
+    const cancelBtn = root.querySelector('#client-modal-cancel');
+
+    function openModal(opts) {
+      const { title, message, confirmText, cancelText, showCancel } = opts;
+      return new Promise((resolve) => {
+        titleEl.textContent = title || 'Notice';
+        messageEl.textContent = message || '';
+        okBtn.textContent = confirmText || 'OK';
+        cancelBtn.textContent = cancelText || 'Cancel';
+        cancelBtn.classList.toggle('hidden', !showCancel);
+        root.classList.remove('hidden');
+        root.classList.add('flex');
+
+        function cleanup(result) {
+          root.classList.add('hidden');
+          root.classList.remove('flex');
+          okBtn.removeEventListener('click', onOk);
+          cancelBtn.removeEventListener('click', onCancel);
+          root.removeEventListener('click', onBackdrop);
+          document.removeEventListener('keydown', onEsc);
+          resolve(result);
+        }
+
+        function onOk() { cleanup(true); }
+        function onCancel() { cleanup(false); }
+        function onBackdrop(e) { if (e.target === root) cleanup(false); }
+        function onEsc(e) { if (e.key === 'Escape') cleanup(false); }
+
+        okBtn.addEventListener('click', onOk);
+        cancelBtn.addEventListener('click', onCancel);
+        root.addEventListener('click', onBackdrop);
+        document.addEventListener('keydown', onEsc);
+      });
+    }
+
+    window.ClientModal = {
+      alert(message, title) {
+        return openModal({ title: title || 'Notice', message, showCancel: false, confirmText: 'OK' });
+      },
+      confirm(message, title) {
+        return openModal({ title: title || 'Please Confirm', message, showCancel: true, confirmText: 'Confirm', cancelText: 'Cancel' });
+      },
+    };
+
+    document.addEventListener('submit', async function (e) {
+      const form = e.target;
+      if (!(form instanceof HTMLFormElement)) return;
+      const text = form.getAttribute('data-confirm');
+      if (!text) return;
+      e.preventDefault();
+      const confirmed = await window.ClientModal.confirm(text, 'Action Confirmation');
+      if (confirmed) form.submit();
+    });
+  })();
+</script>
+<script>
   document.addEventListener('DOMContentLoaded', function () {
     // size selection on product detail
     const sizeButtons = document.querySelectorAll('.size-option');
@@ -28,7 +109,7 @@
     const wishBtn = document.getElementById('add-to-wishlist');
     if (wishBtn) {
       wishBtn.addEventListener('click', () => {
-        alert('Added to wishlist!');
+        window.ClientModal?.alert('Added to wishlist.', 'Wishlist');
       });
     }
 

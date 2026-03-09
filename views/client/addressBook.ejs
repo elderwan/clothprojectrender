@@ -98,7 +98,7 @@
                     >
                       Edit Address
                     </button>
-                    <form action="/addresses/<%= addr.id %>/delete" method="POST">
+                    <form action="/addresses/<%= addr.id %>/delete" method="POST" data-confirm="Delete this address from your account?">
                       <button type="submit" class="inline-flex h-[38px] items-center justify-center border border-[#d8d8d8] px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-red-500 transition-colors duration-200 hover:border-red-500 hover:bg-red-50">
                         Delete
                       </button>

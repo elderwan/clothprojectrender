@@ -10,6 +10,8 @@ export interface CartItem {
   // joined
   product_name?: string;
   product_price?: number;
+  product_category?: string;
+  product_audience?: string;
   product_image?: string;
   subtotal?: number;
 

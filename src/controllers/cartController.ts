@@ -26,16 +26,25 @@ export async function postAddToCart(req: Request, res: Response): Promise<void> 
 export async function postUpdateQty(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
   try {
-    const { id, quantity } = req.body;
-    const qty = Number(quantity);
-    if (!id) throw new Error('Missing cart item id.');
-    if (!Number.isFinite(qty)) throw new Error('Invalid quantity.');
-    
-    if (qty <= 0) {
-      await removeItem(req.session.user.id, id);
-    } else {
-      await updateQty(req.session.user.id, id, qty);
+    const ids = Array.isArray(req.body?.id) ? req.body.id : [req.body?.id];
+    const quantities = Array.isArray(req.body?.quantity) ? req.body.quantity : [req.body?.quantity];
+
+    if (!ids.length || !quantities.length || ids.length !== quantities.length) {
+      throw new Error('Invalid cart update payload.');
     }
+
+    for (let index = 0; index < ids.length; index += 1) {
+      const id = ids[index];
+      const qty = Number(quantities[index]);
+      if (!id) throw new Error('Missing cart item id.');
+      if (!Number.isFinite(qty)) throw new Error('Invalid quantity.');
+      if (qty <= 0) {
+        await removeItem(req.session.user.id, id);
+      } else {
+        await updateQty(req.session.user.id, id, qty);
+      }
+    }
+
     res.redirect('/cart');
   } catch (err: any) {
     res.redirect('/cart?error=' + encodeURIComponent(err.message));

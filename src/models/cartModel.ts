@@ -5,7 +5,7 @@ import { getPrimaryImage } from './productImageModel.js';
 export async function getCartByUser(userId: string): Promise<CartItem[]> {
   const { data, error } = await supabase
     .from('cart_items')
-    .select('*, products(name, price)')
+    .select('*, products(name, price, audience, categories(name))')
     .eq('user_id', userId)
     .eq('del_flg', false);
   if (error) throw new Error(error.message);
@@ -16,6 +16,8 @@ export async function getCartByUser(userId: string): Promise<CartItem[]> {
       ...row,
       product_name:  row.products?.name,
       product_price: row.products?.price,
+      product_category: row.products?.categories?.name,
+      product_audience: row.products?.audience,
       product_image,
       subtotal:      (row.products?.price ?? 0) * row.quantity,
     };

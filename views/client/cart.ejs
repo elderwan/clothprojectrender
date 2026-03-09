@@ -30,11 +30,24 @@
     <% } %>
 
     <% if (cart && cart.items && cart.items.length > 0) { %>
+      <form id="cart-update-form" method="POST" action="/cart/update"></form>
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <!-- Cart Items -->
         <div class="lg:col-span-8 space-y-8 lg:space-y-10">
           <% cart.items.forEach(item => { %>
-            <div class="flex gap-5 lg:gap-10 pb-8 lg:pb-10 border-b border-[#e0e0e0] last:border-0 relative">
+            <div
+              class="flex gap-5 lg:gap-10 pb-8 lg:pb-10 border-b border-[#e0e0e0] last:border-0 relative cart-line-item"
+              data-item-id="<%= item.id %>"
+              data-unit-price="<%= Number(item.product_price || 0) %>"
+              data-initial-quantity="<%= Number(item.quantity || 1) %>">
+              <input form="cart-update-form" type="hidden" name="id" value="<%= item.id %>" />
+              <input
+                form="cart-update-form"
+                type="hidden"
+                name="quantity"
+                value="<%= Number(item.quantity || 1) %>"
+                class="cart-quantity-input"
+                data-item-id="<%= item.id %>" />
               <div class="w-[96px] h-[120px] lg:w-[120px] lg:h-[150px] bg-[#f5f5f5] flex-shrink-0">
                 <% if (item.product_image) { %>
                   <img src="<%= item.product_image %>" alt="<%= item.product_name %>" class="w-full h-full object-cover" />
@@ -43,28 +56,28 @@
               <div class="flex-1">
                 <div class="flex justify-between items-start mb-2">
                   <p class="text-[9px] lg:text-[10px] font-bold text-[#737373] uppercase tracking-wider">Maison</p>
-                  <form method="POST" action="/cart/remove/<%= item.id %>" class="inline">
+                  <form method="POST" action="/cart/remove/<%= item.id %>" class="inline" data-confirm="Remove this item from your shopping bag?">
                     <button type="submit" class="text-[10px] lg:text-[11px] text-[#737373] hover:text-black uppercase">Remove</button>
                   </form>
                 </div>
                 <p class="text-[13px] lg:text-[15px] font-normal mb-1 lg:mb-2"><%= item.product_name %></p>
-                <p class="text-[11px] lg:text-[12px] text-[#737373] mb-3 lg:mb-4">Size: <%= item.size || 'M' %>  |  Black</p>
-                <p class="text-[13px] lg:text-[14px] font-normal mb-4 lg:mb-6">$<%= Number(item.price || 0).toFixed(2) %></p>
+                <p class="text-[11px] lg:text-[12px] text-[#737373] mb-3 lg:mb-4">
+                  Size: <%= item.size || 'M' %><% if (item.product_category) { %>  |  Category: <%= item.product_category %><% } %>
+                </p>
+                <p class="text-[13px] lg:text-[14px] font-normal mb-4 lg:mb-6">$<%= Number(item.product_price || 0).toFixed(2) %></p>
 
                 <div class="flex items-center gap-3">
                   <p class="text-[11px] text-[#737373] hidden lg:block">Qty:</p>
                   <div class="flex items-center">
-                    <form method="POST" action="/cart/update" class="inline">
-                      <input type="hidden" name="id" value="<%= item.id %>" />
-                      <input type="hidden" name="quantity" value="<%= Number(item.quantity || 1) - 1 %>" />
-                      <button type="submit" class="w-[28px] h-[28px] lg:w-[36px] lg:h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[14px] lg:text-[16px]">-</button>
-                    </form>
-                    <span class="w-[30px] lg:w-[40px] text-center text-[12px] lg:text-[13px]"><%= item.quantity %></span>
-                    <form method="POST" action="/cart/update" class="inline">
-                      <input type="hidden" name="id" value="<%= item.id %>" />
-                      <input type="hidden" name="quantity" value="<%= Number(item.quantity || 1) + 1 %>" />
-                      <button type="submit" class="w-[28px] h-[28px] lg:w-[36px] lg:h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[14px] lg:text-[16px]">+</button>
-                    </form>
+                    <button
+                      type="button"
+                      class="cart-qty-decrease w-[28px] h-[28px] lg:w-[36px] lg:h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[14px] lg:text-[16px]"
+                      data-item-id="<%= item.id %>">-</button>
+                    <span class="cart-qty-display w-[30px] lg:w-[40px] text-center text-[12px] lg:text-[13px]" data-item-id="<%= item.id %>"><%= item.quantity %></span>
+                    <button
+                      type="button"
+                      class="cart-qty-increase w-[28px] h-[28px] lg:w-[36px] lg:h-[36px] border border-[#e0e0e0] flex items-center justify-center text-[14px] lg:text-[16px]"
+                      data-item-id="<%= item.id %>">+</button>
                   </div>
                 </div>
               </div>
@@ -81,25 +94,36 @@
             <div class="space-y-4 lg:space-y-6">
               <div class="flex justify-between">
                 <span class="text-[12px]">Subtotal</span>
-                <span class="text-[12px]">$<%= Number(cart.subtotal || 0).toFixed(2) %></span>
+                <span id="cart-subtotal" class="text-[12px]">$<%= Number(cart.subtotal || 0).toFixed(2) %></span>
               </div>
               <div class="flex justify-between">
                 <span class="text-[12px]">Shipping</span>
-                <span class="text-[12px]">Complimentary</span>
+                <span id="cart-shipping" class="text-[12px]"><%= Number(cart.shipping || 0) > 0 ? `$${Number(cart.shipping || 0).toFixed(2)}` : 'Complimentary' %></span>
               </div>
               <div class="flex justify-between">
                 <span class="text-[12px]">Tax (10%)</span>
-                <span class="text-[12px]">$<%= Number((cart.subtotal || 0) * 0.1).toFixed(2) %></span>
+                <span id="cart-tax" class="text-[12px]">$<%= Number((cart.subtotal || 0) * 0.1).toFixed(2) %></span>
               </div>
               <div class="h-px w-full bg-[#e0e0e0] my-2"></div>
               <div class="flex justify-between items-baseline">
                 <span class="text-[15px] lg:text-[16px] font-bold uppercase">Total</span>
-                <span class="text-[15px] lg:text-[16px] font-bold">$<%= Number(cart.total || 0).toFixed(2) %></span>
+                <span id="cart-total" class="text-[15px] lg:text-[16px] font-bold">$<%= Number(cart.total || 0).toFixed(2) %></span>
               </div>
             </div>
 
+            <div id="cart-save-panel" class="hidden mt-8 border border-[#e0e0e0] bg-[#fafafa] p-4">
+              <p class="text-[11px] font-bold uppercase tracking-wider">Cart updated locally</p>
+              <p class="mt-2 text-[11px] text-[#737373]">Your quantity changes are not saved yet. Save the cart before confirming the order.</p>
+              <button
+                form="cart-update-form"
+                type="submit"
+                class="mt-4 w-full h-[46px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800 transition-colors duration-200 uppercase tracking-widest">
+                Save Cart
+              </button>
+            </div>
+
             <form method="POST" action="/orders" class="mt-8 lg:mt-10">
-              <button type="submit" class="w-full h-[52px] bg-black text-[11px] font-bold text-white hover:bg-zinc-800 transition-colors duration-200 uppercase tracking-widest">
+              <button id="confirm-order-button" type="submit" class="w-full h-[52px] bg-black text-[11px] font-bold text-white hover:bg-zinc-800 transition-colors duration-200 uppercase tracking-widest">
                 Confirm Order
               </button>
             </form>
@@ -151,5 +175,90 @@
 
   <!-- Bottom Nav -->
   <%- include('../partials/bottomNav', { title }) %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const items = Array.from(document.querySelectorAll('.cart-line-item'));
+      if (!items.length) return;
+
+      const savePanel = document.getElementById('cart-save-panel');
+      const confirmOrderButton = document.getElementById('confirm-order-button');
+      const subtotalEl = document.getElementById('cart-subtotal');
+      const shippingEl = document.getElementById('cart-shipping');
+      const taxEl = document.getElementById('cart-tax');
+      const totalEl = document.getElementById('cart-total');
+      let hasPendingChanges = false;
+
+      function formatMoney(value) {
+        return '$' + Number(value).toFixed(2);
+      }
+
+      function computeTotals() {
+        let subtotal = 0;
+        let hasDirtyChange = false;
+
+        items.forEach((item) => {
+          const unitPrice = Number(item.getAttribute('data-unit-price') || 0);
+          const initialQuantity = Number(item.getAttribute('data-initial-quantity') || 1);
+          const quantityInput = item.querySelector('.cart-quantity-input');
+          const nextQuantity = Number(quantityInput ? quantityInput.value : initialQuantity);
+          subtotal += unitPrice * nextQuantity;
+          if (nextQuantity !== initialQuantity) hasDirtyChange = true;
+        });
+
+        const shipping = subtotal > 200 ? 0 : 15;
+        const tax = subtotal * 0.1;
+        const total = subtotal + shipping;
+
+        if (subtotalEl) subtotalEl.textContent = formatMoney(subtotal);
+        if (shippingEl) shippingEl.textContent = shipping > 0 ? formatMoney(shipping) : 'Complimentary';
+        if (taxEl) taxEl.textContent = formatMoney(tax);
+        if (totalEl) totalEl.textContent = formatMoney(total);
+        hasPendingChanges = hasDirtyChange;
+        if (savePanel) savePanel.classList.toggle('hidden', !hasDirtyChange);
+        if (confirmOrderButton) {
+          confirmOrderButton.disabled = hasDirtyChange;
+          confirmOrderButton.classList.toggle('cursor-not-allowed', hasDirtyChange);
+          confirmOrderButton.classList.toggle('bg-zinc-300', hasDirtyChange);
+          confirmOrderButton.classList.toggle('text-zinc-500', hasDirtyChange);
+          confirmOrderButton.classList.toggle('hover:bg-zinc-300', hasDirtyChange);
+          confirmOrderButton.classList.toggle('hover:bg-zinc-800', !hasDirtyChange);
+          confirmOrderButton.classList.toggle('bg-black', !hasDirtyChange);
+          confirmOrderButton.classList.toggle('text-white', !hasDirtyChange);
+        }
+      }
+
+      function updateQuantity(itemId, delta) {
+        const quantityInput = document.querySelector('.cart-quantity-input[data-item-id="' + itemId + '"]');
+        const quantityDisplay = document.querySelector('.cart-qty-display[data-item-id="' + itemId + '"]');
+        if (!quantityInput || !quantityDisplay) return;
+
+        const current = Number(quantityInput.value || 1);
+        const next = Math.max(1, current + delta);
+        quantityInput.value = String(next);
+        quantityDisplay.textContent = String(next);
+        computeTotals();
+      }
+
+      document.querySelectorAll('.cart-qty-decrease').forEach((button) => {
+        button.addEventListener('click', function () {
+          const itemId = button.getAttribute('data-item-id');
+          if (itemId) updateQuantity(itemId, -1);
+        });
+      });
+
+      document.querySelectorAll('.cart-qty-increase').forEach((button) => {
+        button.addEventListener('click', function () {
+          const itemId = button.getAttribute('data-item-id');
+          if (itemId) updateQuantity(itemId, 1);
+        });
+      });
+
+      window.addEventListener('beforeunload', function (event) {
+        if (!hasPendingChanges) return;
+        event.preventDefault();
+        event.returnValue = '';
+      });
+    });
+  </script>
 </body>
 </html>
