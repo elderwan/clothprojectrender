@@ -29,9 +29,13 @@ export async function createOrderApi(req: Request, res: Response): Promise<void>
         size: i.size,
       })),
     });
-    res.status(201).json({ message: 'order created', order });
+    res.status(201).json({ message: 'order confirmed', order });
   } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    const message = err?.message || 'Unable to confirm this order right now.';
+    const status = message.toLowerCase().includes('stock') || message.toLowerCase().includes('quantity')
+      ? 409
+      : 400;
+    res.status(status).json({ message });
   }
 }
 
@@ -68,7 +72,7 @@ export async function simulatePaymentApi(req: Request, res: Response): Promise<v
     const result = rawResult === 'fail' ? 'fail' : 'success';
     const updated = await simulatePayment(order.id, result);
     res.status(200).json({
-      message: 'payment simulated',
+      message: 'payment simulation skipped in demo checkout flow',
       simulated: true,
       result,
       order: { id: updated.id, status: updated.status, total_amount: updated.total_amount },

@@ -58,6 +58,13 @@
           <p class="text-[10px] font-bold text-[#737373] mb-2">MAISON</p>
           <h1 class="font-serif text-[28px] font-normal mb-4"><%= product ? product.name : 'Oversized Wool Coat' %></h1>
           <p class="text-[20px] font-normal">$<%= product ? Number(product.price || 0).toFixed(2) : '285.00' %></p>
+          <%
+            const currentStock = Number(product?.stock_quantity ?? 0);
+            const isOutOfStock = currentStock <= 0;
+          %>
+          <p class="mt-3 text-[11px] font-bold uppercase tracking-[0.14em] <%= isOutOfStock ? 'text-red-600' : 'text-[#737373]' %>">
+            <%= isOutOfStock ? 'Out of stock' : `In stock: ${currentStock}` %>
+          </p>
         </div>
 
         <!-- Size Selection -->
@@ -80,8 +87,12 @@
           <input type="hidden" name="product_id" value="<%= product ? product.id : '' %>" />
           <input type="hidden" name="size" id="selected-size" value="" />
           <input type="hidden" name="quantity" value="1" />
-          <button id="add-to-cart" type="button" class="w-full h-[52px] border border-black bg-black text-[11px] font-bold text-white hover:bg-zinc-800">
-            ADD TO CART
+          <button
+            id="add-to-cart"
+            type="button"
+            <%= isOutOfStock ? 'disabled' : '' %>
+            class="w-full h-[52px] border text-[11px] font-bold text-white transition-colors duration-200 <%= isOutOfStock ? 'cursor-not-allowed border-zinc-300 bg-zinc-300 text-zinc-500' : 'border-black bg-black hover:bg-zinc-800' %>">
+            <%= isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART' %>
           </button>
           <button id="add-to-wishlist" type="button" class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
             ADD TO WISHLIST

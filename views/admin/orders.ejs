@@ -78,7 +78,7 @@
             <tr class="border-t border-zinc-200">
               <td class="px-2 py-3">#<%= String(o.id).slice(0, 6) %></td>
               <td class="px-2 py-3 hidden sm:table-cell"><%= o.user_name || o.user_email || 'Customer Name' %></td>
-              <td class="px-2 py-3 hidden md:table-cell"><%= o.created_at ? new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026' %></td>
+              <td class="px-2 py-3 hidden md:table-cell"><%= o.created_at ? new Intl.DateTimeFormat('sv-SE').format(new Date(o.created_at)) : '2026-01-01' %></td>
               <td class="px-2 py-3 hidden sm:table-cell"><%= o.items?.length ?? (idx + 1) %></td>
               <td class="px-2 py-3">$<%= Number(o.total_amount || 0).toFixed(2) %></td>
               <td class="px-2 py-3"><%= o.status %></td>

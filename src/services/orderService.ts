@@ -1,5 +1,4 @@
-import { getOrdersByUser, getOrderById, createOrder, getAllOrders, countOrders, updateOrderStatus, countOrdersByUser } from '../models/orderModel.js';
-import { clearCart } from '../models/cartModel.js';
+import { getOrdersByUser, getOrderById, createOrder, getAllOrders, countOrders, countOrdersByUser } from '../models/orderModel.js';
 import type { Order, CreateOrderInput } from '../types/order.js';
 
 export async function getUserOrders(userId: string, limit?: number, offset?: number): Promise<Order[]> {
@@ -15,25 +14,13 @@ export async function getOrderDetail(id: string): Promise<Order | null> {
 }
 
 export async function placeOrder(input: CreateOrderInput): Promise<Order> {
-  const order = await createOrder(input);
-  // Clear the cart after successful order
-  await clearCart(input.user_id);
-  return order;
+  return createOrder(input);
 }
 
-export async function simulatePayment(orderId: string, result: 'success' | 'fail'): Promise<Order> {
+export async function simulatePayment(orderId: string, _result: 'success' | 'fail'): Promise<Order> {
   const order = await getOrderById(orderId);
   if (!order) throw new Error('Order not found.');
-
-  if (result === 'fail') {
-    return order;
-  }
-
-  if (order.status !== 'pending') {
-    return order;
-  }
-
-  return updateOrderStatus(orderId, 'processing');
+  return order;
 }
 
 export { getAllOrders, countOrders };

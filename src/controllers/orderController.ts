@@ -31,7 +31,8 @@ export async function postPlaceOrder(req: Request, res: Response): Promise<void>
     });
     res.redirect('/order-confirm/' + order.id);
   } catch (err: any) {
-    res.redirect('/cart?error=' + encodeURIComponent(err.message));
+    const message = err?.message || 'Unable to confirm this order right now.';
+    res.redirect('/cart?error=' + encodeURIComponent(message));
   }
 }
 

@@ -130,59 +130,23 @@ export async function createOrder(input: CreateOrderInput): Promise<Order> {
   if (normalizedItems.some(i => !Number.isInteger(i.quantity) || i.quantity <= 0)) {
     throw new Error('Invalid item quantity.');
   }
-
-  const requestedQty = new Map<string, number>();
-  for (const item of normalizedItems) {
-    requestedQty.set(item.product_id, (requestedQty.get(item.product_id) ?? 0) + item.quantity);
-  }
-
-  // Fetch current prices for snapshot
-  const productIds = Array.from(requestedQty.keys());
-  const { data: products, error: pErr } = await supabase
-    .from('products')
-    .select('id, price, stock_quantity, is_active')
-    .in('id', productIds)
-    .eq('del_flg', false);
-  if (pErr) throw new Error(pErr.message);
-
-  const productRows = products ?? [];
-  const productMap = new Map(productRows.map((p: any) => [p.id, p]));
-
-  for (const productId of productIds) {
-    const product = productMap.get(productId);
-    if (!product) throw new Error('Some products no longer exist.');
-    if (!product.is_active) throw new Error('Some products are no longer available.');
-    const needed = requestedQty.get(productId) ?? 0;
-    if ((product.stock_quantity ?? 0) < needed) {
-      throw new Error('Some products are out of stock.');
-    }
-  }
-
-  const priceMap = new Map(productRows.map((p: any) => [p.id, p.price]));
-  const total = normalizedItems.reduce((sum, i) => {
-    return sum + (priceMap.get(i.product_id) ?? 0) * i.quantity;
-  }, 0);
-
-  const { data: order, error: oErr } = await supabase
-    .from('orders')
-    .insert({ user_id: input.user_id, address_id: input.address_id ?? null, total_amount: total, status: 'pending', del_flg: false })
-    .select()
-    .single();
-  if (oErr) throw new Error(oErr.message);
-
-  const lineItems = normalizedItems.map(i => ({
-    order_id:   order.id,
-    product_id: i.product_id,
-    quantity:   i.quantity,
-    unit_price: priceMap.get(i.product_id) ?? 0,
-    size:       i.size ?? null,
-    del_flg:    false,
+  const payload = normalizedItems.map((item) => ({
+    product_id: item.product_id,
+    quantity: item.quantity,
+    size: item.size ?? null,
   }));
 
-  const { error: liErr } = await supabase.from('order_items').insert(lineItems);
-  if (liErr) throw new Error(liErr.message);
+  const { data: orderId, error } = await supabase.rpc('create_demo_order_with_inventory', {
+    p_user_id: input.user_id,
+    p_address_id: input.address_id ?? null,
+    p_items: payload,
+  });
+  if (error) throw new Error(error.message);
+  if (!orderId) throw new Error('Failed to create order.');
 
-  return order as Order;
+  const order = await getOrderById(String(orderId));
+  if (!order) throw new Error('Failed to load created order.');
+  return order;
 }
 
 export async function updateOrderStatus(id: string, status: string): Promise<Order> {

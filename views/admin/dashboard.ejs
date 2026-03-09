@@ -59,7 +59,7 @@
               <tr class="border-t border-zinc-200">
                 <td class="px-3 py-3">#<%= String(o.id).slice(0, 6) %></td>
                 <td class="px-3 py-3"><%= o.user_name || o.user_email || 'Jane Doe' %></td>
-                <td class="px-3 py-3"><%= o.created_at ? new Date(o.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : 'Jan 2026' %></td>
+                <td class="px-3 py-3"><%= o.created_at ? new Intl.DateTimeFormat('sv-SE').format(new Date(o.created_at)) : '2026-01-01' %></td>
                 <td class="px-3 py-3">$<%= Number(o.total_amount || 0).toFixed(2) %></td>
                 <td class="px-3 py-3"><%= o.status %></td>
                 <td class="px-3 py-2 text-right"><a class="inline-flex h-7 w-[56px] items-center justify-center border border-zinc-900 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/orders/<%= o.id %>">View</a></td>
