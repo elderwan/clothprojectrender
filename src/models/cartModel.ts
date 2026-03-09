@@ -60,18 +60,16 @@ export async function updateCartItemQty(id: string, userId: string, quantity: nu
 export async function removeCartItem(id: string, userId: string): Promise<void> {
   const { error } = await supabase
     .from('cart_items')
-    .update({ del_flg: true })
+    .delete()
     .eq('id', id)
-    .eq('user_id', userId)
-    .eq('del_flg', false);
+    .eq('user_id', userId);
   if (error) throw new Error(error.message);
 }
 
 export async function clearCart(userId: string): Promise<void> {
   const { error } = await supabase
     .from('cart_items')
-    .update({ del_flg: true })
-    .eq('user_id', userId)
-    .eq('del_flg', false);
+    .delete()
+    .eq('user_id', userId);
   if (error) throw new Error(error.message);
 }

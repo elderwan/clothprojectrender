@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, .font-serif { font-family: 'Georgia', serif; }
+  </style>
+</head>
+<body class="bg-white text-black pb-[60px] lg:pb-0">
+  <!-- Header -->
+  <%- include('../partials/header', { user, cartCount }) %>  
+
+  <!-- Main Content -->
+  <main class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px] lg:py-[60px]">
+    <div class="flex items-center gap-4 mb-6">
+      <a href="/profile" class="text-[11px] font-bold uppercase hover:underline">← Back to Profile</a>
+    </div>
+
+    <h1 class="text-[24px] lg:text-[36px] font-normal mb-8 uppercase font-serif">Edit Profile & Addresses</h1>
+    <div class="h-px w-full bg-[#e0e0e0] mb-8 lg:mb-10"></div>
+
+    <% if (error) { %>
+      <div class="mb-6 p-4 bg-red-50 text-red-600 text-[12px] border border-red-100 max-w-[800px]">
+        <%= error %>
+      </div>
+    <% } %>
+    <% if (success) { %>
+      <div class="mb-6 p-4 bg-green-50 text-green-600 text-[12px] border border-green-100 max-w-[800px]">
+        <%= success %>
+      </div>
+    <% } %>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-[1160px]">
+      <!-- Personal Information -->
+      <div>
+        <p class="text-[10px] font-bold uppercase mb-6 tracking-widest">Personal Information</p>
+        <form action="/profile/edit" method="POST" class="space-y-6">
+          <div>
+            <label for="full_name" class="block text-[10px] font-bold uppercase text-[#737373] mb-2 tracking-widest">Full Name</label>
+            <input type="text" id="full_name" name="full_name" value="<%= user.full_name %>" required
+                   class="w-full h-[44px] border border-[#e0e0e0] px-4 text-[13px] focus:outline-none focus:border-black transition-colors duration-200" />
+          </div>
+          <div>
+            <label for="email" class="block text-[10px] font-bold uppercase text-[#737373] mb-2 tracking-widest">Email Address (Cannot be changed)</label>
+            <input type="email" id="email" value="<%= user.email %>" disabled
+                   class="w-full h-[44px] border border-[#e0e0e0] px-4 text-[13px] bg-[#f5f5f5] text-[#737373] cursor-not-allowed" />
+          </div>
+          <div>
+            <label for="phone" class="block text-[10px] font-bold uppercase text-[#737373] mb-2 tracking-widest">Phone Number</label>
+            <input type="tel" id="phone" name="phone" value="<%= user.phone || '' %>"
+                   class="w-full h-[44px] border border-[#e0e0e0] px-4 text-[13px] focus:outline-none focus:border-black transition-colors duration-200" />
+          </div>
+
+          <div class="pt-4">
+            <button type="submit" class="w-full h-[52px] bg-black text-white text-[11px] font-bold uppercase tracking-widest hover:bg-zinc-800 transition-colors duration-200">
+              Save Personal Info
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Address Management -->
+      <div id="addresses">
+        <p class="text-[10px] font-bold uppercase mb-6 tracking-widest">Saved Addresses</p>
+        
+        <div class="space-y-6 mb-10">
+          <% if (addresses && addresses.length > 0) { %>
+            <% addresses.forEach(addr => { %>
+              <div class="border border-[#e0e0e0] p-5 relative">
+                <div class="flex justify-between items-start mb-2">
+                  <p class="text-[11px] font-bold uppercase tracking-wider"><%= addr.label %> <%= addr.is_default ? '(Default)' : '' %></p>
+                  <form action="/addresses/<%= addr.id %>/delete" method="POST" onsubmit="return confirm('Delete this address?')">
+                    <button type="submit" class="text-[10px] text-red-500 uppercase hover:underline">Delete</button>
+                  </form>
+                </div>
+                <p class="text-[13px] mb-1"><%= addr.full_name %></p>
+                <p class="text-[12px] text-[#737373]">
+                  <%= addr.address_line1 %><br>
+                  <% if (addr.address_line2) { %><%= addr.address_line2 %><br><% } %>
+                  <%= addr.city %>, <%= addr.state || '' %> <%= addr.postal_code %><br>
+                  <%= addr.country %>
+                </p>
+                <p class="text-[12px] text-[#737373] mt-2"><%= addr.phone %></p>
+              </div>
+            <% }) %>
+          <% } else { %>
+            <p class="text-[12px] text-[#737373]">No addresses saved yet.</p>
+          <% } %>
+        </div>
+
+        <!-- Add New Address -->
+        <p class="text-[10px] font-bold uppercase mb-6 tracking-widest">Add New Address</p>
+        <form action="/addresses" method="POST" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Label (e.g. Home)</label>
+              <input type="text" name="label" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Full Name</label>
+              <input type="text" name="full_name" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Phone</label>
+            <input type="tel" name="phone" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Address Line 1</label>
+            <input type="text" name="address_line1" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Address Line 2 (Optional)</label>
+            <input type="text" name="address_line2" class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+          </div>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">City</label>
+              <input type="text" name="city" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+            </div>
+            <div>
+              <label class="block text-[9px] font-bold uppercase text-[#737373] mb-1">Postal Code</label>
+              <input type="text" name="postal_code" required class="w-full h-[40px] border border-[#e0e0e0] px-3 text-[12px] focus:outline-none focus:border-black" />
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="is_default" name="is_default" class="size-4 accent-black" />
+            <label for="is_default" class="text-[11px] uppercase font-bold tracking-wider cursor-pointer">Set as default address</label>
+          </div>
+          <button type="submit" class="w-full h-[44px] border border-black text-[11px] font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors duration-200">
+            Add Address
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-[#e0e0e0] bg-white mt-16 pb-[60px] lg:pb-0">
+    <div class="mx-auto max-w-[1440px] px-5 py-12 lg:px-[140px]">
+      <div class="flex flex-col lg:flex-row justify-between gap-12">
+        <div class="lg:w-1/3">
+          <p class="font-serif text-[16px] font-normal mb-4">MAISON</p>
+          <p class="text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div class="lg:w-1/3 text-left lg:text-right ml-auto">
+          <p class="text-[11px] font-bold mb-4 uppercase">Account</p>
+          <div class="flex gap-4 lg:justify-end">
+            <a href="/profile" class="text-[11px] text-[#737373] hover:text-black">My Account</a>
+            <a href="/orders" class="text-[11px] text-[#737373] hover:text-black">Order History</a>
+          </div>
+        </div>
+      </div>
+      <div class="mt-16 pt-8 border-t border-[#e0e0e0]">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bottom Nav -->
+  <%- include('../partials/bottomNav', { title }) %>
+</body>
+</html>

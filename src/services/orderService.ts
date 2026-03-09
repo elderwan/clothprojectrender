@@ -1,9 +1,13 @@
-import { getOrdersByUser, getOrderById, createOrder, getAllOrders, countOrders, updateOrderStatus } from '../models/orderModel.js';
+import { getOrdersByUser, getOrderById, createOrder, getAllOrders, countOrders, updateOrderStatus, countOrdersByUser } from '../models/orderModel.js';
 import { clearCart } from '../models/cartModel.js';
 import type { Order, CreateOrderInput } from '../types/order.js';
 
-export async function getUserOrders(userId: string): Promise<Order[]> {
-  return getOrdersByUser(userId);
+export async function getUserOrders(userId: string, limit?: number, offset?: number): Promise<Order[]> {
+  return getOrdersByUser(userId, limit, offset);
+}
+
+export async function countUserOrders(userId: string): Promise<number> {
+  return countOrdersByUser(userId);
 }
 
 export async function getOrderDetail(id: string): Promise<Order | null> {

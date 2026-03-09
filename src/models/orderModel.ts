@@ -13,13 +13,18 @@ export interface AdminOrderSearchFilters {
   max_total?: number;
 }
 
-export async function getOrdersByUser(userId: string): Promise<Order[]> {
-  const { data, error } = await supabase
+export async function getOrdersByUser(userId: string, limit?: number, offset?: number): Promise<Order[]> {
+  let query = supabase
     .from('orders')
     .select('*, order_items(*, products(name))')
     .eq('user_id', userId)
     .eq('del_flg', false)
     .order('created_at', { ascending: false });
+
+  if (limit !== undefined) query = query.limit(limit);
+  if (offset !== undefined) query = query.range(offset, offset + (limit || 10) - 1);
+
+  const { data, error } = await query;
   if (error) throw new Error(error.message);
   return (data ?? []).map((row: any) => ({
     ...row,
@@ -193,6 +198,16 @@ export async function updateOrderStatus(id: string, status: string): Promise<Ord
     .single();
   if (error) throw new Error(error.message);
   return data as Order;
+}
+
+export async function countOrdersByUser(userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from('orders')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('del_flg', false);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
 }
 
 export async function countOrders(): Promise<number> {

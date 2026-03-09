@@ -7,7 +7,11 @@ import { showCart, postAddToCart, postUpdateQty, postRemoveItem } from '../contr
 import {
   postPlaceOrder, postSimulatePayment, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
-import { showProfile, postUpdateProfile, postAddAddress, postEditAddress, postDeleteAddress } from '../controllers/userController.js';
+import { 
+  showProfile, showEditProfile, postUpdateProfile, 
+  showChangePassword, postChangePassword,
+  postAddAddress, postEditAddress, postDeleteAddress 
+} from '../controllers/userController.js';
 import { requireAuth } from '../middleware/authMiddleware.js';
 import { getCart } from '../services/cartService.js';
 import { getAllProductsService, getTopProductsByAudienceService } from '../services/productService.js';
@@ -70,7 +74,10 @@ router.get('/orders/:id', requireAuth, showOrderDetail);
 
 // ── Profile ───────────────────────────────────────────────────
 router.get('/profile', requireAuth, showProfile);
-router.post('/profile', requireAuth, postUpdateProfile);
+router.get('/profile/edit', requireAuth, showEditProfile);
+router.post('/profile/edit', requireAuth, postUpdateProfile);
+router.get('/profile/change-password', requireAuth, showChangePassword);
+router.post('/profile/change-password', requireAuth, postChangePassword);
 
 // ── Addresses ─────────────────────────────────────────────────
 router.post('/addresses', requireAuth, postAddAddress);

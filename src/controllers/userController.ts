@@ -1,47 +1,73 @@
 import type { Request, Response } from 'express';
-import { findUserById, updateUser } from '../models/userModel.js';
+import { findUserById, findUserByIdFull, updateUser } from '../models/userModel.js';
 import {
   getAddressesByUser, getAddressById,
   createAddress, updateAddress, deleteAddress,
 } from '../models/addressModel.js';
+import { getOrdersByUser } from '../models/orderModel.js';
 import bcrypt from 'bcryptjs';
 
 // ── Profile ──────────────────────────────────────────────────
 
 export async function showProfile(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
+  const [user, addresses, orders] = await Promise.all([
+    findUserById(req.session.user.id),
+    getAddressesByUser(req.session.user.id),
+    getOrdersByUser(req.session.user.id, 5),
+  ]);
+  res.render('client/profile', { title: 'My Account', user, addresses, orders, error: null, success: null });
+}
+
+export async function showEditProfile(req: Request, res: Response): Promise<void> {
+  if (!req.session.user) return void res.redirect('/login');
   const [user, addresses] = await Promise.all([
     findUserById(req.session.user.id),
     getAddressesByUser(req.session.user.id),
   ]);
-  res.render('client/profile', { title: 'My Account', user, addresses, error: null, success: null });
+  res.render('client/editProfile', { title: 'Edit Profile', user, addresses, error: null, success: null });
 }
 
 export async function postUpdateProfile(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
   try {
-    const { full_name, phone, password, confirm_password } = req.body;
+    const { full_name, phone } = req.body;
     const updates: Record<string, string> = { full_name, phone };
-
-    if (password) {
-      if (password !== confirm_password) throw new Error('Passwords do not match.');
-      updates.password_hash = await bcrypt.hash(password, 10);
-    }
 
     const updated = await updateUser(req.session.user.id, updates);
     req.session.user = { ...req.session.user, ...updated };
 
-    const [user, addresses] = await Promise.all([
-      findUserById(req.session.user.id),
-      getAddressesByUser(req.session.user.id),
-    ]);
-    res.render('client/profile', { title: 'My Account', user, addresses, error: null, success: 'Profile updated.' });
+    res.redirect('/profile');
   } catch (err: any) {
-    const [user, addresses] = await Promise.all([
-      findUserById(req.session.user!.id),
-      getAddressesByUser(req.session.user!.id),
-    ]);
-    res.render('client/profile', { title: 'My Account', user, addresses, error: err.message, success: null });
+    const user = await findUserById(req.session.user.id);
+    res.render('client/editProfile', { title: 'Edit Profile', user, error: err.message, success: null });
+  }
+}
+
+export async function showChangePassword(req: Request, res: Response): Promise<void> {
+  if (!req.session.user) return void res.redirect('/login');
+  res.render('client/changePassword', { title: 'Change Password', error: null, success: null });
+}
+
+export async function postChangePassword(req: Request, res: Response): Promise<void> {
+  if (!req.session.user) return void res.redirect('/login');
+  try {
+    const { current_password, new_password, confirm_password } = req.body;
+    
+    const user = await findUserByIdFull(req.session.user.id);
+    if (!user) throw new Error('User not found.');
+
+    const isMatch = await bcrypt.compare(current_password, user.password_hash);
+    if (!isMatch) throw new Error('Current password is incorrect.');
+
+    if (new_password !== confirm_password) throw new Error('New passwords do not match.');
+    
+    const password_hash = await bcrypt.hash(new_password, 10);
+    await updateUser(req.session.user.id, { password_hash });
+
+    res.render('client/changePassword', { title: 'Change Password', error: null, success: 'Password updated successfully.' });
+  } catch (err: any) {
+    res.render('client/changePassword', { title: 'Change Password', error: err.message, success: null });
   }
 }
 
@@ -97,4 +123,3 @@ export async function postDeleteAddress(req: Request, res: Response): Promise<vo
   await deleteAddress(req.params.id, req.session.user.id);
   res.redirect('/profile#addresses');
 }
-

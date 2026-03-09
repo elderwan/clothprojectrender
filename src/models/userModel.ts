@@ -28,6 +28,17 @@ export async function findUserById(id: string): Promise<PublicUser | null> {
   return data as PublicUser;
 }
 
+export async function findUserByIdFull(id: string): Promise<User | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', id)
+    .eq('del_flg', false)
+    .single();
+  if (error) return null;
+  return data as User;
+}
+
 export async function createUser(
   input: RegisterInput & { password_hash: string }
 ): Promise<PublicUser> {

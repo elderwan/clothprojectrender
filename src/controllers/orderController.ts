@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { getUserOrders, getOrderDetail, placeOrder, simulatePayment } from '../services/orderService.js';
+import { getUserOrders, getOrderDetail, placeOrder, simulatePayment, countUserOrders } from '../services/orderService.js';
 import { getCart } from '../services/cartService.js';
 import { getAddressById, getDefaultAddress } from '../models/addressModel.js';
 
@@ -46,8 +46,24 @@ export async function showOrderConfirm(req: Request, res: Response): Promise<voi
 
 export async function showOrderHistory(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
-  const orders = await getUserOrders(req.session.user.id);
-  res.render('client/orders', { title: 'Order History', orders });
+  
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  const [orders, total] = await Promise.all([
+    getUserOrders(req.session.user.id, limit, offset),
+    countUserOrders(req.session.user.id),
+  ]);
+
+  const totalPages = Math.ceil(total / limit);
+
+  res.render('client/orders', { 
+    title: 'Order History', 
+    orders,
+    currentPage: page,
+    totalPages
+  });
 }
 
 export async function showOrderDetail(req: Request, res: Response): Promise<void> {

@@ -1,0 +1,22 @@
+<nav class="fixed bottom-0 left-0 z-50 w-full border-t border-[#e0e0e0] bg-white lg:hidden">
+  <div class="flex h-[60px] items-center justify-around">
+    <a href="/" class="flex flex-col items-center gap-1">
+      <p class="text-[9px] <%= title === 'Home' ? 'font-bold text-black' : 'font-normal text-[#737373]' %>">Home</p>
+    </a>
+    <a href="/products" class="flex flex-col items-center gap-1">
+      <p class="text-[9px] <%= title === 'Shop' || title === 'Products' ? 'font-bold text-black' : 'font-normal text-[#737373]' %>">Shop</p>
+    </a>
+    <a href="/products" class="flex flex-col items-center gap-1">
+      <p class="text-[9px] <%= title === 'Search' ? 'font-bold text-black' : 'font-normal text-[#737373]' %>">Search</p>
+    </a>
+    <a href="/profile" class="flex flex-col items-center gap-1">
+      <% if (title === 'My Account') { %>
+        <div class="h-[2px] w-6 bg-black"></div>
+      <% } %>
+      <p class="text-[9px] <%= title === 'My Account' ? 'font-bold text-black' : 'font-normal text-[#737373]' %>">Account</p>
+    </a>
+    <a href="/cart" class="flex flex-col items-center gap-1">
+      <p class="text-[9px] <%= title === 'Shopping Bag' ? 'font-bold text-black' : 'font-normal text-[#737373]' %>">Bag</p>
+    </a>
+  </div>
+</nav>

@@ -2,12 +2,13 @@ import type { Request, Response } from 'express';
 import { getCart, addToCart, updateQty, removeItem, emptyCart } from '../services/cartService.js';
 
 export async function showCart(req: Request, res: Response): Promise<void> {
+  const error = typeof req.query.error === 'string' ? req.query.error : null;
   if (!req.session.user) {
-    res.render('client/cart', { title: 'Shopping Bag', cart: null });
+    res.render('client/cart', { title: 'Shopping Bag', cart: null, error });
     return;
   }
   const cart = await getCart(req.session.user.id);
-  res.render('client/cart', { title: 'Shopping Bag', cart });
+  res.render('client/cart', { title: 'Shopping Bag', cart, error });
 }
 
 export async function postAddToCart(req: Request, res: Response): Promise<void> {
@@ -29,7 +30,12 @@ export async function postUpdateQty(req: Request, res: Response): Promise<void> 
     const qty = Number(quantity);
     if (!id) throw new Error('Missing cart item id.');
     if (!Number.isFinite(qty)) throw new Error('Invalid quantity.');
-    await updateQty(req.session.user.id, id, qty);
+    
+    if (qty <= 0) {
+      await removeItem(req.session.user.id, id);
+    } else {
+      await updateQty(req.session.user.id, id, qty);
+    }
     res.redirect('/cart');
   } catch (err: any) {
     res.redirect('/cart?error=' + encodeURIComponent(err.message));
