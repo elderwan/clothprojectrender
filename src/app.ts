@@ -13,15 +13,16 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+const projectRoot = join(__dirname, '../..');
 
 const app = express();
 
 // View engine
 app.set('view engine', 'ejs');
-app.set('views', join(__dirname, '../views'));
+app.set('views', join(projectRoot, 'views'));
 
 // Static files
-app.use(express.static(join(__dirname, '../public')));
+app.use(express.static(join(projectRoot, 'public')));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
