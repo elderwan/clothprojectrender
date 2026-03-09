@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black">
+  <%- include('./partials/header', { user, cartCount }) %>
+
+  <main class="mx-auto flex min-h-[calc(100vh-76px)] max-w-[1440px] items-center px-5 py-16 lg:px-[140px] lg:py-24">
+    <section class="grid w-full grid-cols-1 gap-10 lg:grid-cols-[minmax(0,0.8fr)_minmax(260px,0.2fr)] lg:items-end">
+      <div class="max-w-[760px]">
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#737373]">Page Not Found</p>
+        <div class="mt-6 border-t border-[#e0e0e0]"></div>
+        <p class="mt-10 text-[64px] leading-none text-[#d6d6d6] lg:text-[120px]">404</p>
+        <h1 class="mt-4 font-serif text-[30px] font-normal uppercase leading-tight lg:text-[52px]">
+          The page you are looking for does not exist.
+        </h1>
+        <p class="mt-5 max-w-[520px] text-[13px] leading-6 text-[#737373]">
+          The link may be outdated, the product may have moved, or the address may have been typed incorrectly.
+          Use one of the routes below to continue browsing MAISON.
+        </p>
+
+        <div class="mt-10 flex flex-col gap-3 sm:flex-row">
+          <a href="/" class="inline-flex h-[48px] items-center justify-center border border-black bg-black px-8 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-zinc-800">
+            Return Home
+          </a>
+          <a href="/products" class="inline-flex h-[48px] items-center justify-center border border-black px-8 text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 hover:bg-black hover:text-white">
+            Explore Products
+          </a>
+        </div>
+      </div>
+
+      <aside class="border border-[#e0e0e0] bg-[#fafafa] p-6">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Quick Links</p>
+        <div class="mt-6 space-y-3 text-[12px]">
+          <a href="/products?category=women" class="block hover:text-zinc-600">Women</a>
+          <a href="/products?category=men" class="block hover:text-zinc-600">Men</a>
+          <a href="/products?category=kids" class="block hover:text-zinc-600">Kids</a>
+          <% if (user) { %>
+            <a href="/profile" class="block hover:text-zinc-600">My Account</a>
+            <a href="/orders" class="block hover:text-zinc-600">My Orders</a>
+          <% } else { %>
+            <a href="/login" class="block hover:text-zinc-600">Sign In</a>
+            <a href="/register" class="block hover:text-zinc-600">Create Account</a>
+          <% } %>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="border-t border-[#e0e0e0] bg-white">
+    <div class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px]">
+      <div class="grid gap-8 md:grid-cols-3">
+        <div>
+          <p class="font-serif text-[16px] font-normal">MAISON</p>
+          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold uppercase">Explore</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/products?category=women" class="block hover:text-black">Women</a>
+            <a href="/products?category=men" class="block hover:text-black">Men</a>
+            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold uppercase">Account</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <% if (user) { %>
+              <a href="/profile" class="block hover:text-black">My Account</a>
+              <a href="/orders" class="block hover:text-black">Orders</a>
+              <a href="/logout" class="block hover:text-black">Sign Out</a>
+            <% } else { %>
+              <a href="/login" class="block hover:text-black">Sign In</a>
+              <a href="/register" class="block hover:text-black">Register</a>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-[#e0e0e0] pt-6">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <%- include('./partials/clientScripts') %>
+</body>
+</html>
