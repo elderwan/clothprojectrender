@@ -60,9 +60,10 @@
             <% if (q) { %><input type="hidden" name="q" value="<%= q %>" /><% } %>
             <label class="text-[11px] text-[#737373]" for="sort-select">Sorted:</label>
             <select id="sort-select" name="sort" class="h-[32px] border border-[#e0e0e0] px-2 text-[11px]" onchange="this.form.submit()">
-              <option value="sales_desc" <%= sort === 'sales_desc' ? 'selected' : '' %>>Sales (high to low)</option>
-              <option value="sales_asc" <%= sort === 'sales_asc' ? 'selected' : '' %>>Sales (low to high)</option>
-              <option value="time_desc" <%= (sort || 'time_desc') === 'time_desc' ? 'selected' : '' %>>Time (new to old)</option>
+              <option value="time_desc" <%= (sort || 'time_desc') === 'time_desc' ? 'selected' : '' %>>New Arrivals</option>
+              <option value="sales_desc" <%= sort === 'sales_desc' ? 'selected' : '' %>>Best Sellers</option>
+              <option value="price_asc" <%= sort === 'price_asc' ? 'selected' : '' %>>Price (low to high)</option>
+              <option value="price_desc" <%= sort === 'price_desc' ? 'selected' : '' %>>Price (high to low)</option>
               <option value="time_asc" <%= sort === 'time_asc' ? 'selected' : '' %>>Time (old to new)</option>
             </select>
           </form>
