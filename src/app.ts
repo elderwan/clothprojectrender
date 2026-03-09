@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { existsSync } from 'fs';
 import dotenv from 'dotenv';
 import clientRouter from './routes/clientRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
@@ -13,7 +14,19 @@ dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-const projectRoot = join(__dirname, '../..');
+
+function resolveProjectRoot(): string {
+  const candidates = [
+    join(__dirname, '..'),
+    join(__dirname, '../..'),
+    process.cwd(),
+  ];
+
+  const match = candidates.find((dir) => existsSync(join(dir, 'views')) && existsSync(join(dir, 'public')));
+  return match ?? process.cwd();
+}
+
+const projectRoot = resolveProjectRoot();
 
 const app = express();
 
