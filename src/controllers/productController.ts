@@ -34,8 +34,8 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
   const keywordQuery = String(req.query.q ?? '').trim();
   const audienceQuery = String(req.query.audience ?? '').trim().toLowerCase();
   const sortQuery = String(req.query.sort ?? 'time_desc').trim().toLowerCase();
-  const validSort = ['time_desc', 'time_asc', 'sales_desc', 'sales_asc'].includes(sortQuery)
-    ? (sortQuery as 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc')
+  const validSort = ['time_desc', 'time_asc', 'sales_desc', 'sales_asc', 'price_asc', 'price_desc'].includes(sortQuery)
+    ? (sortQuery as 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc' | 'price_asc' | 'price_desc')
     : 'time_desc';
 
   const categoryAsAudience = legacyCategoryQuery === 'men' || legacyCategoryQuery === 'women' || legacyCategoryQuery === 'kids';

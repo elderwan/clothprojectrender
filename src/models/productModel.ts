@@ -112,13 +112,12 @@ export async function getAllProducts(
   categorySlug?: string,
   includeInactive = false,
   audience?: 'men' | 'women' | 'kids',
-  sort: 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc' = 'time_desc'
+  sort: 'time_desc' | 'time_asc' | 'sales_desc' | 'sales_asc' | 'price_asc' | 'price_desc' = 'time_desc'
 ): Promise<Product[]> {
   let query = supabase
     .from('products')
     .select('*, categories(name)')
-    .eq('del_flg', false)
-    .order('created_at', { ascending: false });
+    .eq('del_flg', false);
 
   if (!includeInactive) {
     query = query.eq('is_active', true) as typeof query;
@@ -136,46 +135,54 @@ export async function getAllProducts(
   }
 
   if (audience) {
-    const { data: categoryRows } = await supabase
-      .from('categories')
-      .select('id')
-      .eq('audience', audience)
-      .eq('del_flg', false);
-    const categoryIds = (categoryRows ?? []).map((c: any) => c.id);
-    if (categoryIds.length === 0) return [];
-    query = query.in('category_id', categoryIds) as typeof query;
+    query = query.eq('audience', audience) as typeof query;
+  }
+
+  // Handle database-level sorting
+  if (sort === 'time_desc') {
+    query = query.order('created_at', { ascending: false }) as typeof query;
+  } else if (sort === 'time_asc') {
+    query = query.order('created_at', { ascending: true }) as typeof query;
+  } else if (sort === 'price_asc') {
+    query = query.order('price', { ascending: true }) as typeof query;
+  } else if (sort === 'price_desc') {
+    query = query.order('price', { ascending: false }) as typeof query;
+  } else {
+    // Default fallback for sales sorting later
+    query = query.order('created_at', { ascending: false }) as typeof query;
   }
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
   const products = await attachPrimaryImages(data ?? []);
 
-  if (sort === 'time_asc') {
-    return [...products].sort((a, b) => {
-      const at = new Date(a.created_at ?? 0).getTime();
-      const bt = new Date(b.created_at ?? 0).getTime();
-      return at - bt;
-    });
-  }
-
+  // Handle memory-level sorting for sales (requires join/aggregation logic)
   if (sort === 'sales_desc' || sort === 'sales_asc') {
     const productIds = products.map((p) => p.id);
     if (productIds.length === 0) return products;
+    
+    // Sum quantities from order_items
     const { data: orderItems } = await supabase
       .from('order_items')
       .select('product_id, quantity')
       .in('product_id', productIds)
       .eq('del_flg', false);
+      
     const salesMap = new Map<string, number>();
     for (const row of orderItems ?? []) {
       const pid = String((row as any).product_id);
       const qty = Number((row as any).quantity ?? 0);
       salesMap.set(pid, (salesMap.get(pid) ?? 0) + qty);
     }
+    
     return [...products].sort((a, b) => {
       const as = salesMap.get(a.id) ?? 0;
       const bs = salesMap.get(b.id) ?? 0;
-      return sort === 'sales_desc' ? bs - as : as - bs;
+      if (as !== bs) {
+        return sort === 'sales_desc' ? bs - as : as - bs;
+      }
+      // fallback to time desc if sales are equal
+      return new Date(b.created_at ?? 0).getTime() - new Date(a.created_at ?? 0).getTime();
     });
   }
 
