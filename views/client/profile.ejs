@@ -20,7 +20,7 @@
     <h1 class="text-[24px] lg:text-[36px] font-normal mb-4 lg:mb-6">MY ACCOUNT</h1>
     <div class="h-px w-full bg-[#e0e0e0] mb-8 lg:mb-10"></div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-12">
       <!-- Account Info -->
       <div class="lg:col-span-4">
         <p class="text-[10px] lg:text-[11px] font-bold mb-4">ACCOUNT INFORMATION</p>
@@ -45,7 +45,7 @@
           </div>
         </div>
 
-        <div class="mt-10 flex flex-col sm:flex-row gap-4">
+        <div class="mt-10 flex flex-col gap-4">
           <a href="/profile/edit" class="h-[44px] border border-black px-8 flex items-center justify-center text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase">
             Edit Profile
           </a>
@@ -55,8 +55,58 @@
         </div>
       </div>
 
-      <!-- Recent Orders -->
-      <div class="lg:col-span-8">
+      <div class="lg:col-span-8 space-y-10">
+        <section>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-[10px] lg:text-[11px] font-bold mb-2 uppercase tracking-[0.18em]">Address Book</p>
+              <p class="text-[12px] text-[#737373]">Keep your delivery details organized in one place.</p>
+            </div>
+            <a href="/profile/addresses" class="hidden sm:inline-flex h-[42px] items-center justify-center border border-black px-6 text-[11px] font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white transition-colors duration-200">
+              Manage Addresses
+            </a>
+          </div>
+          <div class="h-px w-full bg-[#e0e0e0] mt-4 mb-5"></div>
+
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <% if (addresses && addresses.length > 0) { %>
+              <% addresses.slice(0, 2).forEach(addr => { %>
+                <article class="border border-[#e0e0e0] bg-[#fafafa] p-5">
+                  <div class="flex items-center gap-2">
+                    <p class="text-[11px] font-bold uppercase tracking-[0.18em]"><%= addr.label %></p>
+                    <% if (addr.is_default) { %>
+                      <span class="inline-flex items-center border border-black px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em]">Default</span>
+                    <% } %>
+                  </div>
+                  <p class="mt-4 text-[13px]"><%= addr.full_name %></p>
+                  <p class="mt-2 text-[12px] leading-6 text-[#737373]">
+                    <%= addr.address_line1 %><br>
+                    <% if (addr.address_line2) { %><%= addr.address_line2 %><br><% } %>
+                    <%= addr.city %><% if (addr.state) { %>, <%= addr.state %><% } %> <%= addr.postal_code %><br>
+                    <%= addr.country %>
+                  </p>
+                </article>
+              <% }) %>
+            <% } else { %>
+              <article class="border border-dashed border-[#d7d7d7] bg-[#fafafa] p-6 md:col-span-2">
+                <p class="text-[12px] text-[#737373]">No saved addresses yet.</p>
+                <p class="mt-2 text-[11px] text-[#9a9a9a]">Add your shipping details before checkout for a faster order flow.</p>
+              </article>
+            <% } %>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between gap-4">
+            <p class="text-[11px] text-[#737373]">
+              <%= addresses && addresses.length > 0 ? `${addresses.length} address${addresses.length > 1 ? 'es' : ''} saved` : 'Start your address book' %>
+            </p>
+            <a href="/profile/addresses" class="inline-flex h-[42px] items-center justify-center border border-black px-6 text-[11px] font-bold uppercase tracking-[0.14em] hover:bg-black hover:text-white transition-colors duration-200 sm:hidden">
+              Manage Addresses
+            </a>
+          </div>
+        </section>
+
+        <!-- Recent Orders -->
+        <section>
         <p class="text-[10px] lg:text-[11px] font-bold mb-4 uppercase">Recent Orders</p>
         <div class="h-px w-full bg-[#e0e0e0] mb-5"></div>
 
@@ -124,6 +174,7 @@
             View All Orders
           </a>
         </div>
+        </section>
       </div>
     </div>
   </main>

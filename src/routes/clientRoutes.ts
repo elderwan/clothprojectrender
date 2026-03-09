@@ -8,7 +8,7 @@ import {
   postPlaceOrder, postSimulatePayment, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
 import { 
-  showProfile, showEditProfile, postUpdateProfile, 
+  showProfile, showEditProfile, showAddressBook, postUpdateProfile, 
   showChangePassword, postChangePassword,
   postAddAddress, postEditAddress, postDeleteAddress 
 } from '../controllers/userController.js';
@@ -75,6 +75,7 @@ router.get('/orders/:id', requireAuth, showOrderDetail);
 // ── Profile ───────────────────────────────────────────────────
 router.get('/profile', requireAuth, showProfile);
 router.get('/profile/edit', requireAuth, showEditProfile);
+router.get('/profile/addresses', requireAuth, showAddressBook);
 router.post('/profile/edit', requireAuth, postUpdateProfile);
 router.get('/profile/change-password', requireAuth, showChangePassword);
 router.post('/profile/change-password', requireAuth, postChangePassword);

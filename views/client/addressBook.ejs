@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    h1, .font-serif { font-family: 'Georgia', serif; }
+  </style>
+</head>
+<body class="bg-white text-black pb-[60px] lg:pb-0">
+  <%- include('../partials/header', { user, cartCount }) %>
+
+  <main class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px] lg:py-[60px]">
+    <div class="flex items-center gap-4 mb-6">
+      <a href="/profile" class="text-[11px] font-bold uppercase tracking-[0.14em] hover:underline">← Back to Profile</a>
+    </div>
+
+    <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-[620px]">
+        <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-[#737373]">Account Center</p>
+        <h1 class="mt-4 text-[32px] font-normal uppercase font-serif lg:text-[44px]">Address Book</h1>
+        <p class="mt-4 text-[13px] leading-6 text-[#6b6b6b]">
+          Manage delivery details in a dedicated workspace. Keep your default address visible, update older entries quickly, and add new destinations without affecting your profile settings page.
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button type="button" id="address-add-trigger" class="inline-flex h-[46px] items-center justify-center border border-black bg-black px-7 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-zinc-800">
+          Add New Address
+        </button>
+        <a href="/profile/edit" class="inline-flex h-[46px] items-center justify-center border border-black px-7 text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 hover:bg-black hover:text-white">
+          Edit Profile
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-10 h-px w-full bg-[#e0e0e0]"></div>
+
+    <% if (error) { %>
+      <div class="mt-8 max-w-[820px] border border-red-100 bg-red-50 p-4 text-[12px] text-red-600">
+        <%= error %>
+      </div>
+    <% } %>
+    <% if (success) { %>
+      <div class="mt-8 max-w-[820px] border border-green-100 bg-green-50 p-4 text-[12px] text-green-600">
+        <%= success %>
+      </div>
+    <% } %>
+
+    <section class="mt-10 grid grid-cols-1 gap-8 xl:grid-cols-[minmax(360px,0.9fr)_minmax(0,1.1fr)] xl:items-start">
+      <aside class="border border-[#e0e0e0] bg-[#fafafa]">
+        <div class="border-b border-[#e0e0e0] px-6 py-5">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-[0.18em]">Saved Addresses</p>
+              <p class="mt-2 text-[12px] text-[#737373]">
+                <%= addresses && addresses.length > 0 ? `${addresses.length} address${addresses.length > 1 ? 'es' : ''} available` : 'Start your address book here.' %>
+              </p>
+            </div>
+            <span class="inline-flex min-h-[34px] min-w-[34px] items-center justify-center border border-[#d9d9d9] px-3 text-[10px] font-bold uppercase tracking-[0.18em]">
+              <%= addresses ? addresses.length : 0 %>
+            </span>
+          </div>
+        </div>
+
+        <div class="max-h-[720px] overflow-y-auto p-4">
+          <% if (addresses && addresses.length > 0) { %>
+            <div class="space-y-3">
+              <% addresses.forEach(addr => { %>
+                <article class="address-card border border-[#e0e0e0] bg-white p-5 transition-all duration-200" data-address-card-id="<%= addr.id %>">
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-[11px] font-bold uppercase tracking-[0.18em]"><%= addr.label %></p>
+                        <% if (addr.is_default) { %>
+                          <span class="inline-flex items-center border border-black px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em]">Default</span>
+                        <% } %>
+                      </div>
+                      <p class="mt-4 text-[13px]"><%= addr.full_name %></p>
+                      <p class="mt-2 text-[12px] leading-6 text-[#737373]">
+                        <%= addr.address_line1 %><br>
+                        <% if (addr.address_line2) { %><%= addr.address_line2 %><br><% } %>
+                        <%= addr.city %><% if (addr.state) { %>, <%= addr.state %><% } %> <%= addr.postal_code %><br>
+                        <%= addr.country %>
+                      </p>
+                      <p class="mt-2 text-[12px] text-[#737373]"><%= addr.phone || 'No phone number' %></p>
+                    </div>
+                  </div>
+
+                  <div class="mt-5 flex flex-wrap gap-3 border-t border-[#efefef] pt-4">
+                    <button
+                      type="button"
+                      class="address-edit-trigger inline-flex h-[38px] items-center justify-center border border-black px-4 text-[10px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 hover:bg-black hover:text-white"
+                      data-address-id="<%= addr.id %>"
+                    >
+                      Edit Address
+                    </button>
+                    <form action="/addresses/<%= addr.id %>/delete" method="POST">
+                      <button type="submit" class="inline-flex h-[38px] items-center justify-center border border-[#d8d8d8] px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-red-500 transition-colors duration-200 hover:border-red-500 hover:bg-red-50">
+                        Delete
+                      </button>
+                    </form>
+                  </div>
+                </article>
+              <% }) %>
+            </div>
+          <% } else { %>
+            <div class="border border-dashed border-[#d7d7d7] bg-white px-6 py-14 text-center">
+              <p class="text-[12px] text-[#737373]">No addresses saved yet.</p>
+              <p class="mt-2 text-[11px] text-[#9a9a9a]">Add your first shipping destination to begin.</p>
+            </div>
+          <% } %>
+        </div>
+      </aside>
+
+      <div class="border border-[#e0e0e0] bg-white">
+        <div class="border-b border-[#e0e0e0] px-6 py-5">
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <p id="address-form-kicker" class="text-[10px] font-bold uppercase tracking-[0.18em]">Add New Address</p>
+              <p id="address-form-helper" class="mt-2 text-[12px] text-[#737373]">Create a new shipping destination in your account.</p>
+            </div>
+            <button type="button" id="address-cancel-edit" class="hidden border border-[#d5d5d5] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-[#4a4a4a] transition-colors duration-200 hover:border-black hover:text-black">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <form id="address-form" action="/addresses" method="POST" class="space-y-6 px-6 py-6 lg:px-8 lg:py-8">
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label for="address-label" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Label</label>
+              <input id="address-label" type="text" name="label" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+            <div>
+              <label for="address-full-name" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Full Name</label>
+              <input id="address-full-name" type="text" name="full_name" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <div>
+              <label for="address-phone" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Phone</label>
+              <input id="address-phone" type="tel" name="phone" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+            <div>
+              <label for="address-country" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Country</label>
+              <input id="address-country" type="text" name="country" value="MY" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] uppercase transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label for="address-line1" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Address Line 1</label>
+            <input id="address-line1" type="text" name="address_line1" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+          </div>
+
+          <div>
+            <label for="address-line2" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Address Line 2</label>
+            <input id="address-line2" type="text" name="address_line2" class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+          </div>
+
+          <div class="grid grid-cols-1 gap-5 sm:grid-cols-3">
+            <div>
+              <label for="address-city" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">City</label>
+              <input id="address-city" type="text" name="city" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+            <div>
+              <label for="address-state" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">State</label>
+              <input id="address-state" type="text" name="state" class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+            <div>
+              <label for="address-postal-code" class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Postal Code</label>
+              <input id="address-postal-code" type="text" name="postal_code" required class="h-[46px] w-full border border-[#e0e0e0] px-4 text-[13px] transition-colors duration-200 focus:border-black focus:outline-none" />
+            </div>
+          </div>
+
+          <label for="is_default" class="flex cursor-pointer items-center gap-3 border border-[#e0e0e0] px-4 py-4 transition-colors duration-200 hover:border-black">
+            <input type="checkbox" id="is_default" name="is_default" class="size-4 accent-black" />
+            <span class="text-[11px] font-bold uppercase tracking-[0.18em]">Set as default address</span>
+          </label>
+
+          <div class="flex flex-col gap-3 border-t border-[#e0e0e0] pt-6 sm:flex-row">
+            <button type="submit" id="address-submit-button" class="inline-flex h-[48px] items-center justify-center border border-black bg-black px-8 text-[11px] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-zinc-800">
+              Add Address
+            </button>
+            <button type="button" id="address-reset-button" class="inline-flex h-[48px] items-center justify-center border border-[#d5d5d5] px-8 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a4a4a] transition-colors duration-200 hover:border-black hover:text-black">
+              Clear Form
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-[#e0e0e0] bg-white mt-16 pb-[60px] lg:pb-0">
+    <div class="mx-auto max-w-[1440px] px-5 py-12 lg:px-[140px]">
+      <div class="flex flex-col lg:flex-row justify-between gap-12">
+        <div class="lg:w-1/3">
+          <p class="font-serif text-[16px] font-normal mb-4">MAISON</p>
+          <p class="text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div class="lg:w-1/3 text-left lg:text-right ml-auto">
+          <p class="text-[11px] font-bold mb-4 uppercase">Account</p>
+          <div class="flex gap-4 lg:justify-end">
+            <a href="/profile" class="text-[11px] text-[#737373] hover:text-black">My Account</a>
+            <a href="/orders" class="text-[11px] text-[#737373] hover:text-black">Order History</a>
+          </div>
+        </div>
+      </div>
+      <div class="mt-16 pt-8 border-t border-[#e0e0e0]">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <%- include('../partials/bottomNav', { title }) %>
+
+  <script id="address-book-data" type="application/json"><%- JSON.stringify(addresses || []) %></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const dataNode = document.getElementById('address-book-data');
+      const addresses = dataNode ? JSON.parse(dataNode.textContent || '[]') : [];
+      const form = document.getElementById('address-form');
+      if (!form) return;
+
+      const addTrigger = document.getElementById('address-add-trigger');
+      const cancelEditButton = document.getElementById('address-cancel-edit');
+      const resetButton = document.getElementById('address-reset-button');
+      const submitButton = document.getElementById('address-submit-button');
+      const kicker = document.getElementById('address-form-kicker');
+      const helper = document.getElementById('address-form-helper');
+      const editButtons = Array.from(document.querySelectorAll('.address-edit-trigger'));
+      const cards = Array.from(document.querySelectorAll('.address-card'));
+
+      const fields = {
+        label: document.getElementById('address-label'),
+        full_name: document.getElementById('address-full-name'),
+        phone: document.getElementById('address-phone'),
+        country: document.getElementById('address-country'),
+        address_line1: document.getElementById('address-line1'),
+        address_line2: document.getElementById('address-line2'),
+        city: document.getElementById('address-city'),
+        state: document.getElementById('address-state'),
+        postal_code: document.getElementById('address-postal-code'),
+        is_default: document.getElementById('is_default')
+      };
+
+      function highlightCard(addressId) {
+        cards.forEach((card) => {
+          const active = card.getAttribute('data-address-card-id') === addressId;
+          card.classList.toggle('border-black', active);
+          card.classList.toggle('shadow-[0_16px_38px_rgba(0,0,0,0.06)]', active);
+          card.classList.toggle('bg-[#fcfcfc]', active);
+        });
+      }
+
+      function setAddMode() {
+        form.action = '/addresses';
+        form.reset();
+        fields.country.value = 'MY';
+        kicker.textContent = 'Add New Address';
+        helper.textContent = 'Create a new shipping destination in your account.';
+        submitButton.textContent = 'Add Address';
+        cancelEditButton.classList.add('hidden');
+        highlightCard('');
+      }
+
+      function setEditMode(addressId) {
+        const address = addresses.find((item) => item.id === addressId);
+        if (!address) return;
+
+        form.action = '/addresses/' + address.id + '/edit';
+        fields.label.value = address.label || '';
+        fields.full_name.value = address.full_name || '';
+        fields.phone.value = address.phone || '';
+        fields.country.value = address.country || 'MY';
+        fields.address_line1.value = address.address_line1 || '';
+        fields.address_line2.value = address.address_line2 || '';
+        fields.city.value = address.city || '';
+        fields.state.value = address.state || '';
+        fields.postal_code.value = address.postal_code || '';
+        fields.is_default.checked = Boolean(address.is_default);
+
+        kicker.textContent = 'Edit Address';
+        helper.textContent = 'Update the selected address and keep your delivery preferences current.';
+        submitButton.textContent = 'Update Address';
+        cancelEditButton.classList.remove('hidden');
+        highlightCard(address.id);
+        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      if (addTrigger) addTrigger.addEventListener('click', setAddMode);
+      if (cancelEditButton) cancelEditButton.addEventListener('click', setAddMode);
+      if (resetButton) {
+        resetButton.addEventListener('click', function () {
+          if (form.action.includes('/edit')) {
+            setAddMode();
+            return;
+          }
+          form.reset();
+          fields.country.value = 'MY';
+        });
+      }
+
+      editButtons.forEach((button) => {
+        button.addEventListener('click', function () {
+          const addressId = button.getAttribute('data-address-id');
+          if (addressId) setEditMode(addressId);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

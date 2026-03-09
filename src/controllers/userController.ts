@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { findUserById, findUserByIdFull, updateUser } from '../models/userModel.js';
 import {
-  getAddressesByUser, getAddressById,
+  getAddressesByUser,
   createAddress, updateAddress, deleteAddress,
 } from '../models/addressModel.js';
 import { getOrdersByUser } from '../models/orderModel.js';
@@ -16,16 +16,40 @@ export async function showProfile(req: Request, res: Response): Promise<void> {
     getAddressesByUser(req.session.user.id),
     getOrdersByUser(req.session.user.id, 5),
   ]);
-  res.render('client/profile', { title: 'My Account', user, addresses, orders, error: null, success: null });
+  res.render('client/profile', {
+    title: 'My Account',
+    user,
+    addresses,
+    orders,
+    error: typeof req.query.error === 'string' ? req.query.error : null,
+    success: typeof req.query.success === 'string' ? req.query.success : null,
+  });
 }
 
 export async function showEditProfile(req: Request, res: Response): Promise<void> {
+  if (!req.session.user) return void res.redirect('/login');
+  const user = await findUserById(req.session.user.id);
+  res.render('client/editProfile', {
+    title: 'Edit Profile',
+    user,
+    error: typeof req.query.error === 'string' ? req.query.error : null,
+    success: typeof req.query.success === 'string' ? req.query.success : null,
+  });
+}
+
+export async function showAddressBook(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
   const [user, addresses] = await Promise.all([
     findUserById(req.session.user.id),
     getAddressesByUser(req.session.user.id),
   ]);
-  res.render('client/editProfile', { title: 'Edit Profile', user, addresses, error: null, success: null });
+  res.render('client/addressBook', {
+    title: 'Address Book',
+    user,
+    addresses,
+    error: typeof req.query.error === 'string' ? req.query.error : null,
+    success: typeof req.query.success === 'string' ? req.query.success : null,
+  });
 }
 
 export async function postUpdateProfile(req: Request, res: Response): Promise<void> {
@@ -90,9 +114,9 @@ export async function postAddAddress(req: Request, res: Response): Promise<void>
       country:      country || 'MY',
       is_default:   is_default === 'on',
     });
-    res.redirect('/profile#addresses');
+    res.redirect('/profile/addresses?success=' + encodeURIComponent('Address added successfully.'));
   } catch (err: any) {
-    res.redirect('/profile?error=' + encodeURIComponent(err.message));
+    res.redirect('/profile/addresses?error=' + encodeURIComponent(err.message));
   }
 }
 
@@ -112,14 +136,14 @@ export async function postEditAddress(req: Request, res: Response): Promise<void
       country:      country || 'MY',
       is_default:   is_default === 'on',
     });
-    res.redirect('/profile#addresses');
+    res.redirect('/profile/addresses?success=' + encodeURIComponent('Address updated successfully.'));
   } catch (err: any) {
-    res.redirect('/profile?error=' + encodeURIComponent(err.message));
+    res.redirect('/profile/addresses?error=' + encodeURIComponent(err.message));
   }
 }
 
 export async function postDeleteAddress(req: Request, res: Response): Promise<void> {
   if (!req.session.user) return void res.redirect('/login');
   await deleteAddress(req.params.id, req.session.user.id);
-  res.redirect('/profile#addresses');
+  res.redirect('/profile/addresses?success=' + encodeURIComponent('Address deleted successfully.'));
 }
