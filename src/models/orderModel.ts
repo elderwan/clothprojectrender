@@ -1,5 +1,6 @@
 import { supabase } from '../../data/supabaseClient.js';
 import type { Order, OrderItem, CreateOrderInput } from '../types/order.js';
+import { getPrimaryImagesBulk } from './productImageModel.js';
 
 const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'shipped', 'delivered', 'cancelled']);
 export type AdminOrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
@@ -26,9 +27,29 @@ export async function getOrdersByUser(userId: string, limit?: number, offset?: n
 
   const { data, error } = await query;
   if (error) throw new Error(error.message);
-  return (data ?? []).map((row: any) => ({
+
+  const orders = (data ?? []) as any[];
+  
+  // Extract all unique product IDs across all orders to fetch images in bulk
+  const allProductIds = new Set<string>();
+  orders.forEach(order => {
+    (order.order_items ?? []).forEach((item: any) => {
+      if (item.product_id) allProductIds.add(item.product_id);
+    });
+  });
+
+  const imageMap = await getPrimaryImagesBulk(Array.from(allProductIds));
+
+  return orders.map((row: any) => ({
     ...row,
-    order_items: (row.order_items ?? []).filter((i: any) => !i.del_flg),
+    order_items: (row.order_items ?? [])
+      .filter((i: any) => !i.del_flg)
+      .map((i: any) => ({
+        ...i,
+        product_name: i.products?.name,
+        product_image: imageMap.get(i.product_id),
+        unit_price: i.unit_price,
+      })),
   })) as Order[];
 }
 
@@ -41,16 +62,20 @@ export async function getOrderById(id: string): Promise<Order | null> {
     .single();
   if (error) return null;
   const row = data as any;
+  
+  const orderItems = (row.order_items ?? []).filter((i: any) => !i.del_flg);
+  const productIds = orderItems.map((i: any) => i.product_id);
+  const imageMap = await getPrimaryImagesBulk(productIds);
+
   return {
     ...row,
     user_email: row.users?.email,
     user_name:  row.users?.full_name,
-    items: (row.order_items ?? [])
-      .filter((i: any) => !i.del_flg)
-      .map((i: any) => ({
+    items: orderItems.map((i: any) => ({
       ...i,
       product_name:  i.products?.name,
-      })),
+      product_image: imageMap.get(i.product_id),
+    })),
   };
 }
 
