@@ -11,7 +11,7 @@
   <%- include('../partials/header', { user, cartCount }) %>  
 
   <!-- Breadcrumb -->
-  <div class="border-b border-[#e0e0e0] bg-white">
+  <div class="border-b border-[#e0e0e0] bg-[#fcfcfa]">
     <div class="mx-auto max-w-[1440px] px-4 py-4 lg:px-[140px]">
       <p class="text-[11px] text-[#737373]">Home / <%= audience ? audience.charAt(0).toUpperCase() + audience.slice(1) : 'All' %><%= categoryName ? (' / ' + categoryName) : '' %></p>
     </div>
@@ -19,6 +19,34 @@
 
   <!-- Main Content -->
   <main class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+    <% if (categoryBanners && categoryBanners.length > 0) { %>
+      <section class="mb-10 overflow-hidden border border-[#e6e0d8] bg-[#f5f1eb]">
+        <div class="relative min-h-[280px] lg:min-h-[420px]">
+          <% categoryBanners.forEach((banner, idx) => { %>
+            <div class="category-banner absolute inset-0 transition-opacity duration-700 <%= idx === 0 ? 'opacity-100 z-10' : 'pointer-events-none opacity-0 z-0' %>">
+              <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('<%= banner.image_url %>');"></div>
+              <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent"></div>
+              <div class="relative flex h-full items-end px-6 py-8 lg:px-12 lg:py-12">
+                <div class="max-w-[560px] text-white">
+                  <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70"><%= audience ? audience.toUpperCase() : 'COLLECTION' %> EDIT</p>
+                  <h2 class="mt-3 font-serif text-[34px] leading-none lg:text-[54px]"><%= banner.title %></h2>
+                  <% if (banner.description) { %>
+                    <p class="mt-4 text-[14px] leading-7 text-white/85"><%= banner.description %></p>
+                  <% } %>
+                  <a href="<%= banner.product_id ? ('/products/' + banner.product_id) : '/products' + (audience ? ('?audience=' + audience) : '') %>" class="mt-6 inline-flex h-11 items-center border border-white px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-white hover:text-black">Shop the Edit</a>
+                </div>
+              </div>
+            </div>
+          <% }) %>
+          <% if (categoryBanners.length > 1) { %>
+            <div class="absolute bottom-4 right-4 z-20 flex gap-2">
+              <button id="category-banner-prev" class="inline-flex h-10 w-10 items-center justify-center border border-white/70 bg-black/45 text-white transition-colors duration-200 hover:bg-black/65">‹</button>
+              <button id="category-banner-next" class="inline-flex h-10 w-10 items-center justify-center border border-white/70 bg-black/45 text-white transition-colors duration-200 hover:bg-black/65">›</button>
+            </div>
+          <% } %>
+        </div>
+      </section>
+    <% } %>
     <h1 class="font-serif text-[36px] font-normal mb-6"><%= audience ? audience.toUpperCase() : 'ALL' %></h1>
 
     <!-- Filters -->
@@ -73,18 +101,10 @@
     </div>
 
     <!-- Products Grid -->
-    <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-4">
       <% if (products && products.length > 0) { %>
-        <% products.forEach(product => { %>
-          <a href="/products/<%= product.id %>" class="group cursor-pointer">
-            <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
-              <% if (product.primary_image) { %>
-                <img src="<%= product.primary_image %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-              <% } %>
-            </div>
-            <p class="text-[13px] font-normal mb-1"><%= product.name %></p>
-            <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %></p>
-          </a>
+        <% products.forEach((product, idx) => { %>
+          <%- include('../partials/productCard', { product, cardIndex: idx + ((pagination.page - 1) * pagination.pageSize) }) %>
         <% }) %>
       <% } else { %>
         <div class="col-span-full text-center py-16">
@@ -164,6 +184,35 @@
     </div>
   </footer>
   <%- include('../partials/clientScripts') %>
+  <script>
+    (function () {
+      const slides = Array.from(document.querySelectorAll('.category-banner'));
+      if (!slides.length) return;
+      const prev = document.getElementById('category-banner-prev');
+      const next = document.getElementById('category-banner-next');
+      let activeIndex = 0;
+
+      function renderBanner(index) {
+        slides.forEach((slide, idx) => {
+          const active = idx === index;
+          slide.classList.toggle('opacity-100', active);
+          slide.classList.toggle('z-10', active);
+          slide.classList.toggle('pointer-events-none', !active);
+          slide.classList.toggle('opacity-0', !active);
+          slide.classList.toggle('z-0', !active);
+        });
+      }
+
+      prev && prev.addEventListener('click', () => {
+        activeIndex = (activeIndex - 1 + slides.length) % slides.length;
+        renderBanner(activeIndex);
+      });
+      next && next.addEventListener('click', () => {
+        activeIndex = (activeIndex + 1) % slides.length;
+        renderBanner(activeIndex);
+      });
+    })();
+  </script>
 </body>
 </html>
 

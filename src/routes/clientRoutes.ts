@@ -28,7 +28,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 
   // fetch a handful of products for the homepage
-  const [all, banners, manTrends, womanTrends, kidTrends] = await Promise.all([
+  const [all, homeBanners, manTrends, womanTrends, kidTrends] = await Promise.all([
     getAllProductsService(),
     getActiveHomeBanners(),
     getTopProductsByAudienceService('men', 4),
@@ -41,7 +41,7 @@ router.get('/', async (req: Request, res: Response) => {
     title: 'MAISON',
     cartCount,
     newArrivals,
-    banners,
+    homeBanners,
     manTrends,
     womanTrends,
     kidTrends,

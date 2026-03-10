@@ -3,7 +3,7 @@ import { adminLoginPage, adminLoginSubmitPage, adminLogoutPage } from '../contro
 import { showDashboard } from '../controllers/adminDashboardController.js';
 import {
   listProducts, showAddProduct, handleAddProduct,
-  showEditProduct, handleEditProduct, handleDeleteProduct
+  showEditProduct, handleEditProduct, handleDeleteProduct, handleUploadProductImage
 } from '../controllers/adminProductController.js';
 import { listOrders, showOrderDetail, handleUpdateStatus } from '../controllers/adminOrderController.js';
 import { listCustomers, showCustomerDetail } from '../controllers/adminUserController.js';
@@ -38,6 +38,7 @@ router.post('/admin/products/add', handleAddProduct);
 router.get('/admin/products/:id/edit', showEditProduct);
 router.post('/admin/products/:id/edit', handleEditProduct);
 router.post('/admin/products/:id/delete', handleDeleteProduct);
+router.post('/admin/uploads/product-image', handleUploadProductImage);
 
 // ── Orders ────────────────────────────────────────────────────
 router.get('/admin/orders', listOrders);

@@ -9,18 +9,24 @@
 <body class="bg-zinc-100 text-zinc-900">
   <div id="sidebar-overlay" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"></div>
   <%- include('../partials/adminSidebar', { activePage: 'banner' }) %>
+  <% const isCategoryBanner = kind === 'category'; %>
 
   <div class="lg:pl-[260px]">
-    <%- include('../partials/adminTopbar', { title: banner ? 'Edit Banner' : 'Add Banner' }) %>
+    <%- include('../partials/adminTopbar', { title: banner ? (isCategoryBanner ? 'Edit Category Banner' : 'Edit Home Banner') : (isCategoryBanner ? 'Add Category Banner' : 'Add Home Banner') }) %>
 
     <main class="px-5 py-5 lg:ml-10 lg:w-[1100px] lg:px-0 lg:py-8">
-      <h1 class="font-serif text-[44px] leading-none"><%= banner ? 'Edit Banner' : 'Add Banner' %></h1>
+      <div class="flex items-center gap-2">
+        <a href="/admin/settings/banner?kind=home" class="inline-flex h-10 items-center justify-center border px-4 text-[12px] font-semibold <%= kind === 'home' ? 'border-black bg-black text-white' : 'border-zinc-300 bg-white text-zinc-700 hover:border-zinc-500' %>">Home Banner</a>
+        <a href="/admin/settings/banner?kind=category" class="inline-flex h-10 items-center justify-center border px-4 text-[12px] font-semibold <%= kind === 'category' ? 'border-black bg-black text-white' : 'border-zinc-300 bg-white text-zinc-700 hover:border-zinc-500' %>">Category Banner</a>
+      </div>
+      <h1 class="mt-5 font-serif text-[44px] leading-none"><%= banner ? (isCategoryBanner ? 'Edit Category Banner' : 'Edit Home Banner') : (isCategoryBanner ? 'Add Category Banner' : 'Add Home Banner') %></h1>
       <div class="mt-3 border-t border-zinc-300"></div>
       <% if (error) { %>
         <div class="mb-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700"><%= error %></div>
       <% } %>
 
       <form method="POST" action="<%= banner ? ('/admin/settings/banner/' + banner.id + '/edit') : '/admin/settings/banner/add' %>" class="mt-4 w-full max-w-[620px] space-y-3">
+        <input type="hidden" name="banner_kind" value="<%= kind %>" />
         <div>
           <label class="mb-1 block text-[12px] text-zinc-500">Banner Title *</label>
           <input class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" name="title" value="<%= banner?.title || '' %>" required />
@@ -29,14 +35,39 @@
           <label class="mb-1 block text-[12px] text-zinc-500">Description</label>
           <textarea class="h-[96px] w-full border border-zinc-300 bg-zinc-100 px-3 py-2 text-[13px]" name="description"><%= banner?.description || '' %></textarea>
         </div>
+        <% if (isCategoryBanner) { %>
+          <div>
+            <label class="mb-1 block text-[12px] text-zinc-500">Target Audience *</label>
+            <select class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" name="audience_scope" required>
+              <option value="">Select audience</option>
+              <option value="women" <%= banner?.audience_scope === 'women' ? 'selected' : '' %>>Women</option>
+              <option value="men" <%= banner?.audience_scope === 'men' ? 'selected' : '' %>>Men</option>
+              <option value="kids" <%= banner?.audience_scope === 'kids' ? 'selected' : '' %>>Kids</option>
+            </select>
+          </div>
+        <% } %>
         <div>
           <label class="mb-1 block text-[12px] text-zinc-500">Linked Product</label>
-          <select class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]" name="product_id">
-            <option value="">No product link</option>
+          <% const selectedProduct = products.find((p) => p.id === banner?.product_id); %>
+          <input id="linked-product-id" type="hidden" name="product_id" value="<%= banner?.product_id || '' %>" />
+          <input
+            id="linked-product-search"
+            list="linked-product-options"
+            class="h-11 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]"
+            type="text"
+            placeholder="Type product name or pick from list"
+            value="<%= selectedProduct?.name || '' %>"
+            autocomplete="off"
+          />
+          <datalist id="linked-product-options">
             <% products.forEach((p) => { %>
-              <option value="<%= p.id %>" <%= banner?.product_id === p.id ? 'selected' : '' %>><%= p.name %></option>
+              <option value="<%= p.name %>" data-product-id="<%= p.id %>"></option>
             <% }) %>
-          </select>
+          </datalist>
+          <div class="mt-1 flex items-center justify-between gap-3">
+            <p id="linked-product-help" class="text-[11px] text-zinc-500">Leave blank if the banner should not link to a product.</p>
+            <button id="clear-linked-product" type="button" class="text-[11px] font-medium text-zinc-600 hover:text-black">Clear</button>
+          </div>
         </div>
         <div class="grid gap-3 md:grid-cols-2">
           <div>
@@ -57,12 +88,12 @@
           </label>
         </div>
         <div>
-          <label class="mb-1 block text-[12px] text-zinc-500">Banner Image *</label>
+          <label class="mb-1 block text-[12px] text-zinc-500"><%= isCategoryBanner ? 'Category Banner Image *' : 'Home Banner Image *' %></label>
           <div id="upload-zone" class="relative h-[188px] w-full border border-zinc-300 bg-zinc-100">
             <div class="absolute left-1/2 top-[38px] h-[88px] w-[180px] -translate-x-1/2 border border-zinc-200 bg-zinc-200">
               <button id="upload-trigger" type="button" class="h-full w-full text-[12px] text-zinc-500">[ Upload Banner Image ]</button>
             </div>
-            <p class="absolute bottom-8 left-1/2 -translate-x-1/2 text-[12px] text-zinc-500">Recommended horizontal image (16:9)</p>
+            <p class="absolute bottom-8 left-1/2 -translate-x-1/2 text-[12px] text-zinc-500"><%= isCategoryBanner ? 'Recommended wide editorial image' : 'Recommended editorial image for split home layout' %></p>
             <input id="upload-input" type="file" accept="image/*" class="hidden" />
           </div>
           <div id="upload-status" class="mt-2 text-[12px] text-zinc-500">No image uploaded.</div>
@@ -74,7 +105,7 @@
 
         <div class="flex gap-3 pt-2">
           <button class="inline-flex h-12 w-[200px] items-center justify-center border border-black bg-black text-[12px] font-semibold text-white hover:bg-zinc-800" type="submit"><%= banner ? 'SAVE CHANGES' : 'SAVE BANNER' %></button>
-          <a class="inline-flex h-12 w-[120px] items-center justify-center border border-zinc-800 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/settings/banner">CANCEL</a>
+          <a class="inline-flex h-12 w-[120px] items-center justify-center border border-zinc-800 text-[12px] font-semibold hover:bg-zinc-900 hover:text-white" href="/admin/settings/banner?kind=<%= kind %>">CANCEL</a>
         </div>
       </form>
     </main>
@@ -89,6 +120,40 @@
       const imageUrlInput = document.getElementById('image-url');
       const uploadPreview = document.getElementById('upload-preview');
       const previewImage = document.getElementById('preview-image');
+      const linkedProductSearch = document.getElementById('linked-product-search');
+      const linkedProductId = document.getElementById('linked-product-id');
+      const linkedProductHelp = document.getElementById('linked-product-help');
+      const clearLinkedProduct = document.getElementById('clear-linked-product');
+      const linkedProductOptions = Array.from(document.querySelectorAll('#linked-product-options option'));
+      const productNameMap = new Map(
+        linkedProductOptions.map((option) => [
+          option.value.trim().toLowerCase(),
+          option.getAttribute('data-product-id') || '',
+        ])
+      );
+
+      function updateLinkedProductState() {
+        const typedValue = (linkedProductSearch.value || '').trim();
+        if (!typedValue) {
+          linkedProductId.value = '';
+          linkedProductHelp.textContent = 'Leave blank if the banner should not link to a product.';
+          linkedProductHelp.className = 'text-[11px] text-zinc-500';
+          return true;
+        }
+
+        const matchedId = productNameMap.get(typedValue.toLowerCase()) || '';
+        linkedProductId.value = matchedId;
+
+        if (matchedId) {
+          linkedProductHelp.textContent = 'Matched linked product.';
+          linkedProductHelp.className = 'text-[11px] text-zinc-500';
+          return true;
+        }
+
+        linkedProductHelp.textContent = 'Please select a valid product from the list.';
+        linkedProductHelp.className = 'text-[11px] text-red-600';
+        return false;
+      }
 
       function fileToDataUrl(file) {
         return new Promise((resolve, reject) => {
@@ -107,7 +172,7 @@
         uploadStatus.textContent = 'Uploading...';
         try {
           const dataUrl = await fileToDataUrl(file);
-          const resp = await fetch('/api/admin/uploads/product-image', {
+          const resp = await fetch('/admin/uploads/product-image', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
             body: JSON.stringify({ file: dataUrl }),
@@ -128,6 +193,19 @@
         const file = e.target.files && e.target.files[0];
         uploadImage(file);
       });
+      linkedProductSearch.addEventListener('input', updateLinkedProductState);
+      linkedProductSearch.addEventListener('change', updateLinkedProductState);
+      clearLinkedProduct.addEventListener('click', () => {
+        linkedProductSearch.value = '';
+        updateLinkedProductState();
+      });
+      document.querySelector('form').addEventListener('submit', (e) => {
+        if (!updateLinkedProductState()) {
+          e.preventDefault();
+          linkedProductSearch.focus();
+        }
+      });
+      updateLinkedProductState();
     })();
   </script>
 </body>

@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAISON Client Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: Inter, sans-serif; }
+    .font-editorial { font-family: "Playfair Display", serif; }
+  </style>
+</head>
+<body class="bg-[#fcfcfa] text-[#111111]">
+  <header class="border-b border-black/10 bg-[#fcfcfa]">
+    <div class="mx-auto flex max-w-[1440px] items-center justify-between px-4 py-5 lg:px-[140px]">
+      <nav class="flex items-center gap-8 text-[12px] font-semibold tracking-[0.14em] text-black">
+        <a href="#" class="hover:opacity-60">WOMEN</a>
+        <a href="#" class="hover:opacity-60">MEN</a>
+        <a href="#" class="hover:opacity-60">KIDS</a>
+      </nav>
+      <a href="#" class="font-editorial text-[38px] tracking-[0.08em]">MAISON</a>
+      <div class="flex items-center gap-7 text-[12px] text-black/70">
+        <a href="#" class="hover:text-black">Search</a>
+        <a href="#" class="hover:text-black">Account</a>
+        <a href="#" class="hover:text-black">Cart</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="border-b border-black/10 bg-[#f3f0eb]">
+      <div class="mx-auto grid max-w-[1440px] gap-8 px-4 py-10 lg:grid-cols-[1.15fr_0.85fr] lg:px-[140px] lg:py-14">
+        <div class="overflow-hidden bg-[#e7e0d6]">
+          <img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=80" alt="Hero editorial fashion" class="h-full w-full object-cover" />
+        </div>
+        <div class="flex flex-col justify-end">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.22em] text-black/45">Spring Selection</p>
+          <h1 class="mt-4 max-w-[12ch] font-editorial text-[42px] leading-[0.98] lg:text-[66px]">Sharper hierarchy. Cleaner product discovery.</h1>
+          <p class="mt-5 max-w-[48ch] text-[14px] leading-7 text-black/62">
+            This demo keeps your existing luxury editorial tone, but tightens spacing, removes visual noise, and gives product cards a more deliberate rhythm.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href="#" class="inline-flex h-11 items-center border border-black bg-black px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-transparent hover:text-black">Shop New Arrivals</a>
+            <a href="#" class="inline-flex h-11 items-center border border-black/20 px-5 text-[11px] font-semibold uppercase tracking-[0.18em] text-black transition-colors duration-200 hover:border-black">View Categories</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="mx-auto max-w-[1440px] px-4 py-14 lg:px-[140px]">
+      <div class="flex flex-col gap-6 border-b border-black/10 pb-6 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/40">Listing Direction</p>
+          <h2 class="mt-3 font-editorial text-[34px] leading-none">Product Grid Demo</h2>
+        </div>
+        <div class="flex flex-col gap-3 lg:items-end">
+          <div class="flex flex-wrap gap-2 text-[11px] uppercase tracking-[0.14em]">
+            <button class="h-9 border border-black bg-black px-4 font-semibold text-white">All</button>
+            <button class="h-9 border border-black/15 px-4 text-black/65 hover:border-black/40 hover:text-black">Outerwear</button>
+            <button class="h-9 border border-black/15 px-4 text-black/65 hover:border-black/40 hover:text-black">Knitwear</button>
+            <button class="h-9 border border-black/15 px-4 text-black/65 hover:border-black/40 hover:text-black">Trousers</button>
+            <button class="h-9 border border-black/15 px-4 text-black/65 hover:border-black/40 hover:text-black">Accessories</button>
+          </div>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="flex h-10 min-w-[280px] items-center border border-black/15 bg-white px-3">
+              <input type="text" value="wool coat" class="w-full bg-transparent text-[12px] text-black outline-none placeholder:text-black/35" />
+            </div>
+            <select class="h-10 border border-black/15 bg-white px-3 text-[12px] text-black/75 outline-none">
+              <option>Best Sellers</option>
+              <option>New Arrivals</option>
+              <option>Price Low to High</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-10 grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 xl:grid-cols-4">
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden bg-[#efebe5]">
+            <img src="https://images.unsplash.com/photo-1544441893-675973e31985?auto=format&fit=crop&w=900&q=80" alt="Structured wool coat" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+            <div class="absolute left-3 top-3 border border-white/70 bg-white/85 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-black">New</div>
+          </div>
+          <div class="space-y-2 pt-4">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="max-w-[18ch] text-[14px] leading-6 text-black">Women Tailored Wool Coat</h3>
+              <span class="shrink-0 text-[12px] text-black/55">01</span>
+            </div>
+            <p class="text-[12px] uppercase tracking-[0.16em] text-black/40">Outerwear</p>
+            <div class="flex items-center justify-between">
+              <p class="text-[14px]">$189.00</p>
+              <p class="text-[12px] text-black/45">6 left</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden bg-[#f0eeea]">
+            <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=900&q=80" alt="Soft cashmere knit" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          </div>
+          <div class="space-y-2 pt-4">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="max-w-[18ch] text-[14px] leading-6 text-black">Cashmere Crewneck Knit</h3>
+              <span class="shrink-0 text-[12px] text-black/55">02</span>
+            </div>
+            <p class="text-[12px] uppercase tracking-[0.16em] text-black/40">Knitwear</p>
+            <div class="flex items-center justify-between">
+              <p class="text-[14px]">$128.00</p>
+              <p class="text-[12px] text-black/45">14 left</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden bg-[#ece7e0]">
+            <img src="https://images.unsplash.com/photo-1506629905607-d9d4314c17f1?auto=format&fit=crop&w=900&q=80" alt="Wide leg trousers" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+            <div class="absolute left-3 top-3 border border-black/10 bg-black px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-white">Best Seller</div>
+          </div>
+          <div class="space-y-2 pt-4">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="max-w-[18ch] text-[14px] leading-6 text-black">Men Wide-Leg Tailored Trousers</h3>
+              <span class="shrink-0 text-[12px] text-black/55">03</span>
+            </div>
+            <p class="text-[12px] uppercase tracking-[0.16em] text-black/40">Trousers</p>
+            <div class="flex items-center justify-between">
+              <p class="text-[14px]">$146.00</p>
+              <p class="text-[12px] text-black/45">21 left</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="group cursor-pointer">
+          <div class="relative overflow-hidden bg-[#f2efe9]">
+            <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?auto=format&fit=crop&w=900&q=80" alt="Leather crossbody bag" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]" />
+          </div>
+          <div class="space-y-2 pt-4">
+            <div class="flex items-start justify-between gap-3">
+              <h3 class="max-w-[18ch] text-[14px] leading-6 text-black">Structured Leather Crossbody</h3>
+              <span class="shrink-0 text-[12px] text-black/55">04</span>
+            </div>
+            <p class="text-[12px] uppercase tracking-[0.16em] text-black/40">Accessories</p>
+            <div class="flex items-center justify-between">
+              <p class="text-[14px]">$172.00</p>
+              <p class="text-[12px] text-black/45">9 left</p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <section class="mt-20 grid gap-6 lg:grid-cols-3">
+        <div class="border border-black/10 bg-white p-6">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/40">What Changes</p>
+          <h3 class="mt-3 font-editorial text-[24px]">More editorial rhythm</h3>
+          <p class="mt-4 text-[13px] leading-7 text-black/62">Use taller card imagery, smaller utility text, and slightly more vertical breathing room so the product name becomes the hero, not the grid itself.</p>
+        </div>
+        <div class="border border-black/10 bg-white p-6">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/40">What Changes</p>
+          <h3 class="mt-3 font-editorial text-[24px]">Cleaner filter hierarchy</h3>
+          <p class="mt-4 text-[13px] leading-7 text-black/62">Audience tabs, category pills, search, and sort should read as separate layers. Right now they visually compete too much.</p>
+        </div>
+        <div class="border border-black/10 bg-white p-6">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-black/40">What Changes</p>
+          <h3 class="mt-3 font-editorial text-[24px]">Sharper hover feedback</h3>
+          <p class="mt-4 text-[13px] leading-7 text-black/62">Keep the hover subtle: image zoom, tag opacity, and text color. Avoid heavy motion. This is luxury, not marketplace UI.</p>
+        </div>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

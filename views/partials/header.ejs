@@ -1,21 +1,21 @@
-<header class="relative border-b border-[#e0e0e0] bg-white">
-  <div class="mx-auto h-[76px] max-w-[1440px] px-4 lg:px-0">
-    <a href="/" class="absolute left-1/2 top-[27px] -translate-x-1/2 font-serif text-[20px] font-normal leading-none">MAISON</a>
+<header class="relative border-b border-[#e6e0d8] bg-[#fcfcfa]">
+  <div class="mx-auto h-[92px] max-w-[1440px] px-4 lg:px-[140px]">
+    <a href="/" class="absolute left-1/2 top-[24px] -translate-x-1/2 font-serif text-[34px] font-normal tracking-[0.08em] leading-none lg:text-[42px]">MAISON</a>
 
-    <nav class="absolute left-[140px] top-[29px] hidden items-center gap-[28px] lg:flex">
-      <a href="/products?category=women" class="text-[11px] font-bold leading-none text-black hover:text-zinc-600">WOMEN</a>
-      <a href="/products?category=men" class="text-[11px] font-bold leading-none text-black hover:text-zinc-600">MEN</a>
-      <a href="/products?category=kids" class="text-[11px] font-bold leading-none text-black hover:text-zinc-600">KIDS</a>
+    <nav class="absolute left-[140px] top-[38px] hidden items-center gap-[34px] lg:flex">
+      <a href="/products?audience=women" class="text-[13px] font-semibold tracking-[0.14em] leading-none text-black hover:text-zinc-600">WOMEN</a>
+      <a href="/products?audience=men" class="text-[13px] font-semibold tracking-[0.14em] leading-none text-black hover:text-zinc-600">MEN</a>
+      <a href="/products?audience=kids" class="text-[13px] font-semibold tracking-[0.14em] leading-none text-black hover:text-zinc-600">KIDS</a>
     </nav>
 
-    <nav class="absolute right-[140px] top-[29px] hidden items-center gap-[37px] lg:flex">
-      <a href="/products" class="text-[11px] font-normal leading-none text-black hover:text-zinc-600">Search</a>
+    <nav class="absolute right-[140px] top-[38px] hidden items-center gap-[34px] lg:flex">
+      <a href="/products" class="text-[13px] font-normal leading-none text-black hover:text-zinc-600">Search</a>
       <% if (user) { %>
-        <a href="/profile" class="text-[11px] font-normal leading-none text-black hover:text-zinc-600">Account</a>
+        <a href="/profile" class="text-[13px] font-normal leading-none text-black hover:text-zinc-600">Account</a>
       <% } else { %>
-        <a href="/login" class="text-[11px] font-normal leading-none text-black hover:text-zinc-600">Account</a>
+        <a href="/login" class="text-[13px] font-normal leading-none text-black hover:text-zinc-600">Account</a>
       <% } %>
-      <a href="/cart" class="text-[11px] font-normal leading-none text-black hover:text-zinc-600">
+      <a href="/cart" class="text-[13px] font-normal leading-none text-black hover:text-zinc-600">
         Cart<% if (cartCount && cartCount > 0) { %> (<%= cartCount %>)<% } %>
       </a>
     </nav>
@@ -27,11 +27,11 @@
       </svg>
     </button>
 
-    <nav id="main-nav" class="hidden absolute z-20 top-full left-0 w-full border-b border-[#e0e0e0] bg-white p-4 lg:hidden">
-      <div class="flex flex-col gap-4 text-[11px]">
-        <a href="/products?category=women" class="font-bold hover:text-zinc-600">WOMEN</a>
-        <a href="/products?category=men" class="font-bold hover:text-zinc-600">MEN</a>
-        <a href="/products?category=kids" class="font-bold hover:text-zinc-600">KIDS</a>
+    <nav id="main-nav" class="hidden absolute z-20 top-full left-0 w-full border-b border-[#e6e0d8] bg-[#fcfcfa] p-4 lg:hidden">
+      <div class="flex flex-col gap-4 text-[13px]">
+        <a href="/products?audience=women" class="font-bold hover:text-zinc-600">WOMEN</a>
+        <a href="/products?audience=men" class="font-bold hover:text-zinc-600">MEN</a>
+        <a href="/products?audience=kids" class="font-bold hover:text-zinc-600">KIDS</a>
         <a href="/products" class="hover:text-zinc-600">Search</a>
         <% if (user) { %>
           <a href="/profile" class="hover:text-zinc-600">Account</a>

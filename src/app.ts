@@ -6,7 +6,6 @@ import { existsSync } from 'fs';
 import dotenv from 'dotenv';
 import clientRouter from './routes/clientRoutes.js';
 import adminRouter from './routes/adminRoutes.js';
-import apiRouter from './routes/apiRoutes.js';
 import { injectUser } from './middleware/authMiddleware.js';
 import './types/session.js'; // session type augmentation
 
@@ -53,7 +52,6 @@ app.use(session({
 app.use(injectUser);
 
 // Routes
-app.use('/', apiRouter);
 app.use('/', clientRouter);
 app.use('/', adminRouter);
 

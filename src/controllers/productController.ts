@@ -6,6 +6,7 @@ import {
   getAllProductsService,
 } from '../services/productService.js';
 import { supabase } from '../../data/supabaseClient.js';
+import { getActiveCategoryBanners } from '../models/homeBannerModel.js';
 
 const PRODUCT_VIEW_THROTTLE_MS = 30_000;
 const globalProductViewThrottle = new Map<string, number>();
@@ -71,10 +72,14 @@ export async function getProducts(req: Request, res: Response): Promise<void> {
   const categoryNames = Array.from(
     new Set((categoryRows ?? []).map((c: any) => String(c.name ?? '').trim()).filter(Boolean))
   );
+  const categoryBanners = audience
+    ? await getActiveCategoryBanners(audience as 'men' | 'women' | 'kids')
+    : [];
 
   res.render('client/products', {
     title: 'Shop',
     products,
+    categoryBanners,
     categoryNames,
     categoryName: categoryNameQuery || undefined,
     audience: audience || undefined,

@@ -234,7 +234,7 @@
         for (const file of files) {
           try {
             const dataUrl = await fileToDataUrl(file);
-            const resp = await fetch('/api/admin/uploads/product-image', {
+            const resp = await fetch('/admin/uploads/product-image', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

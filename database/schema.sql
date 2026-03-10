@@ -142,6 +142,8 @@ CREATE TABLE IF NOT EXISTS home_banners (
   description TEXT,
   image_url   TEXT NOT NULL,
   product_id  UUID REFERENCES products(id) ON DELETE SET NULL,
+  banner_kind TEXT NOT NULL DEFAULT 'category' CHECK (banner_kind IN ('home', 'category')),
+  audience_scope TEXT CHECK (audience_scope IN ('men', 'women', 'kids')),
   is_active   BOOLEAN NOT NULL DEFAULT TRUE,
   active_from TIMESTAMPTZ,
   active_to   TIMESTAMPTZ,
@@ -174,6 +176,8 @@ CREATE INDEX IF NOT EXISTS idx_cart_items_user         ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg      ON cart_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_home_banners_active     ON home_banners(is_active);
 CREATE INDEX IF NOT EXISTS idx_home_banners_del_flg    ON home_banners(del_flg);
+CREATE INDEX IF NOT EXISTS idx_home_banners_kind       ON home_banners(banner_kind);
+CREATE INDEX IF NOT EXISTS idx_home_banners_audience_scope ON home_banners(audience_scope);
 
 -- ── AUTO-UPDATE updated_at ────────────────────────────────────
 CREATE OR REPLACE FUNCTION update_updated_at()
