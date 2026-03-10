@@ -130,7 +130,10 @@
           <p class="text-[12px] text-zinc-600">
             Showing page <%= currentPage %> / <%= totalPages %> (<%= pagination.totalItems %> products)
           </p>
-          <div class="flex items-center gap-1">
+          <div class="flex flex-wrap items-center gap-1">
+            <% if (currentPage > 1) { %>
+              <a href="<%= makeLink(1) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">First</a>
+            <% } %>
             <% if (pagination.hasPrev) { %>
               <a href="<%= makeLink(currentPage - 1) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">Prev</a>
             <% } %>
@@ -140,7 +143,19 @@
             <% if (pagination.hasNext) { %>
               <a href="<%= makeLink(currentPage + 1) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">Next</a>
             <% } %>
+            <% if (currentPage < totalPages) { %>
+              <a href="<%= makeLink(totalPages) %>" class="inline-flex h-9 min-w-9 items-center justify-center border border-zinc-300 px-3 text-[12px] hover:bg-zinc-200">Last</a>
+            <% } %>
           </div>
+          <form method="GET" action="/admin/products" class="flex items-center gap-2">
+            <% if (filters?.q) { %><input type="hidden" name="q" value="<%= filters.q %>" /><% } %>
+            <% if (filters?.category_id) { %><input type="hidden" name="category_id" value="<%= filters.category_id %>" /><% } %>
+            <% if (filters?.active && filters.active !== 'all') { %><input type="hidden" name="active" value="<%= filters.active %>" /><% } %>
+            <% if (filters?.audience && filters.audience !== 'all') { %><input type="hidden" name="audience" value="<%= filters.audience %>" /><% } %>
+            <label for="admin-products-page-jump" class="text-[12px] text-zinc-600">Go to page</label>
+            <input id="admin-products-page-jump" name="page" type="number" min="1" max="<%= totalPages %>" value="<%= currentPage %>" class="h-9 w-[84px] border border-zinc-300 bg-zinc-100 px-2 text-center text-[12px]" />
+            <button type="submit" class="inline-flex h-9 min-w-9 items-center justify-center border border-black bg-black px-3 text-[12px] font-semibold text-white hover:bg-zinc-800">Go</button>
+          </form>
         </div>
       <% } %>
     </main>

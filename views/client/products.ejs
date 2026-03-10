@@ -133,7 +133,10 @@
       %>
       <div class="mt-12 flex flex-col items-center gap-3">
         <p class="text-[11px] text-[#737373]">Page <%= currentPage %> / <%= totalPages %></p>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <% if (currentPage > 1) { %>
+            <a href="<%= makeLink(1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:bg-[#f5f5f5]">First</a>
+          <% } %>
           <% if (pagination.hasPrev) { %>
             <a href="<%= makeLink(currentPage - 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:bg-[#f5f5f5]">Prev</a>
           <% } %>
@@ -143,7 +146,19 @@
           <% if (pagination.hasNext) { %>
             <a href="<%= makeLink(currentPage + 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:bg-[#f5f5f5]">Next</a>
           <% } %>
+          <% if (currentPage < totalPages) { %>
+            <a href="<%= makeLink(totalPages) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:bg-[#f5f5f5]">Last</a>
+          <% } %>
         </div>
+        <form method="GET" action="/products" class="flex flex-wrap items-center justify-center gap-2">
+          <% if (audience) { %><input type="hidden" name="audience" value="<%= audience %>" /><% } %>
+          <% if (categoryName) { %><input type="hidden" name="category_name" value="<%= categoryName %>" /><% } %>
+          <% if (q) { %><input type="hidden" name="q" value="<%= q %>" /><% } %>
+          <% if (sort) { %><input type="hidden" name="sort" value="<%= sort %>" /><% } %>
+          <label for="products-page-jump" class="text-[11px] text-[#737373]">Go to page</label>
+          <input id="products-page-jump" name="page" type="number" min="1" max="<%= totalPages %>" value="<%= currentPage %>" class="h-[36px] w-[84px] border border-[#e0e0e0] px-2 text-center text-[12px]" />
+          <button type="submit" class="inline-flex h-[36px] min-w-[56px] items-center justify-center border border-black bg-black px-3 text-[11px] font-bold text-white hover:bg-zinc-800">Go</button>
+        </form>
       </div>
     <% } %>
   </main>

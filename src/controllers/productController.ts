@@ -4,6 +4,7 @@ import {
   getProductByIdService,
   incrementProductClickCountService,
   getAllProductsService,
+  getRelatedProductsService,
 } from '../services/productService.js';
 import { supabase } from '../../data/supabaseClient.js';
 import { getActiveCategoryBanners } from '../models/homeBannerModel.js';
@@ -111,7 +112,6 @@ export async function getProductDetail(req: Request, res: Response): Promise<voi
       // Non-blocking: product page should still render even if click increment fails.
     }
   }
-  // Fetch related products from same category
-  const related = await getAllProductsService();
+  const related = await getRelatedProductsService(product, 4);
   res.render('client/productDetail', { title: product.name, product, related: related.slice(0, 4) });
 }

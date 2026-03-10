@@ -116,13 +116,33 @@
 
       <!-- Pagination -->
       <% if (totalPages > 1) { %>
-        <div class="mt-12 flex justify-center gap-2">
-          <% for (let i = 1; i <= totalPages; i++) { %>
-            <a href="/orders?page=<%= i %>" 
-               class="w-[36px] h-[36px] flex items-center justify-center text-[13px] <%= currentPage === i ? 'bg-black text-white' : 'border border-[#e0e0e0] text-black hover:border-black' %>">
-              <%= i %>
-            </a>
-          <% } %>
+        <%
+          const startPage = Math.max(1, currentPage - 2);
+          const endPage = Math.min(totalPages, currentPage + 2);
+          const makeLink = (targetPage) => '/orders?page=' + targetPage;
+        %>
+        <div class="mt-12 flex flex-col items-center gap-3">
+          <div class="flex flex-wrap justify-center gap-2">
+            <% if (currentPage > 1) { %>
+              <a href="<%= makeLink(1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">First</a>
+              <a href="<%= makeLink(currentPage - 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Prev</a>
+            <% } %>
+            <% for (let i = startPage; i <= endPage; i++) { %>
+              <a href="<%= makeLink(i) %>" 
+                 class="w-[36px] h-[36px] flex items-center justify-center text-[13px] <%= currentPage === i ? 'bg-black text-white' : 'border border-[#e0e0e0] text-black hover:border-black' %>">
+                <%= i %>
+              </a>
+            <% } %>
+            <% if (currentPage < totalPages) { %>
+              <a href="<%= makeLink(currentPage + 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Next</a>
+              <a href="<%= makeLink(totalPages) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Last</a>
+            <% } %>
+          </div>
+          <form method="GET" action="/orders" class="flex items-center gap-2">
+            <label for="orders-page-jump" class="text-[11px] text-[#737373]">Go to page</label>
+            <input id="orders-page-jump" name="page" type="number" min="1" max="<%= totalPages %>" value="<%= currentPage %>" class="h-[36px] w-[84px] border border-[#e0e0e0] px-2 text-center text-[12px]" />
+            <button type="submit" class="inline-flex h-[36px] min-w-[56px] items-center justify-center border border-black bg-black px-3 text-[11px] font-bold text-white hover:bg-zinc-800 uppercase">Go</button>
+          </form>
         </div>
       <% } %>
     <% } else { %>

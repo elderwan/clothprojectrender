@@ -1,4 +1,4 @@
-import { getAllProducts, getProductById, getTopProductsByAudience, incrementProductClickCount, getFilteredProductsPaginated, type PaginatedProductsResult } from '../models/productModel.js';
+import { getAllProducts, getProductById, getTopProductsByAudience, incrementProductClickCount, getFilteredProductsPaginated, getRelatedProducts, type PaginatedProductsResult } from '../models/productModel.js';
 import type { Product } from '../types/product.js';
 
 export async function getAllProductsService(
@@ -33,4 +33,8 @@ export async function getTopProductsByAudienceService(
   limit = 4
 ): Promise<Product[]> {
   return getTopProductsByAudience(audience, limit);
+}
+
+export async function getRelatedProductsService(product: Product, limit = 4): Promise<Product[]> {
+  return getRelatedProducts(product.id, product.audience, Number(product.price ?? 0), product.category_id, limit);
 }

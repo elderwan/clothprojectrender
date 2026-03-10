@@ -28,13 +28,13 @@
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
       <!-- Product Images -->
       <div class="space-y-4">
-        <div class="aspect-square bg-[#f5f5f5] relative overflow-hidden">
+        <div class="flex min-h-[420px] items-center justify-center bg-[#f5f5f5] p-4 lg:min-h-[720px] lg:p-6">
           <% if (product && (product.primary_image || (product.images && product.images.length))) { %>
             <img
               id="main-product-image"
               src="<%= product.primary_image || product.images[0].url %>"
               alt="<%= product.name %>"
-              class="h-full w-full object-cover" />
+              class="max-h-[388px] w-full object-contain lg:max-h-[672px]" />
           <% } %>
         </div>
         <% const galleryImages = (product && product.images && product.images.length) ? product.images : []; %>
@@ -122,40 +122,14 @@
         <div class="mt-2 h-px w-full bg-[#e0e0e0]"></div>
       </div>
 
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+      <div class="grid grid-cols-1 gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-4">
         <% if (related && related.length > 0) { %>
-          <% related.forEach(product => { %>
-            <a href="/products/<%= product.id %>" class="group">
-              <div class="aspect-square bg-[#f5f5f5] mb-4 overflow-hidden">
-                <% if (product.primary_image) { %>
-                  <img src="<%= product.primary_image %>" alt="<%= product.name %>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <% } %>
-              </div>
-              <p class="text-[13px] font-normal mb-1"><%= product.name %></p>
-              <p class="text-[13px] text-[#737373]">$<%= Number(product.price || 0).toFixed(2) %></p>
-            </a>
+          <% related.forEach((relatedProduct, idx) => { %>
+            <%- include('../partials/productCard', { product: relatedProduct, cardIndex: idx }) %>
           <% }) %>
         <% } else { %>
-          <!-- Placeholder related products -->
-          <div class="group">
-            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
-            <p class="text-[13px] font-normal mb-1">Related Product 1</p>
-            <p class="text-[13px] text-[#737373]">$95.00</p>
-          </div>
-          <div class="group">
-            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
-            <p class="text-[13px] font-normal mb-1">Related Product 2</p>
-            <p class="text-[13px] text-[#737373]">$190.00</p>
-          </div>
-          <div class="group">
-            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
-            <p class="text-[13px] font-normal mb-1">Related Product 3</p>
-            <p class="text-[13px] text-[#737373]">$285.00</p>
-          </div>
-          <div class="group">
-            <div class="aspect-square bg-[#f5f5f5] mb-4"></div>
-            <p class="text-[13px] font-normal mb-1">Related Product 4</p>
-            <p class="text-[13px] text-[#737373]">$380.00</p>
+          <div class="col-span-full py-10 text-center">
+            <p class="text-[13px] text-[#737373]">No related products available.</p>
           </div>
         <% } %>
       </div>

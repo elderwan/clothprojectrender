@@ -202,6 +202,70 @@ export async function getTopProductsByAudience(
   return attachPrimaryImagesBulk(data ?? []);
 }
 
+export async function getRelatedProducts(
+  productId: string,
+  audience: 'men' | 'women' | 'kids',
+  price: number,
+  categoryId?: string,
+  limit = 4
+): Promise<Product[]> {
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 4;
+
+  const baseQuery = supabase
+    .from('products')
+    .select('*, categories(name)')
+    .eq('del_flg', false)
+    .eq('is_active', true)
+    .eq('audience', audience)
+    .neq('id', productId);
+
+  let primaryQuery = baseQuery;
+  if (categoryId) {
+    primaryQuery = primaryQuery.eq('category_id', categoryId) as typeof primaryQuery;
+  }
+
+  const { data: primaryData, error: primaryError } = await primaryQuery;
+  if (primaryError) throw new Error(primaryError.message);
+
+  const primaryItems = (await attachPrimaryImagesBulk(primaryData ?? []))
+    .sort((a, b) => {
+      const priceDiffA = Math.abs(Number(a.price ?? 0) - price);
+      const priceDiffB = Math.abs(Number(b.price ?? 0) - price);
+      if (priceDiffA !== priceDiffB) return priceDiffA - priceDiffB;
+      const clickDiff = Number(b.click_count ?? 0) - Number(a.click_count ?? 0);
+      if (clickDiff !== 0) return clickDiff;
+      return new Date(String(b.created_at ?? 0)).getTime() - new Date(String(a.created_at ?? 0)).getTime();
+    });
+
+  if (primaryItems.length >= safeLimit) {
+    return primaryItems.slice(0, safeLimit);
+  }
+
+  const excludeIds = [productId, ...primaryItems.map((item) => item.id)];
+  const fallbackLimit = safeLimit - primaryItems.length;
+  const { data: fallbackData, error: fallbackError } = await supabase
+    .from('products')
+    .select('*, categories(name)')
+    .eq('del_flg', false)
+    .eq('is_active', true)
+    .eq('audience', audience)
+    .not('id', 'in', `(${excludeIds.map((id) => `"${id}"`).join(',')})`)
+    .limit(Math.max(fallbackLimit * 3, fallbackLimit));
+
+  if (fallbackError) throw new Error(fallbackError.message);
+  const fallbackItems = (await attachPrimaryImagesBulk(fallbackData ?? []))
+    .sort((a, b) => {
+      const priceDiffA = Math.abs(Number(a.price ?? 0) - price);
+      const priceDiffB = Math.abs(Number(b.price ?? 0) - price);
+      if (priceDiffA !== priceDiffB) return priceDiffA - priceDiffB;
+      const clickDiff = Number(b.click_count ?? 0) - Number(a.click_count ?? 0);
+      if (clickDiff !== 0) return clickDiff;
+      return new Date(String(b.created_at ?? 0)).getTime() - new Date(String(a.created_at ?? 0)).getTime();
+    });
+
+  return [...primaryItems, ...fallbackItems].slice(0, safeLimit);
+}
+
 export async function getProductById(id: string, includeInactive = false): Promise<Product | null> {
   let query = supabase
     .from('products')
