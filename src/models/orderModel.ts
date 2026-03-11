@@ -99,6 +99,29 @@ export async function getAllOrders(status?: string): Promise<Order[]> {
   }));
 }
 
+export async function getRecentOrders(limit = 5): Promise<Order[]> {
+  const safeLimit = Number.isFinite(limit) && limit > 0 ? Math.floor(limit) : 5;
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, users(email, full_name)')
+    .eq('del_flg', false)
+    .order('created_at', { ascending: false })
+    .limit(safeLimit);
+
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: any) => ({
+    ...row,
+    user_email: row.users?.email,
+    user_name: row.users?.full_name,
+  })) as Order[];
+}
+
+export async function getOrderRevenueTotal(): Promise<number> {
+  const { data, error } = await supabase.rpc('get_demo_revenue_total');
+  if (error) throw new Error(error.message);
+  return Number(data ?? 0);
+}
+
 export async function searchOrdersForAdmin(filters: AdminOrderSearchFilters): Promise<Order[]> {
   let query = supabase
     .from('orders')

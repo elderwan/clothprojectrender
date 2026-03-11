@@ -212,6 +212,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_demo_revenue_total()
+RETURNS NUMERIC AS $$
+  SELECT COALESCE(SUM(total_amount), 0)
+  FROM orders
+  WHERE del_flg = FALSE;
+$$ LANGUAGE SQL STABLE;
+
 CREATE OR REPLACE FUNCTION create_demo_order_with_inventory(
   p_user_id UUID,
   p_address_id UUID,

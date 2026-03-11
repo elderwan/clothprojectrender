@@ -32,7 +32,7 @@
         </article>
         <article class="border border-zinc-300 bg-zinc-100 p-4">
           <p class="text-[11px] uppercase text-zinc-500">Revenue</p>
-          <p class="mt-2 font-serif text-[42px] leading-none">$<%= Number(recentOrders.reduce((s,o)=>s+Number(o.total_amount||0),0)).toLocaleString() %></p>
+          <p class="mt-2 font-serif text-[42px] leading-none">$<%= Number(stats.revenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></p>
         </article>
       </section>
 
