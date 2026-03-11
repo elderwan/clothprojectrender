@@ -25,6 +25,13 @@
 
   <!-- Main Content -->
   <main class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+    <% if (typeof success === 'string' && success) { %>
+      <div class="mb-6 border border-[#d9d4cb] bg-[#f8f5ef] px-5 py-4 text-[12px] text-[#5e5a52]"><%= success %></div>
+    <% } %>
+    <% if (typeof error === 'string' && error) { %>
+      <div class="mb-6 border border-[#ead1d1] bg-[#fbf3f3] px-5 py-4 text-[12px] text-[#8b4b4b]"><%= error %></div>
+    <% } %>
+
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
       <!-- Product Images -->
       <div class="space-y-4">
@@ -82,6 +89,10 @@
           </div>
         </div>
 
+        <form id="wishlist-form" method="POST" action="/wishlist/add">
+          <input type="hidden" name="product_id" value="<%= product ? product.id : '' %>" />
+        </form>
+
         <!-- Add to Cart -->
         <form id="cart-form" method="POST" action="/cart/add" class="space-y-4">
           <input type="hidden" name="product_id" value="<%= product ? product.id : '' %>" />
@@ -94,7 +105,7 @@
             class="w-full h-[52px] border text-[11px] font-bold text-white transition-colors duration-200 <%= isOutOfStock ? 'cursor-not-allowed border-zinc-300 bg-zinc-300 text-zinc-500' : 'border-black bg-black hover:bg-zinc-800' %>">
             <%= isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART' %>
           </button>
-          <button id="add-to-wishlist" type="button" class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
+          <button id="add-to-wishlist" form="wishlist-form" type="submit" class="w-full h-[44px] border border-black text-[11px] font-bold text-black hover:bg-black hover:text-white">
             ADD TO WISHLIST
           </button>
         </form>
@@ -157,6 +168,7 @@
           <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
             <% if (user) { %>
               <a href="/profile" class="block hover:text-black">My Account</a>
+              <a href="/wishlist" class="block hover:text-black">Wishlist</a>
               <a href="/orders" class="block hover:text-black">Orders</a>
               <a href="/logout" class="block hover:text-black">Sign Out</a>
             <% } else { %>

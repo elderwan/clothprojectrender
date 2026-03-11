@@ -113,5 +113,11 @@ export async function getProductDetail(req: Request, res: Response): Promise<voi
     }
   }
   const related = await getRelatedProductsService(product, 4);
-  res.render('client/productDetail', { title: product.name, product, related: related.slice(0, 4) });
+  res.render('client/productDetail', {
+    title: product.name,
+    product,
+    related: related.slice(0, 4),
+    success: typeof req.query.success === 'string' ? req.query.success : null,
+    error: typeof req.query.error === 'string' ? req.query.error : null,
+  });
 }

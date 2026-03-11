@@ -5,6 +5,7 @@
 
 -- ── DROP ALL TABLES (clean slate) ────────────────────────────
 -- Must drop in reverse dependency order to avoid FK constraint errors.
+DROP TABLE IF EXISTS wishlist_items  CASCADE;
 DROP TABLE IF EXISTS cart_items      CASCADE;
 DROP TABLE IF EXISTS order_items     CASCADE;
 DROP TABLE IF EXISTS orders          CASCADE;
@@ -136,6 +137,17 @@ CREATE TABLE IF NOT EXISTS cart_items (
 );
 
 -- ── 9. HOMEPAGE BANNERS ─────────────────────────────────────
+CREATE TABLE IF NOT EXISTS wishlist_items (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  product_id  UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+  del_flg     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, product_id, del_flg)
+);
+
+-- ── 10. HOMEPAGE BANNERS ────────────────────────────────────
 CREATE TABLE IF NOT EXISTS home_banners (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   title       TEXT NOT NULL,
@@ -174,6 +186,8 @@ CREATE INDEX IF NOT EXISTS idx_order_items_order       ON order_items(order_id);
 CREATE INDEX IF NOT EXISTS idx_order_items_del_flg     ON order_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_cart_items_user         ON cart_items(user_id);
 CREATE INDEX IF NOT EXISTS idx_cart_items_del_flg      ON cart_items(del_flg);
+CREATE INDEX IF NOT EXISTS idx_wishlist_items_user     ON wishlist_items(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlist_items_del_flg  ON wishlist_items(del_flg);
 CREATE INDEX IF NOT EXISTS idx_home_banners_active     ON home_banners(is_active);
 CREATE INDEX IF NOT EXISTS idx_home_banners_del_flg    ON home_banners(del_flg);
 CREATE INDEX IF NOT EXISTS idx_home_banners_kind       ON home_banners(banner_kind);
@@ -429,6 +443,10 @@ CREATE OR REPLACE TRIGGER trg_orders_updated_at
 
 CREATE OR REPLACE TRIGGER trg_cart_items_updated_at
   BEFORE UPDATE ON cart_items
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+
+CREATE OR REPLACE TRIGGER trg_wishlist_items_updated_at
+  BEFORE UPDATE ON wishlist_items
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 CREATE OR REPLACE TRIGGER trg_home_banners_updated_at

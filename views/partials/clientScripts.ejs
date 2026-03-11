@@ -105,14 +105,6 @@
       });
     }
 
-    // wishlist placeholder
-    const wishBtn = document.getElementById('add-to-wishlist');
-    if (wishBtn) {
-      wishBtn.addEventListener('click', () => {
-        window.ClientModal?.alert('Added to wishlist.', 'Wishlist');
-      });
-    }
-
     // product gallery: click sub image to switch main image
     const mainProductImage = document.getElementById('main-product-image');
     const thumbs = document.querySelectorAll('.product-thumb');
@@ -164,5 +156,29 @@
         });
       }
     }
+
+    document.querySelectorAll('.wishlist-qty-input').forEach((input) => {
+      const qtyInput = input;
+      const wrapper = qtyInput.closest('div');
+      if (!wrapper) return;
+      const buttons = wrapper.querySelectorAll('.wishlist-qty-btn');
+      const clampValue = () => {
+        const min = Number(qtyInput.getAttribute('min') || 1);
+        const max = Number(qtyInput.getAttribute('max') || 10);
+        const raw = Number(qtyInput.value || min);
+        const nextValue = Number.isFinite(raw) ? Math.min(max, Math.max(min, raw)) : min;
+        qtyInput.value = String(nextValue);
+      };
+
+      qtyInput.addEventListener('change', clampValue);
+      buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+          const step = Number(button.getAttribute('data-step') || 0);
+          const current = Number(qtyInput.value || 1);
+          qtyInput.value = String(current + step);
+          clampValue();
+        });
+      });
+    });
   });
 </script>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | MAISON</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-white text-black pb-[60px] lg:pb-0">
+  <%- include('../partials/header', { user, cartCount }) %>
+
+  <main class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px] lg:py-[60px]">
+    <section class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div class="max-w-[720px]">
+        <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Curated Selection</p>
+        <h1 class="mt-3 font-serif text-[32px] font-normal uppercase leading-[0.94] lg:text-[62px]">Wishlist</h1>
+        <p class="mt-4 max-w-[520px] text-[13px] leading-6 text-[#737373]">
+          Save the pieces you want to revisit. Each card keeps the editorial product presentation, then moves directly
+          into size and quantity selection so the transition to cart stays short.
+        </p>
+      </div>
+      <a href="/products" class="inline-flex h-[46px] items-center justify-center border border-black px-8 text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 hover:bg-black hover:text-white">
+        Continue Shopping
+      </a>
+    </section>
+
+    <div class="mt-8 h-px w-full bg-[#e0e0e0]"></div>
+
+    <% if (success) { %>
+      <div class="mt-8 border border-[#d9d4cb] bg-[#f8f5ef] px-5 py-4 text-[12px] text-[#5e5a52]"><%= success %></div>
+    <% } %>
+    <% if (error) { %>
+      <div class="mt-8 border border-[#ead1d1] bg-[#fbf3f3] px-5 py-4 text-[12px] text-[#8b4b4b]"><%= error %></div>
+    <% } %>
+
+    <% const sizeOptions = ['XS', 'S', 'M', 'L', 'XL']; %>
+    <% if (items && items.length > 0) { %>
+      <section class="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <% items.forEach((item, idx) => { %>
+          <article class="group border border-[#e7e1d8] bg-[#fcfbf8] p-4 transition-colors duration-200 hover:border-black/30 lg:p-5">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-[10px] uppercase tracking-[0.18em] text-[#8b8479]"><%= item.product_category || 'Collection' %></p>
+                <p class="mt-2 text-[11px] uppercase tracking-[0.16em] text-black/40"><%= item.product_audience || 'all' %></p>
+              </div>
+              <form method="POST" action="/wishlist/remove/<%= item.id %>" data-confirm="Remove this item from your wishlist?">
+                <button type="submit" class="text-[10px] font-bold uppercase tracking-[0.18em] text-black/45 transition-colors duration-200 hover:text-black">
+                  Remove
+                </button>
+              </form>
+            </div>
+
+            <a href="/products/<%= item.product_id %>" class="mt-4 block cursor-pointer">
+              <div class="overflow-hidden bg-[#f1eee8]">
+                <div class="aspect-[4/5] overflow-hidden">
+                  <% if (item.product_image) { %>
+                    <img
+                      src="<%= item.product_image %>"
+                      alt="<%= item.product_name %>"
+                      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    />
+                  <% } else { %>
+                    <div class="flex h-full w-full items-center justify-center text-[11px] uppercase tracking-[0.18em] text-black/35">No Image</div>
+                  <% } %>
+                </div>
+              </div>
+            </a>
+
+            <div class="space-y-4 pt-5">
+              <div class="flex items-start justify-between gap-4">
+                <a href="/products/<%= item.product_id %>" class="max-w-[18ch] text-[16px] leading-6 text-black hover:text-black/65">
+                  <%= item.product_name %>
+                </a>
+                <span class="text-[12px] text-black/45"><%= String(idx + 1).padStart(2, '0') %></span>
+              </div>
+
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-[15px]">$<%= Number(item.product_price || 0).toFixed(2) %></p>
+                <p class="text-[11px] uppercase tracking-[0.16em] <%= item.product_is_active && Number(item.product_stock_quantity || 0) > 0 ? 'text-black/45' : 'text-red-600' %>">
+                  <%= item.product_is_active && Number(item.product_stock_quantity || 0) > 0 ? `${item.product_stock_quantity} in stock` : 'Unavailable' %>
+                </p>
+              </div>
+
+              <form method="POST" action="/cart/add" class="space-y-4">
+                <input type="hidden" name="product_id" value="<%= item.product_id %>" />
+
+                <div class="grid grid-cols-[minmax(0,1fr)_132px] gap-3">
+                  <label class="block">
+                    <span class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#6f6a61]">Size</span>
+                    <select
+                      name="size"
+                      class="h-[44px] w-full border border-[#d9d4cb] bg-white px-3 text-[12px] text-black outline-none transition-colors duration-200 focus:border-black"
+                    >
+                      <% sizeOptions.forEach((sizeOption) => { %>
+                        <option value="<%= sizeOption %>" <%= sizeOption === 'M' ? 'selected' : '' %>><%= sizeOption %></option>
+                      <% }) %>
+                    </select>
+                  </label>
+
+                  <div class="block">
+                    <span class="mb-2 block text-[10px] font-bold uppercase tracking-[0.18em] text-[#6f6a61]">Quantity</span>
+                    <div class="flex h-[44px] items-center border border-[#d9d4cb] bg-white">
+                      <button type="button" class="wishlist-qty-btn flex h-full w-[44px] items-center justify-center text-[18px] text-black/60 hover:text-black" data-step="-1">-</button>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        step="1"
+                        name="quantity"
+                        value="1"
+                        class="wishlist-qty-input h-full w-full border-x border-[#ece8df] text-center text-[12px] outline-none"
+                      />
+                      <button type="button" class="wishlist-qty-btn flex h-full w-[44px] items-center justify-center text-[18px] text-black/60 hover:text-black" data-step="1">+</button>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  <%= item.product_is_active && Number(item.product_stock_quantity || 0) > 0 ? '' : 'disabled' %>
+                  class="inline-flex h-[48px] w-full items-center justify-center border text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 <%= item.product_is_active && Number(item.product_stock_quantity || 0) > 0 ? 'border-black bg-black text-white hover:bg-zinc-800' : 'cursor-not-allowed border-zinc-300 bg-zinc-300 text-zinc-500' %>"
+                >
+                  <%= item.product_is_active && Number(item.product_stock_quantity || 0) > 0 ? 'Add to Cart' : 'Unavailable' %>
+                </button>
+              </form>
+            </div>
+          </article>
+        <% }) %>
+      </section>
+    <% } else { %>
+      <section class="mt-10 grid gap-8 border border-[#e7e1d8] bg-[#fcfbf8] p-6 lg:grid-cols-[minmax(0,0.68fr)_minmax(280px,0.32fr)] lg:p-10">
+        <div>
+          <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8b8479]">No Saved Pieces</p>
+          <h2 class="mt-4 font-serif text-[28px] uppercase leading-tight lg:text-[46px]">Your wishlist is empty.</h2>
+          <p class="mt-4 max-w-[520px] text-[13px] leading-6 text-[#737373]">
+            Start saving products from the detail page. Once they are here, you can choose a size, set the quantity,
+            and move them straight into your shopping bag without opening each product again.
+          </p>
+        </div>
+        <div class="flex items-end justify-start lg:justify-end">
+          <a href="/products" class="inline-flex h-[48px] items-center justify-center border border-black px-8 text-[11px] font-bold uppercase tracking-[0.18em] transition-colors duration-200 hover:bg-black hover:text-white">
+            Explore Products
+          </a>
+        </div>
+      </section>
+    <% } %>
+  </main>
+
+  <footer class="border-t border-[#e0e0e0] bg-white">
+    <div class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+      <div class="grid gap-8 md:grid-cols-3">
+        <div>
+          <p class="font-serif text-[16px] font-normal">MAISON</p>
+          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">EXPLORE</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/products?category=women" class="block hover:text-black">Women</a>
+            <a href="/products?category=men" class="block hover:text-black">Men</a>
+            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
+          </div>
+        </div>
+        <div>
+          <p class="text-[11px] font-bold">ACCOUNT</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/profile" class="block hover:text-black">My Account</a>
+            <a href="/wishlist" class="block hover:text-black">Wishlist</a>
+            <a href="/orders" class="block hover:text-black">Orders</a>
+            <a href="/logout" class="block hover:text-black">Sign Out</a>
+          </div>
+        </div>
+      </div>
+      <div class="mt-8 border-t border-[#e0e0e0] pt-6">
+        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <%- include('../partials/bottomNav', { title }) %>
+  <%- include('../partials/clientScripts') %>
+</body>
+</html>

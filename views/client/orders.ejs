@@ -1,197 +1,246 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %> | MAISON</title>
+  <title>
+    <%= title %> | MAISON
+  </title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; }
-    h1, .font-serif { font-family: 'Georgia', serif; }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+
+    h1,
+    .font-serif {
+      font-family: 'Georgia', serif;
+    }
   </style>
 </head>
+
 <body class="bg-white text-black pb-[60px] lg:pb-0">
   <!-- Header -->
-  <%- include('../partials/header', { user, cartCount }) %>  
+  <%- include('../partials/header', { user, cartCount }) %>
 
-  <!-- Main Content -->
-  <main class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px] lg:py-[60px]">
-    <h1 class="text-[24px] lg:text-[36px] font-normal mb-4 lg:mb-6 uppercase font-serif">Order History</h1>
-    <div class="h-px w-full bg-[#e0e0e0] mb-8 lg:mb-10"></div>
+    <!-- Main Content -->
+    <main class="mx-auto max-w-[1440px] px-5 py-8 lg:px-[140px] lg:py-[60px]">
+      <h1 class="text-[24px] lg:text-[36px] font-normal mb-4 lg:mb-6 uppercase font-serif">Order History</h1>
+      <div class="h-px w-full bg-[#e0e0e0] mb-8 lg:mb-10"></div>
 
-    <% if (orders && orders.length > 0) { %>
-      <!-- Desktop View -->
-      <div class="hidden lg:block overflow-x-auto">
-        <table class="w-full text-left">
-          <thead>
-            <tr class="bg-[#f5f5f5] h-[40px]">
-              <th class="pl-4 text-[11px] font-bold uppercase">Order #</th>
-              <th class="text-[11px] font-bold uppercase">Name</th>
-              <th class="text-[11px] font-bold uppercase">Date</th>
-              <th class="text-[11px] font-bold uppercase text-center">Items</th>
-              <th class="text-[11px] font-bold uppercase">Total</th>
-              <th class="text-[11px] font-bold uppercase">Status</th>
-              <th class="pr-4 text-[11px] font-bold text-right uppercase">Action</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#e0e0e0]">
-            <% orders.forEach(order => { %>
-              <tr class="hover:bg-[#fafafa] transition-colors duration-150">
-                <td class="pl-4 py-6 text-[12px] align-top font-medium">#<%= order.id.slice(0, 8).toUpperCase() %></td>
-                <td class="py-6 align-top">
-                  <div class="flex flex-col gap-4">
-                    <% (order.order_items || []).forEach((item, index) => { %>
-                      <div class="flex items-center gap-4">
-                        <div class="h-14 w-11 bg-[#f5f5f5] flex-shrink-0 border border-[#eeeeee] overflow-hidden">
-                          <% if (item.product_image) { %>
-                            <img src="<%= item.product_image %>" alt="<%= item.product_name %>" class="h-full w-full object-cover" />
-                          <% } %>
-                        </div>
-                        <div class="flex flex-col">
-                          <span class="text-[11px] font-bold text-black uppercase tracking-tight"><%= item.product_name %></span>
-                          <span class="text-[10px] text-[#737373]">Size: <%= item.size || 'M' %> | Qty: <%= item.quantity %></span>
-                        </div>
-                      </div>
-                    <% }) %>
-                  </div>
-                </td>
-                <td class="py-6 text-[12px] align-top whitespace-nowrap"><%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></td>
-                <td class="py-6 text-[12px] align-top text-center">
-                  <%= order.order_items.length %> <%= order.order_items.length === 1 ? 'item' : 'items' %>
-                </td>
-                <td class="py-6 text-[12px] align-top font-bold text-black">$<%= Number(order.total_amount).toFixed(2) %></td>
-                <td class="py-6 text-[12px] align-top capitalize"><%= order.status %></td>
-                <td class="pr-4 py-6 text-right align-top">
-                  <a href="/orders/<%= order.id %>" class="inline-block border border-black px-6 py-1.5 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase">
-                    View
-                  </a>
-                </td>
+      <% if (orders && orders.length> 0) { %>
+        <!-- Desktop View -->
+        <div class="hidden lg:block overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-[#f5f5f5] h-[40px]">
+                <th class="pl-4 text-[11px] font-bold uppercase">Order #</th>
+                <th class="text-[11px] font-bold uppercase">Name</th>
+                <th class="text-[11px] font-bold uppercase">Date</th>
+                <th class="text-[11px] font-bold uppercase text-center">Items</th>
+                <th class="text-[11px] font-bold uppercase">Total</th>
+                <th class="text-[11px] font-bold uppercase">Status</th>
+                <th class="pr-4 text-[11px] font-bold text-right uppercase">Action</th>
               </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody class="divide-y divide-[#e0e0e0]">
+              <% orders.forEach(order=> { %>
+                <tr class="hover:bg-[#fafafa] transition-colors duration-150">
+                  <td class="pl-4 py-6 text-[12px] align-top font-medium">#<%= order.id.slice(0, 8).toUpperCase() %>
+                  </td>
+                  <td class="py-6 align-top">
+                    <div class="flex flex-col gap-4">
+                      <% (order.order_items || []).forEach((item, index)=> { %>
+                        <div class="flex items-center gap-4">
+                          <div class="h-14 w-11 bg-[#f5f5f5] flex-shrink-0 border border-[#eeeeee] overflow-hidden">
+                            <% if (item.product_image) { %>
+                              <img src="<%= item.product_image %>" alt="<%= item.product_name %>"
+                                class="h-full w-full object-cover" />
+                              <% } %>
+                          </div>
+                          <div class="flex flex-col">
+                            <span class="text-[11px] font-bold text-black uppercase tracking-tight">
+                              <%= item.product_name %>
+                            </span>
+                            <span class="text-[10px] text-[#737373]">Size: <%= item.size || 'M' %> | Qty: <%=
+                                  item.quantity %></span>
+                          </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                  </td>
+                  <td class="py-6 text-[12px] align-top whitespace-nowrap">
+                    <%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                      year: 'numeric' }) %>
+                  </td>
+                  <td class="py-6 text-[12px] align-top text-center">
+                    <%= order.order_items.length %>
+                      <%= order.order_items.length===1 ? 'item' : 'items' %>
+                  </td>
+                  <td class="py-6 text-[12px] align-top font-bold text-black">$<%= Number(order.total_amount).toFixed(2)
+                      %>
+                  </td>
+                  <td class="py-6 text-[12px] align-top capitalize">
+                    <%= order.status %>
+                  </td>
+                  <td class="pr-4 py-6 text-right align-top">
+                    <a href="/orders/<%= order.id %>"
+                      class="inline-block border border-black px-6 py-1.5 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase">
+                      View
+                    </a>
+                  </td>
+                </tr>
+                <% }) %>
+            </tbody>
+          </table>
+        </div>
 
-      <!-- Mobile View -->
-      <div class="lg:hidden space-y-6">
-        <% orders.forEach(order => { %>
-          <div class="border border-[#e0e0e0] p-5 bg-white">
-            <div class="flex justify-between items-start mb-4 pb-3 border-b border-[#f5f5f5]">
-              <div>
-                <p class="text-[12px] font-bold">#<%= order.id.slice(0, 8).toUpperCase() %></p>
-                <p class="text-[11px] text-[#737373] mt-1"><%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %></p>
-              </div>
-              <p class="text-[12px] font-serif italic text-black uppercase"><%= order.status %></p>
-            </div>
-            
-            <div class="space-y-4">
-              <% (order.order_items || []).forEach(item => { %>
-                <div class="flex items-center gap-4">
-                  <div class="h-14 w-11 bg-[#f5f5f5] border border-[#eeeeee] flex-shrink-0">
-                    <% if (item.product_image) { %>
-                      <img src="<%= item.product_image %>" alt="<%= item.product_name %>" class="h-full w-full object-cover" />
-                    <% } %>
-                  </div>
-                  <div class="flex-1">
-                    <p class="text-[11px] font-bold uppercase leading-tight text-black"><%= item.product_name %></p>
-                    <p class="text-[10px] text-[#737373] mt-1">Size: <%= item.size || 'M' %> | Qty: <%= item.quantity %></p>
-                  </div>
+        <!-- Mobile View -->
+        <div class="lg:hidden space-y-6">
+          <% orders.forEach(order=> { %>
+            <div class="border border-[#e0e0e0] p-5 bg-white">
+              <div class="flex justify-between items-start mb-4 pb-3 border-b border-[#f5f5f5]">
+                <div>
+                  <p class="text-[12px] font-bold">#<%= order.id.slice(0, 8).toUpperCase() %>
+                  </p>
+                  <p class="text-[11px] text-[#737373] mt-1">
+                    <%= new Date(order.created_at).toLocaleDateString('en-US', { month: 'short' , day: 'numeric' ,
+                      year: 'numeric' }) %>
+                  </p>
                 </div>
-              <% }) %>
-            </div>
-
-            <div class="flex justify-between items-center mt-6 pt-4 border-t border-[#f5f5f5]">
-              <div>
-                <p class="text-[10px] text-[#737373] uppercase mb-1"><%= order.order_items.length %> <%= order.order_items.length === 1 ? 'item' : 'items' %></p>
-                <p class="text-[14px] font-bold text-black tracking-tight">$<%= Number(order.total_amount).toFixed(2) %></p>
+                <p class="text-[12px] font-serif italic text-black uppercase">
+                  <%= order.status %>
+                </p>
               </div>
-              <a href="/orders/<%= order.id %>" class="border border-black px-6 py-2.5 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-widest">
-                View
-              </a>
+
+              <div class="space-y-4">
+                <% (order.order_items || []).forEach(item=> { %>
+                  <div class="flex items-center gap-4">
+                    <div class="h-14 w-11 bg-[#f5f5f5] border border-[#eeeeee] flex-shrink-0">
+                      <% if (item.product_image) { %>
+                        <img src="<%= item.product_image %>" alt="<%= item.product_name %>"
+                          class="h-full w-full object-cover" />
+                        <% } %>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-[11px] font-bold uppercase leading-tight text-black">
+                        <%= item.product_name %>
+                      </p>
+                      <p class="text-[10px] text-[#737373] mt-1">Size: <%= item.size || 'M' %> | Qty: <%= item.quantity
+                            %>
+                      </p>
+                    </div>
+                  </div>
+                  <% }) %>
+              </div>
+
+              <div class="flex justify-between items-center mt-6 pt-4 border-t border-[#f5f5f5]">
+                <div>
+                  <p class="text-[10px] text-[#737373] uppercase mb-1">
+                    <%= order.order_items.length %>
+                      <%= order.order_items.length===1 ? 'item' : 'items' %>
+                  </p>
+                  <p class="text-[14px] font-bold text-black tracking-tight">$<%= Number(order.total_amount).toFixed(2)
+                      %>
+                  </p>
+                </div>
+                <a href="/orders/<%= order.id %>"
+                  class="border border-black px-6 py-2.5 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-widest">
+                  View
+                </a>
+              </div>
+            </div>
+            <% }) %>
+        </div>
+
+        <!-- Pagination -->
+        <% if (totalPages> 1) { %>
+          <% const startPage=Math.max(1, currentPage - 2); const endPage=Math.min(totalPages, currentPage + 2); const
+            makeLink=(targetPage)=> '/orders?page=' + targetPage;
+            %>
+            <div class="mt-12 flex flex-col items-center gap-3">
+              <div class="flex flex-wrap justify-center gap-2">
+                <% if (currentPage> 1) { %>
+                  <a href="<%= makeLink(1) %>"
+                    class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">First</a>
+                  <a href="<%= makeLink(currentPage - 1) %>"
+                    class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Prev</a>
+                  <% } %>
+                    <% for (let i=startPage; i <=endPage; i++) { %>
+                      <a href="<%= makeLink(i) %>"
+                        class="w-[36px] h-[36px] flex items-center justify-center text-[13px] <%= currentPage === i ? 'bg-black text-white' : 'border border-[#e0e0e0] text-black hover:border-black' %>">
+                        <%= i %>
+                      </a>
+                      <% } %>
+                        <% if (currentPage < totalPages) { %>
+                          <a href="<%= makeLink(currentPage + 1) %>"
+                            class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Next</a>
+                          <a href="<%= makeLink(totalPages) %>"
+                            class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Last</a>
+                          <% } %>
+              </div>
+              <form method="GET" action="/orders" class="flex items-center gap-2">
+                <label for="orders-page-jump" class="text-[11px] text-[#737373]">Go to page</label>
+                <input id="orders-page-jump" name="page" type="number" min="1" max="<%= totalPages %>"
+                  value="<%= currentPage %>"
+                  class="h-[36px] w-[84px] border border-[#e0e0e0] px-2 text-center text-[12px]" />
+                <button type="submit"
+                  class="inline-flex h-[36px] min-w-[56px] items-center justify-center border border-black bg-black px-3 text-[11px] font-bold text-white hover:bg-zinc-800 uppercase">Go</button>
+              </form>
+            </div>
+            <% } %>
+              <% } else { %>
+                <div class="text-center py-20">
+                  <p class="text-[13px] text-[#737373] mb-6 font-serif italic">You haven't placed any orders yet.</p>
+                  <a href="/products"
+                    class="inline-block border border-black px-10 py-4 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-widest">
+                    Start Shopping
+                  </a>
+                </div>
+                <% } %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-[#e0e0e0] bg-white">
+      <div class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
+        <div class="grid gap-8 md:grid-cols-3">
+          <div>
+            <p class="font-serif text-[16px] font-normal">MAISON</p>
+            <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
+          </div>
+          <div>
+            <p class="text-[11px] font-bold">EXPLORE</p>
+            <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+              <a href="/products?category=women" class="block hover:text-black">Women</a>
+              <a href="/products?category=men" class="block hover:text-black">Men</a>
+              <a href="/products?category=kids" class="block hover:text-black">Kids</a>
             </div>
           </div>
-        <% }) %>
-      </div>
-
-      <!-- Pagination -->
-      <% if (totalPages > 1) { %>
-        <%
-          const startPage = Math.max(1, currentPage - 2);
-          const endPage = Math.min(totalPages, currentPage + 2);
-          const makeLink = (targetPage) => '/orders?page=' + targetPage;
-        %>
-        <div class="mt-12 flex flex-col items-center gap-3">
-          <div class="flex flex-wrap justify-center gap-2">
-            <% if (currentPage > 1) { %>
-              <a href="<%= makeLink(1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">First</a>
-              <a href="<%= makeLink(currentPage - 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Prev</a>
-            <% } %>
-            <% for (let i = startPage; i <= endPage; i++) { %>
-              <a href="<%= makeLink(i) %>" 
-                 class="w-[36px] h-[36px] flex items-center justify-center text-[13px] <%= currentPage === i ? 'bg-black text-white' : 'border border-[#e0e0e0] text-black hover:border-black' %>">
-                <%= i %>
-              </a>
-            <% } %>
-            <% if (currentPage < totalPages) { %>
-              <a href="<%= makeLink(currentPage + 1) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Next</a>
-              <a href="<%= makeLink(totalPages) %>" class="inline-flex h-[36px] min-w-[52px] items-center justify-center border border-[#e0e0e0] px-3 text-[12px] hover:border-black">Last</a>
-            <% } %>
-          </div>
-          <form method="GET" action="/orders" class="flex items-center gap-2">
-            <label for="orders-page-jump" class="text-[11px] text-[#737373]">Go to page</label>
-            <input id="orders-page-jump" name="page" type="number" min="1" max="<%= totalPages %>" value="<%= currentPage %>" class="h-[36px] w-[84px] border border-[#e0e0e0] px-2 text-center text-[12px]" />
-            <button type="submit" class="inline-flex h-[36px] min-w-[56px] items-center justify-center border border-black bg-black px-3 text-[11px] font-bold text-white hover:bg-zinc-800 uppercase">Go</button>
-          </form>
-        </div>
-      <% } %>
-    <% } else { %>
-      <div class="text-center py-20">
-        <p class="text-[13px] text-[#737373] mb-6 font-serif italic">You haven't placed any orders yet.</p>
-        <a href="/products" class="inline-block border border-black px-10 py-4 text-[11px] font-bold hover:bg-black hover:text-white transition-colors duration-200 uppercase tracking-widest">
-          Start Shopping
-        </a>
-      </div>
-    <% } %>
-  </main>
-
-  <!-- Footer -->
-  <footer class="border-t border-[#e0e0e0] bg-white">
-    <div class="mx-auto max-w-[1440px] px-4 py-8 lg:px-[140px]">
-      <div class="grid gap-8 md:grid-cols-3">
-        <div>
-          <p class="font-serif text-[16px] font-normal">MAISON</p>
-          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
-        </div>
-        <div>
-          <p class="text-[11px] font-bold">EXPLORE</p>
-          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
-            <a href="/products?category=women" class="block hover:text-black">Women</a>
-            <a href="/products?category=men" class="block hover:text-black">Men</a>
-            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
+          <div>
+            <p class="text-[11px] font-bold">ACCOUNT</p>
+            <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+              <% if (user) { %>
+                <a href="/profile" class="block hover:text-black">My Account</a>
+                <a href="/wishlist" class="block hover:text-black">Wishlist</a>
+                <a href="/orders" class="block hover:text-black">Orders</a>
+                <a href="/logout" class="block hover:text-black">Sign Out</a>
+                <% } else { %>
+                  <a href="/login" class="block hover:text-black">Sign In</a>
+                  <a href="/register" class="block hover:text-black">Register</a>
+                  <% } %>
+            </div>
           </div>
         </div>
-        <div>
-          <p class="text-[11px] font-bold">ACCOUNT</p>
-          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
-            <% if (user) { %>
-              <a href="/profile" class="block hover:text-black">My Account</a>
-              <a href="/orders" class="block hover:text-black">Orders</a>
-              <a href="/logout" class="block hover:text-black">Sign Out</a>
-            <% } else { %>
-              <a href="/login" class="block hover:text-black">Sign In</a>
-              <a href="/register" class="block hover:text-black">Register</a>
-            <% } %>
-          </div>
+        <div class="mt-8 border-t border-[#e0e0e0] pt-6">
+          <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
         </div>
       </div>
-      <div class="mt-8 border-t border-[#e0e0e0] pt-6">
-        <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
-      </div>
-    </div>
-  </footer>
+    </footer>
 
-  <!-- Bottom Nav -->
-  <%- include('../partials/bottomNav', { title }) %>
+    <!-- Bottom Nav -->
+    <%- include('../partials/bottomNav', { title }) %>
 </body>
+
 </html>

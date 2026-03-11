@@ -4,6 +4,7 @@ import {
   showLogin, handleLogin, showRegister, handleRegister, handleLogout
 } from '../controllers/authController.js';
 import { showCart, postAddToCart, postUpdateQty, postRemoveItem } from '../controllers/cartController.js';
+import { showWishlist, postAddWishlistItem, postRemoveWishlistItem } from '../controllers/wishlistController.js';
 import {
   postPlaceOrder, postSimulatePayment, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
@@ -64,6 +65,9 @@ router.get('/cart', showCart);
 router.post('/cart/add', requireAuth, postAddToCart);
 router.post('/cart/update', requireAuth, postUpdateQty);
 router.post('/cart/remove/:id', requireAuth, postRemoveItem);
+router.get('/wishlist', requireAuth, showWishlist);
+router.post('/wishlist/add', requireAuth, postAddWishlistItem);
+router.post('/wishlist/remove/:id', requireAuth, postRemoveWishlistItem);
 
 // ── Orders ────────────────────────────────────────────────────
 router.post('/orders', requireAuth, postPlaceOrder);
