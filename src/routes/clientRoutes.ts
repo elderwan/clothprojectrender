@@ -6,7 +6,7 @@ import {
 import { showCart, postAddToCart, postUpdateQty, postRemoveItem } from '../controllers/cartController.js';
 import { showWishlist, postAddWishlistItem, postRemoveWishlistItem } from '../controllers/wishlistController.js';
 import {
-  postPlaceOrder, postSimulatePayment, showOrderConfirm, showOrderHistory, showOrderDetail
+  postPlaceOrder, postConfirmAndPay, showOrderConfirm, showOrderHistory, showOrderDetail
 } from '../controllers/orderController.js';
 import { 
   showProfile, showEditProfile, showAddressBook, postUpdateProfile, 
@@ -71,7 +71,7 @@ router.post('/wishlist/remove/:id', requireAuth, postRemoveWishlistItem);
 
 // ── Orders ────────────────────────────────────────────────────
 router.post('/orders', requireAuth, postPlaceOrder);
-router.post('/orders/:id/simulate-payment', requireAuth, postSimulatePayment);
+router.post('/orders/:id/confirm-pay', requireAuth, postConfirmAndPay);
 router.get('/order-confirm/:id', requireAuth, showOrderConfirm);
 router.get('/orders', requireAuth, showOrderHistory);
 router.get('/orders/:id', requireAuth, showOrderDetail);

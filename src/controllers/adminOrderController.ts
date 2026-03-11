@@ -5,13 +5,13 @@ export async function listOrders(req: Request, res: Response): Promise<void> {
   const statusRaw = String(req.query.status ?? 'all');
   const minRaw = req.query.min_total ? Number(req.query.min_total) : undefined;
   const maxRaw = req.query.max_total ? Number(req.query.max_total) : undefined;
-  const status = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled'].includes(statusRaw)
+  const status = ['all', 'pending', 'processing', 'payed', 'shipped', 'delivered', 'cancelled'].includes(statusRaw)
     ? statusRaw
     : 'all';
   const filters = {
     order_no: String(req.query.order_no ?? '').trim(),
     customer: String(req.query.customer ?? '').trim(),
-    status: status as 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled',
+    status: status as 'all' | 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled',
     date_from: String(req.query.date_from ?? '').trim(),
     date_to: String(req.query.date_to ?? '').trim(),
     min_total: Number.isFinite(minRaw) ? minRaw : undefined,

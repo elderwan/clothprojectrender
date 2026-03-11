@@ -1,9 +1,9 @@
 import { supabase } from '../../data/supabaseClient.js';
-import type { Order, OrderItem, CreateOrderInput } from '../types/order.js';
+import type { CreateOrderInput, Order, OrderAddressSnapshot, OrderItem } from '../types/order.js';
 import { getPrimaryImagesBulk } from './productImageModel.js';
 
-const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'shipped', 'delivered', 'cancelled']);
-export type AdminOrderStatus = 'all' | 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'payed', 'shipped', 'delivered', 'cancelled']);
+export type AdminOrderStatus = 'all' | 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled';
 export interface AdminOrderSearchFilters {
   order_no?: string;
   customer?: string;
@@ -12,6 +12,24 @@ export interface AdminOrderSearchFilters {
   date_to?: string;
   min_total?: number;
   max_total?: number;
+}
+
+function getOrderAddressSnapshot(row: any): OrderAddressSnapshot | null {
+  if (!row?.shipping_full_name || !row?.shipping_address_line1 || !row?.shipping_city || !row?.shipping_postal_code || !row?.shipping_country) {
+    return null;
+  }
+
+  return {
+    label: row.shipping_label ?? null,
+    full_name: row.shipping_full_name,
+    phone: row.shipping_phone ?? null,
+    address_line1: row.shipping_address_line1,
+    address_line2: row.shipping_address_line2 ?? null,
+    city: row.shipping_city,
+    state: row.shipping_state ?? null,
+    postal_code: row.shipping_postal_code,
+    country: row.shipping_country,
+  };
 }
 
 export async function getOrdersByUser(userId: string, limit?: number, offset?: number): Promise<Order[]> {
@@ -71,6 +89,7 @@ export async function getOrderById(id: string): Promise<Order | null> {
     ...row,
     user_email: row.users?.email,
     user_name:  row.users?.full_name,
+    shipping_address: getOrderAddressSnapshot(row),
     items: orderItems.map((i: any) => ({
       ...i,
       product_name:  i.products?.name,
@@ -201,15 +220,77 @@ export async function updateOrderStatus(id: string, status: string): Promise<Ord
   if (!VALID_ORDER_STATUS.has(status)) {
     throw new Error('Invalid order status.');
   }
-  const { data, error } = await supabase
+
+  const current = await getOrderById(id);
+  if (!current) {
+    throw new Error('Order not found.');
+  }
+
+  const currentStatus = current.status;
+  const nextStatus = status as Order['status'];
+  const isCancelled = nextStatus === 'cancelled';
+  const allowedTransitions: Record<Order['status'], Order['status'][]> = {
+    pending: ['processing', 'cancelled'],
+    processing: ['payed', 'cancelled'],
+    payed: ['shipped', 'cancelled'],
+    shipped: ['delivered', 'cancelled'],
+    delivered: [],
+    cancelled: [],
+  };
+
+  if (currentStatus !== nextStatus && !isCancelled && !allowedTransitions[currentStatus].includes(nextStatus)) {
+    throw new Error(`Invalid status transition from ${currentStatus} to ${nextStatus}.`);
+  }
+
+  const { error } = await supabase
     .from('orders')
-    .update({ status })
+    .update({ status: nextStatus })
     .eq('id', id)
-    .eq('del_flg', false)
-    .select()
-    .single();
+    .eq('del_flg', false);
   if (error) throw new Error(error.message);
-  return data as Order;
+
+  const updated = await getOrderById(id);
+  if (!updated) throw new Error('Failed to load updated order.');
+  return updated;
+}
+
+export async function confirmOrderPayment(
+  id: string,
+  userId: string,
+  addressId: string,
+  addressSnapshot: OrderAddressSnapshot
+): Promise<Order> {
+  const order = await getOrderById(id);
+  if (!order || order.user_id !== userId) {
+    throw new Error('Order not found.');
+  }
+  if (order.status !== 'processing' && order.status !== 'pending') {
+    throw new Error('This order can no longer be paid from the client side.');
+  }
+
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      address_id: addressId,
+      status: 'payed',
+      shipping_label: addressSnapshot.label ?? null,
+      shipping_full_name: addressSnapshot.full_name,
+      shipping_phone: addressSnapshot.phone ?? null,
+      shipping_address_line1: addressSnapshot.address_line1,
+      shipping_address_line2: addressSnapshot.address_line2 ?? null,
+      shipping_city: addressSnapshot.city,
+      shipping_state: addressSnapshot.state ?? null,
+      shipping_postal_code: addressSnapshot.postal_code,
+      shipping_country: addressSnapshot.country,
+    })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .eq('del_flg', false);
+  if (error) throw new Error(error.message);
+
+  const updated = await getOrderById(id);
+  if (!updated) throw new Error('Failed to load updated order.');
+  return updated;
 }
 
 export async function countOrdersByUser(userId: string): Promise<number> {

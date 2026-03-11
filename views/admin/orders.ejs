@@ -29,7 +29,7 @@
         <div>
           <label class="block text-[12px] text-zinc-500">Status</label>
           <select name="status" class="mt-1 h-10 w-full border border-zinc-300 bg-zinc-100 px-3 text-[13px]">
-            <% const statuses = ['all', 'pending', 'processing', 'shipped', 'delivered', 'cancelled']; %>
+            <% const statuses = ['all', 'pending', 'processing', 'payed', 'shipped', 'delivered', 'cancelled']; %>
             <% statuses.forEach((s) => { %>
               <option value="<%= s %>" <%= (filters?.status || 'all') === s ? 'selected' : '' %>><%= s.charAt(0).toUpperCase() + s.slice(1) %></option>
             <% }) %>

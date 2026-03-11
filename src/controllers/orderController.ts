@@ -1,35 +1,23 @@
 import type { Request, Response } from 'express';
-import { getUserOrders, getOrderDetail, placeOrder, simulatePayment, countUserOrders } from '../services/orderService.js';
+import { getUserOrders, getOrderDetail, placeOrder, payOrder, countUserOrders } from '../services/orderService.js';
 import { getCart } from '../services/cartService.js';
-import { getAddressById, getDefaultAddress } from '../models/addressModel.js';
+import { getAddressById, getAddressesByUser } from '../models/addressModel.js';
 
 export async function postPlaceOrder(req: Request, res: Response): Promise<void> {
   if (!req.authUser) return void res.redirect('/login');
   try {
     const cart = await getCart(req.authUser.id);
     if (!cart.items.length) return void res.redirect('/cart');
-    const rawAddressId = typeof req.body?.address_id === 'string' ? req.body.address_id : '';
-
-    let addressId: string | undefined;
-    if (rawAddressId) {
-      const addr = await getAddressById(rawAddressId, req.authUser.id);
-      if (!addr) throw new Error('Selected address is invalid.');
-      addressId = addr.id;
-    } else {
-      const defaultAddr = await getDefaultAddress(req.authUser.id);
-      addressId = defaultAddr?.id;
-    }
 
     const order = await placeOrder({
       user_id: req.authUser.id,
-      address_id: addressId,
       items: cart.items.map(i => ({
         product_id: i.product_id,
         quantity:   i.quantity,
         size:       i.size,
       })),
     });
-    res.redirect('/order-confirm/' + order.id);
+    res.redirect('/orders/' + order.id);
   } catch (err: any) {
     const message = err?.message || 'Unable to confirm this order right now.';
     res.redirect('/cart?error=' + encodeURIComponent(message));
@@ -42,7 +30,14 @@ export async function showOrderConfirm(req: Request, res: Response): Promise<voi
   if (!order || order.user_id !== req.authUser.id) {
     return void res.redirect('/');
   }
-  res.render('client/orderConfirmation', { title: 'Order Confirmed', order });
+  if (order.status !== 'payed') {
+    return void res.redirect('/orders/' + order.id);
+  }
+  res.render('client/orderConfirmation', {
+    title: 'Order Confirmed',
+    order,
+    payment: typeof req.query.payment === 'string' ? req.query.payment : null,
+  });
 }
 
 export async function showOrderHistory(req: Request, res: Response): Promise<void> {
@@ -69,29 +64,52 @@ export async function showOrderHistory(req: Request, res: Response): Promise<voi
 
 export async function showOrderDetail(req: Request, res: Response): Promise<void> {
   if (!req.authUser) return void res.redirect('/login');
-  const order = await getOrderDetail(req.params.id);
+  const [order, addresses] = await Promise.all([
+    getOrderDetail(req.params.id),
+    getAddressesByUser(req.authUser.id),
+  ]);
   if (!order || order.user_id !== req.authUser.id) {
     return void res.status(404).render('404', { title: 'Not Found' });
   }
-  res.render('client/orderDetail', { title: 'Order ' + order.id, order });
+  res.render('client/orderDetail', {
+    title: 'Order ' + order.id,
+    order,
+    addresses,
+    error: typeof req.query.error === 'string' ? req.query.error : null,
+    success: typeof req.query.success === 'string' ? req.query.success : null,
+  });
 }
 
-export async function postSimulatePayment(req: Request, res: Response): Promise<void> {
+export async function postConfirmAndPay(req: Request, res: Response): Promise<void> {
   if (!req.authUser) return void res.redirect('/login');
 
   const order = await getOrderDetail(req.params.id);
   if (!order || order.user_id !== req.authUser.id) {
     return void res.status(404).render('404', { title: 'Not Found' });
   }
-
-  const rawResult = String(req.body?.result ?? req.query?.result ?? 'success').toLowerCase();
-  const result = rawResult === 'fail' ? 'fail' : 'success';
+  const addressId = typeof req.body?.address_id === 'string' ? req.body.address_id.trim() : '';
+  if (!addressId) {
+    return void res.redirect('/orders/' + order.id + '?error=' + encodeURIComponent('Please select a shipping address before payment.'));
+  }
 
   try {
-    await simulatePayment(order.id, result);
-    const paymentFlag = result === 'success' ? 'success' : 'failed';
-    return void res.redirect(`/order-confirm/${order.id}?payment=${paymentFlag}`);
+    const address = await getAddressById(addressId, req.authUser.id);
+    if (!address) {
+      throw new Error('Selected address is invalid.');
+    }
+    await payOrder(order.id, req.authUser.id, address.id, {
+      label: address.label,
+      full_name: address.full_name,
+      phone: address.phone ?? null,
+      address_line1: address.address_line1,
+      address_line2: address.address_line2 ?? null,
+      city: address.city,
+      state: address.state ?? null,
+      postal_code: address.postal_code,
+      country: address.country,
+    });
+    return void res.redirect(`/order-confirm/${order.id}?payment=success`);
   } catch (err: any) {
-    return void res.redirect('/order-confirm/' + order.id + '?payment=failed');
+    return void res.redirect('/orders/' + order.id + '?error=' + encodeURIComponent(err?.message || 'Unable to confirm payment right now.'));
   }
 }

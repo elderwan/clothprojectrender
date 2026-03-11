@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAISON Fashion Shop - Project Defense Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f5f3ee;
+      --bg-secondary: #efede8;
+      --panel: rgba(255, 255, 255, 0.62);
+      --panel-strong: rgba(255, 255, 255, 0.8);
+      --text-primary: #111111;
+      --text-secondary: #5f5c57;
+      --text-soft: #8a857d;
+      --line: rgba(17, 17, 17, 0.12);
+      --accent: #c7b8a4;
+      --accent-deep: #8e7f6d;
+      --shadow: 0 24px 80px rgba(20, 20, 20, 0.08);
+      --font-display: 'Noto Serif SC', serif;
+      --font-body: 'Noto Sans SC', 'Manrope', sans-serif;
+      --font-metric: 'Manrope', sans-serif;
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --duration-normal: 0.7s;
+      --title-size: clamp(1.5rem, 5vw, 4rem);
+      --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
+      --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
+      --small-size: clamp(0.65rem, 1vw, 0.875rem);
+      --slide-padding: clamp(1rem, 4vw, 4rem);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; overflow-x: hidden; }
+    html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
+    .slide { width: 100vw; height: 100vh; height: 100dvh; overflow: hidden; scroll-snap-align: start; display: flex; flex-direction: column; position: relative; }
+    .slide-content { flex: 1; display: flex; flex-direction: column; justify-content: center; max-height: 100%; overflow: hidden; padding: var(--slide-padding); }
+    .card, .container, .content-box { max-width: min(90vw, 1000px); max-height: min(80vh, 700px); }
+    .feature-list li, .bullet-list li { font-size: var(--body-size); line-height: 1.4; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: clamp(0.5rem, 1.5vw, 1rem); }
+    img, .image-container { max-width: 100%; max-height: min(50vh, 400px); object-fit: contain; }
+
+    @media (max-height: 700px) {
+      :root { --slide-padding: clamp(0.75rem, 3vw, 2rem); --title-size: clamp(1.25rem, 4.5vw, 2.5rem); --h2-size: clamp(1rem, 3vw, 1.75rem); }
+    }
+    @media (max-height: 600px) {
+      :root { --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem); --title-size: clamp(1.1rem, 4vw, 2rem); --body-size: clamp(0.7rem, 1.2vw, 0.95rem); }
+      .nav-dots, .keyboard-hint, .decorative { display: none; }
+    }
+    @media (max-height: 500px) {
+      :root { --slide-padding: clamp(0.4rem, 2vw, 1rem); --title-size: clamp(1rem, 3.5vw, 1.5rem); --h2-size: clamp(0.9rem, 2.5vw, 1.25rem); --body-size: clamp(0.65rem, 1vw, 0.85rem); }
+    }
+    @media (max-width: 600px) { :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); } .grid { grid-template-columns: 1fr; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; } html { scroll-behavior: auto; } }
+
+    body {
+      background: radial-gradient(circle at top left, rgba(199, 184, 164, 0.18), transparent 28%), linear-gradient(180deg, var(--bg-primary) 0%, #f8f7f3 46%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image: linear-gradient(rgba(17, 17, 17, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(17, 17, 17, 0.03) 1px, transparent 1px);
+      background-size: 46px 46px;
+      mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.35), transparent 78%);
+    }
+
+    .progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0; z-index: 100; background: linear-gradient(90deg, #111111, var(--accent-deep)); box-shadow: 0 0 16px rgba(17, 17, 17, 0.25); }
+    .nav-dots { position: fixed; top: 50%; right: clamp(0.8rem, 1.8vw, 1.5rem); z-index: 90; display: flex; flex-direction: column; gap: 0.7rem; transform: translateY(-50%); }
+    .nav-dot { width: 10px; height: 10px; border: 1px solid rgba(17, 17, 17, 0.45); border-radius: 999px; background: transparent; cursor: pointer; transition: transform 0.3s ease, background 0.3s ease; }
+    .nav-dot.active { background: #111111; transform: scale(1.25); }
+    .keyboard-hint { position: fixed; right: clamp(1rem, 2vw, 1.8rem); bottom: clamp(0.8rem, 1.8vw, 1.5rem); z-index: 90; font-size: var(--small-size); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
+    .slide-shell { position: relative; z-index: 2; display: flex; flex: 1; flex-direction: column; gap: clamp(0.8rem, 1.4vw, 1.2rem); max-width: min(1320px, 100%); margin: 0 auto; width: 100%; height: 100%; overflow: hidden; }
+    .slide-meta, .footer-note { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: var(--small-size); letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-soft); }
+    .footer-note { padding-top: 0.6rem; border-top: 1px solid rgba(17, 17, 17, 0.12); }
+    .slide-index { font-family: var(--font-metric); color: var(--text-primary); }
+    .eyebrow { font-size: var(--small-size); letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-soft); }
+    .title { font-family: var(--font-display); font-size: var(--title-size); line-height: 0.95; letter-spacing: -0.04em; max-width: 12ch; }
+    .subtitle, .section-intro { max-width: 62ch; font-size: clamp(0.82rem, 1.12vw, 1rem); line-height: 1.8; color: var(--text-secondary); }
+    .section-title { font-family: var(--font-display); font-size: var(--h2-size); line-height: 1; letter-spacing: -0.03em; }
+    .kpi-row, .feature-grid, .image-duo, .compare-grid, .spec-grid { display: grid; gap: clamp(0.75rem, 1vw, 1rem); }
+    .kpi-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .feature-grid, .compare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .spec-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .two-col { display: grid; grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); gap: clamp(1rem, 2vw, 2rem); align-items: stretch; min-height: 0; flex: 1; }
+    .two-col.reverse { grid-template-columns: minmax(0, 0.58fr) minmax(0, 0.42fr); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 0.42fr) minmax(0, 0.58fr); gap: clamp(1rem, 2vw, 2rem); align-items: end; flex: 1; min-height: 0; }
+    .stack { display: flex; flex-direction: column; gap: clamp(0.7rem, 1vw, 0.95rem); min-height: 0; }
+    .panel, .kpi-card, .feature-card, .spec-card, .compare-panel, .logic-step, .quote-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+    .panel, .kpi-card, .feature-card, .spec-card, .compare-panel, .logic-step, .quote-panel { padding: clamp(0.9rem, 1.6vw, 1.3rem); }
+    .panel { display: flex; flex-direction: column; gap: clamp(0.7rem, 1.2vw, 1rem); overflow: hidden; min-height: 0; }
+    .panel.dark { background: linear-gradient(160deg, rgba(18, 18, 18, 0.98), rgba(40, 40, 40, 0.92)); color: #f5f1eb; border-color: rgba(255, 255, 255, 0.08); }
+    .panel.dark .eyebrow, .panel.dark .body-list li, .panel.dark .subtitle { color: rgba(255, 255, 255, 0.72); }
+    .kpi-label, .spec-card strong, .logic-step b { font-size: var(--small-size); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
+    .kpi-value { margin-top: 0.6rem; font-family: var(--font-metric); font-size: clamp(1.4rem, 2.6vw, 2.4rem); line-height: 1; }
+    .body-list, .spec-card ul, .compare-panel ul { list-style: none; display: grid; gap: 0.42rem; }
+    .body-list li, .spec-card li, .compare-panel li, .logic-step p, .feature-card span { font-size: clamp(0.78rem, 0.98vw, 0.92rem); line-height: 1.65; color: var(--text-secondary); }
+    .body-list li { position: relative; padding-left: 1rem; }
+    .body-list li::before { content: ''; position: absolute; left: 0; top: 0.72em; width: 0.34rem; height: 0.34rem; border-radius: 999px; background: var(--accent-deep); }
+    .feature-card strong, .compare-panel h3 { font-size: clamp(0.9rem, 1.1vw, 1rem); letter-spacing: 0.1em; text-transform: uppercase; }
+    .image-frame { position: relative; overflow: hidden; border: 1px solid rgba(17, 17, 17, 0.08); background: rgba(255, 255, 255, 0.72); box-shadow: var(--shadow); }
+    .image-frame img { width: 100%; max-height: min(44vh, 360px); object-fit: cover; object-position: top center; display: block; }
+    .image-caption { display: flex; justify-content: space-between; gap: 1rem; padding: 0.8rem 0.9rem; border-top: 1px solid rgba(17, 17, 17, 0.08); font-size: var(--small-size); letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); background: rgba(255, 255, 255, 0.78); }
+    .logic-flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.8rem; align-items: center; }
+    .logic-step { min-height: 7.6rem; display: flex; flex-direction: column; gap: 0.4rem; }
+    .logic-arrow { justify-self: center; font-size: clamp(1.4rem, 2vw, 2rem); color: var(--accent-deep); }
+    .quote-panel blockquote { font-family: var(--font-display); font-size: clamp(1.15rem, 2.1vw, 2rem); line-height: 1.3; max-width: 24ch; }
+    .quote-panel p { margin-top: 1rem; font-size: var(--small-size); letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-soft); }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag { display: inline-flex; align-items: center; justify-content: center; min-height: 2rem; padding: 0.1rem 0.8rem; border: 1px solid var(--line); font-size: var(--small-size); letter-spacing: 0.12em; text-transform: uppercase; background: rgba(255, 255, 255, 0.55); color: var(--text-secondary); }
+    .mega-number { position: absolute; top: clamp(3rem, 9vh, 5rem); right: clamp(1.4rem, 4vw, 4rem); font-family: var(--font-metric); font-size: clamp(4rem, 18vw, 12rem); line-height: 0.88; color: rgba(17, 17, 17, 0.05); pointer-events: none; user-select: none; z-index: 1; }
+    .title-slide { background: radial-gradient(circle at 20% 20%, rgba(199, 184, 164, 0.22), transparent 25%), radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.08), transparent 24%), linear-gradient(145deg, #111111 0%, #1f1f1f 42%, #171717 100%); }
+    .title-slide .brand-lockup { display: inline-flex; align-items: center; gap: 0.9rem; padding: 0.5rem 0.8rem; border: 1px solid rgba(255, 255, 255, 0.12); color: rgba(255, 255, 255, 0.8); letter-spacing: 0.18em; text-transform: uppercase; font-size: var(--small-size); }
+    .title-slide .title { color: #f5f1eb; max-width: 10ch; }
+    .title-slide .subtitle { color: rgba(245, 241, 235, 0.75); max-width: 44ch; }
+    .title-slide .hero-visual { position: relative; overflow: hidden; min-height: min(50vh, 430px); background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02)); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 32px 90px rgba(0, 0, 0, 0.2); }
+    .title-slide .hero-visual img { width: 100%; height: 100%; max-height: none; object-fit: cover; object-position: top center; display: block; mix-blend-mode: lighten; opacity: 0.94; }
+    .title-slide .hero-visual::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.24)), linear-gradient(90deg, rgba(0, 0, 0, 0.14), transparent 45%); }
+    .title-slide .footer-note { color: rgba(245, 241, 235, 0.68); border-top-color: rgba(255, 255, 255, 0.12); }
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity var(--duration-normal) var(--ease-out-expo), transform var(--duration-normal) var(--ease-out-expo); }
+    .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+    .reveal:nth-child(1) { transition-delay: 0.08s; } .reveal:nth-child(2) { transition-delay: 0.16s; } .reveal:nth-child(3) { transition-delay: 0.24s; } .reveal:nth-child(4) { transition-delay: 0.32s; } .reveal:nth-child(5) { transition-delay: 0.4s; }
+
+    @media (max-width: 980px) {
+      .hero-grid, .two-col, .two-col.reverse, .compare-grid, .image-duo, .spec-grid, .feature-grid { grid-template-columns: 1fr; }
+      .kpi-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .logic-flow { grid-template-columns: 1fr; }
+      .logic-arrow { transform: rotate(90deg); }
+      .slide-meta { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar" aria-hidden="true"></div>
+  <nav class="nav-dots" aria-label="Slide navigation"></nav>
+  <div class="keyboard-hint">Arrow Keys / Scroll</div>
+
+  <section class="slide title-slide" data-title="Cover">
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Project Defense / Fashion Commerce</span><span class="slide-index">01</span></div>
+        <div class="hero-grid">
+          <div class="stack">
+            <div class="brand-lockup reveal">MAISON / Fashion Shop</div>
+            <p class="eyebrow reveal">Fashion E-commerce Course Project</p>
+            <h1 class="title reveal">MAISON Fashion Shop System</h1>
+            <p class="subtitle reveal">A client-and-admin integrated fashion store built from the real code in this repository. The project is not only about selling products. It combines brand-style presentation, browsing, wishlist, shopping flow, order handling, and back-office management into one complete workflow.</p>
+            <div class="tag-row reveal"><span class="tag">Express</span><span class="tag">TypeScript</span><span class="tag">EJS</span><span class="tag">Supabase</span><span class="tag">Cloudinary</span></div>
+          </div>
+          <div class="hero-visual reveal"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221199/maison/presentation/home-2026-03-11T09-26-33-365Z.png" alt="MAISON home page"></div>
+        </div>
+        <div class="footer-note reveal"><span>Minimal Fashion Commerce Style</span><span>Real Page Screenshots Captured</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Positioning">
+    <span class="mega-number">02</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Project Positioning</span><span class="slide-index">02</span></div>
+        <p class="eyebrow reveal">Goal / Explain what the project is</p>
+        <h2 class="section-title reveal">This is not a basic demo store. It is a fashion shop that combines brand presentation, transaction flow, and admin operations.</h2>
+        <p class="section-intro reveal">From the codebase structure, the project clearly separates the client storefront and the admin back office. The MAISON brand style is visually close to Zara or COS: black, white, serif headlines, large imagery, and clean navigation. The target audience is users who care about visual simplicity, structured browsing, and quick checkout.</p>
+        <div class="kpi-row reveal">
+          <article class="kpi-card"><p class="kpi-label">Project Type</p><p class="kpi-value">B2C</p></article>
+          <article class="kpi-card"><p class="kpi-label">Core Object</p><p class="kpi-value">Fashion Items</p></article>
+          <article class="kpi-card"><p class="kpi-label">User Roles</p><p class="kpi-value">Customer / Admin</p></article>
+          <article class="kpi-card"><p class="kpi-label">Demo Status</p><p class="kpi-value">Runnable</p></article>
+        </div>
+        <div class="compare-grid reveal">
+          <div class="compare-panel"><h3>Target Users</h3><ul><li>Users who want to browse fashion items quickly by men, women, and kids categories</li><li>Young shoppers who care about product imagery, detail pages, and clean interactions</li><li>Registered users who want saved addresses, order history, and repeat purchasing</li></ul></div>
+          <div class="compare-panel"><h3>Project Value</h3><ul><li>The storefront focuses on brand feel and product discovery instead of raw data listing</li><li>The back office supports daily operations for products, orders, users, banners, and categories</li><li>The database layer already handles stock deduction and order status transitions</li></ul></div>
+        </div>
+        <div class="footer-note reveal"><span>Keywords</span><span>Brand-like / Shop-ready / Admin-enabled</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Client Experience">
+    <span class="mega-number">03</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Client Experience</span><span class="slide-index">03</span></div>
+        <div class="two-col">
+          <div class="panel dark reveal">
+            <p class="eyebrow">Goal / Show the storefront experience</p>
+            <h2 class="section-title">The homepage is designed to attract first, then guide product discovery.</h2>
+            <ul class="body-list">
+              <li>The top navigation splits traffic directly into women, men, and kids, which matches real fashion browsing habits.</li>
+              <li>The homepage supports dynamic home banners, and the copy, image, and target link are all configurable from the admin side.</li>
+              <li>The page continues with New Arrivals, Man Trends, Woman Trends, and Kid Trends, balancing brand tone and selling intent.</li>
+              <li>Product cards consistently show category, audience, price, and stock status, so users can filter mentally during browsing.</li>
+            </ul>
+            <p class="subtitle">This slide is the best place to emphasize visual design plus product organization. It shows that the project is not a plain list page. It has a curated homepage structure.</p>
+          </div>
+          <div class="stack reveal">
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221199/maison/presentation/home-2026-03-11T09-26-33-365Z.png" alt="Home screenshot"><div class="image-caption"><span>Homepage Banner</span><span>Brand-driven Visual Entry</span></div></div>
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221202/maison/presentation/products-women-2026-03-11T09-26-33-365Z.png" alt="Products screenshot"><div class="image-caption"><span>Category Listing</span><span>Filter + Search + Pagination</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Product Discovery">
+    <span class="mega-number">04</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Discovery & Detail</span><span class="slide-index">04</span></div>
+        <p class="eyebrow reveal">Goal / Explain how users find and evaluate products</p>
+        <h2 class="section-title reveal">The discovery journey moves from audience-based filtering to detail-page decision making.</h2>
+        <div class="two-col reverse">
+          <div class="stack reveal">
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221202/maison/presentation/product-detail-2026-03-11T09-26-33-365Z.png" alt="Product detail"><div class="image-caption"><span>Product Detail</span><span>Multi-image + Size + Related Items</span></div></div>
+          </div>
+          <div class="panel reveal">
+            <div class="feature-grid">
+              <article class="feature-card"><strong>Category Filtering</strong><span>The system supports audience, category_name, keyword search, sorting, and pagination. The main logic lives in `productController` and `productModel`.</span></article>
+              <article class="feature-card"><strong>Dynamic Recommendation</strong><span>The detail page calculates related products by audience, category, and price range instead of using a static recommendation block.</span></article>
+              <article class="feature-card"><strong>Product Popularity</strong><span>Opening a detail page can increase click count, but the logic is throttled by session and IP to reduce rapid refresh abuse.</span></article>
+              <article class="feature-card"><strong>Multi-image Model</strong><span>The primary image comes from the `product_images` table, which supports ordering and a real primary-image concept instead of one fixed image field.</span></article>
+            </div>
+            <p class="subtitle">This is where you can show that the project goes beyond presentation. It already includes real commerce-style browsing logic, including filtering, recommendation, and click tracking.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Shopping Flow">
+    <span class="mega-number">05</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Cart / Order Flow</span><span class="slide-index">05</span></div>
+        <p class="eyebrow reveal">Goal / Explain the shopping loop clearly</p>
+        <div class="logic-flow reveal">
+          <div class="logic-step"><b>Step 1</b><p>Users select a size on the detail page and add the item to the cart, or save it in the wishlist first and move it later.</p></div>
+          <div class="logic-arrow">→</div>
+          <div class="logic-step"><b>Step 2</b><p>The cart supports quantity updates, item removal, and live recalculation of subtotal, shipping, and total.</p></div>
+          <div class="logic-arrow">→</div>
+          <div class="logic-step"><b>Step 3</b><p>When the order is confirmed, a Supabase RPC creates the order, inserts order_items, deducts stock, and clears the cart.</p></div>
+        </div>
+        <div class="two-col">
+          <div class="stack reveal">
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221198/maison/presentation/cart-flow-2026-03-11T09-26-33-365Z.png" alt="Cart flow"><div class="image-caption"><span>Shopping Cart</span><span>Quantity Edit / Price Summary</span></div></div>
+          </div>
+          <div class="panel reveal">
+            <h2 class="section-title">The strongest part of the order flow is inventory consistency.</h2>
+            <ul class="body-list">
+              <li>`create_demo_order_with_inventory` validates stock first, then creates the order, then deducts inventory in one backend flow.</li>
+              <li>After creation, the order enters `processing`, and the client-side order detail page completes address confirmation and demo payment confirmation.</li>
+              <li>The order detail page shows item lines, shipping address snapshot, tax, and status instead of only showing a success message.</li>
+              <li>The admin side also enforces allowed status transitions from pending to delivered to avoid arbitrary updates.</li>
+            </ul>
+            <p class="subtitle">This is the best slide to prove that the business loop is already complete. Once a product enters the cart, the order, stock, payment confirmation, and admin status workflow are all connected.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Account Center">
+    <span class="mega-number">06</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Account Center</span><span class="slide-index">06</span></div>
+        <div class="two-col">
+          <div class="panel reveal">
+            <p class="eyebrow">Goal / Show long-term logged-in user value</p>
+            <h2 class="section-title">Registered users do not only buy. They also build reusable account data.</h2>
+            <ul class="body-list">
+              <li>The system supports register, login, logout, profile update, and password change, with bcrypt password hashing.</li>
+              <li>The account center combines profile data, address book, recent orders, and wishlist to support repeat purchases.</li>
+              <li>The address book supports create, edit, delete, and default address settings, and the selected address is reused during order confirmation.</li>
+              <li>The wishlist page allows users to pick size and quantity and move items into the cart directly.</li>
+            </ul>
+            <div class="tag-row"><span class="tag">Profile</span><span class="tag">Address Book</span><span class="tag">Wishlist</span><span class="tag">Order History</span></div>
+          </div>
+          <div class="stack reveal">
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221195/maison/presentation/address-book-2026-03-11T09-26-33-365Z.png" alt="Address book"><div class="image-caption"><span>Address Book</span><span>Create / Edit / Default Address</span></div></div>
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221200/maison/presentation/order-detail-2026-03-11T09-26-33-365Z.png" alt="Order detail"><div class="image-caption"><span>Order Detail</span><span>Address Snapshot + Status + Payment Confirm</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Admin Capability">
+    <span class="mega-number">07</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Back Office</span><span class="slide-index">07</span></div>
+        <p class="eyebrow reveal">Goal / Prove the project is more than a storefront skin</p>
+        <h2 class="section-title reveal">The admin panel is built around operations and already covers a strong set of course-project management features.</h2>
+        <div class="two-col">
+          <div class="stack reveal">
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221197/maison/presentation/admin-dashboard-2026-03-11T09-26-33-365Z.png" alt="Admin dashboard"><div class="image-caption"><span>Dashboard</span><span>Products / Orders / Users / Revenue</span></div></div>
+            <div class="image-frame"><img src="https://res.cloudinary.com/dewxaup4t/image/upload/v1773221197/maison/presentation/admin-products-2026-03-11T09-26-33-365Z.png" alt="Admin products"><div class="image-caption"><span>Product Management</span><span>Filter / Edit / Active State</span></div></div>
+          </div>
+          <div class="panel reveal">
+            <div class="feature-grid">
+              <article class="feature-card"><strong>Admin Login</strong><span>Admins enter through a dedicated `/admin/login` route, and normal users cannot access admin pages.</span></article>
+              <article class="feature-card"><strong>Dashboard</strong><span>The dashboard reports total products, total orders, total users, total revenue, and recent orders.</span></article>
+              <article class="feature-card"><strong>Product Management</strong><span>Admins can create, edit, and delete products, and can input image URLs or upload through Cloudinary.</span></article>
+              <article class="feature-card"><strong>Order Management</strong><span>Orders can be searched by status, date, amount, and customer, with full detail view support.</span></article>
+              <article class="feature-card"><strong>Customer Management</strong><span>The admin can inspect customer records and order counts to understand user activity.</span></article>
+              <article class="feature-card"><strong>Content Settings</strong><span>Banner settings and category settings make the storefront content configurable.</span></article>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Architecture">
+    <span class="mega-number">08</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Architecture</span><span class="slide-index">08</span></div>
+        <p class="eyebrow reveal">Goal / Explain the implementation structurally</p>
+        <h2 class="section-title reveal">The codebase uses a layered structure: controllers handle pages, services handle business logic, and models handle Supabase data access.</h2>
+        <div class="spec-grid reveal">
+          <article class="spec-card"><strong>Presentation Layer</strong><ul><li>`views/client/*` and `views/admin/*` are rendered with EJS templates.</li><li>The UI uses Tailwind CDN plus a small amount of native browser JavaScript.</li><li>The pages feel like a static fashion site on first view, but the data is injected by the backend.</li></ul></article>
+          <article class="spec-card"><strong>Business Layer</strong><ul><li>`controllers` coordinate routes and rendering.</li><li>`services` encapsulate auth, cart, order, and product recommendation logic.</li><li>Middleware centralizes user injection and admin permission checks.</li></ul></article>
+          <article class="spec-card"><strong>Data Layer</strong><ul><li>`@supabase/supabase-js` connects the application to the cloud database.</li><li>The model layer manages products, orders, cart, wishlist, and related tables independently.</li><li>Some multi-step operations are handled through Supabase RPC and SQL functions.</li></ul></article>
+        </div>
+        <div class="quote-panel reveal"><blockquote>The frontend is responsible for looking like a fashion brand site. The backend is responsible for acting like a real commerce system.</blockquote><p>Presentation Note / Use this as your architecture summary line</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Database Design">
+    <span class="mega-number">09</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Database Design</span><span class="slide-index">09</span></div>
+        <p class="eyebrow reveal">Goal / Show how the data model supports the business</p>
+        <h2 class="section-title reveal">The database is not just a product table. It is divided into multiple entities around the full transaction journey.</h2>
+        <div class="feature-grid reveal">
+          <article class="feature-card"><strong>Product Domain</strong><span>`categories`, `products`, and `product_images` support categorization, stock, primary image selection, multi-image display, and audience tags.</span></article>
+          <article class="feature-card"><strong>User Domain</strong><span>`users` and `user_addresses` support identity, role, contact information, and default address behavior.</span></article>
+          <article class="feature-card"><strong>Transaction Domain</strong><span>`cart_items`, `orders`, and `order_items` support the full path from cart to order placement to order tracking.</span></article>
+          <article class="feature-card"><strong>Preference Domain</strong><span>`wishlist_items` supports delayed purchase behavior by letting users save items before buying.</span></article>
+          <article class="feature-card"><strong>Content Operations</strong><span>`home_banners` makes homepage and category visuals configurable for campaigns and seasonal updates.</span></article>
+          <article class="feature-card"><strong>Functions & Triggers</strong><span>The database defines `update_updated_at`, `increment_product_click_count`, and the order-inventory RPC for consistency.</span></article>
+        </div>
+        <div class="footer-note reveal"><span>Most Important Point</span><span>Order creation and stock deduction are handled atomically at the database side</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Completion Boundary">
+    <span class="mega-number">10</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Completed vs Pending</span><span class="slide-index">10</span></div>
+        <p class="eyebrow reveal">Goal / Clarify what is truly completed</p>
+        <h2 class="section-title reveal">The project already supports a full demo, but it still has some course-project boundaries.</h2>
+        <div class="compare-grid reveal">
+          <div class="compare-panel"><h3>Completed</h3><ul><li>The client pages, admin pages, routes, middleware, and database tables are connected.</li><li>Product browsing, detail pages, cart, orders, address book, and wishlist work in the running project.</li><li>Admins can manage products, orders, users, banners, and categories.</li><li>The current repository passes `npm run build` successfully.</li></ul></div>
+          <div class="compare-panel"><h3>Current Limits</h3><ul><li>The payment step is demo-style `confirm-pay`, not a real payment gateway integration.</li><li>The repository includes Jest configuration, but the project itself does not yet include real test coverage.</li><li>The sorting options include `sales_desc / sales_asc`, but the model layer does not fully implement sales-based sorting.</li><li>The cart currently assumes a logged-in user. A full guest cart flow is not finished yet.</li></ul></div>
+        </div>
+        <p class="section-intro reveal">This slide should be presented proactively. If your instructor asks about real payment or guest checkout, you can answer clearly: the current version focuses on a complete course-level business loop, while production-level capabilities are the next step.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-title="Highlights">
+    <span class="mega-number">11</span>
+    <div class="slide-content">
+      <div class="slide-shell">
+        <div class="slide-meta reveal"><span>Highlights & Challenges</span><span class="slide-index">11</span></div>
+        <div class="two-col">
+          <div class="panel reveal">
+            <p class="eyebrow">Technical Highlights</p>
+            <ul class="body-list">
+              <li>Express plus EJS makes server-side rendered pages straightforward and works well for a brand-style course project.</li>
+              <li>A custom HMAC-signed JWT cookie approach keeps authentication from relying only on session state.</li>
+              <li>Click counting, revenue statistics, and inventory deduction are pushed into database functions to reduce scattered backend logic.</li>
+              <li>Cloudinary upload support and multi-image management move product maintenance closer to a real store workflow.</li>
+            </ul>
+          </div>
+          <div class="panel reveal">
+            <p class="eyebrow">Challenges and Solutions</p>
+            <ul class="body-list">
+              <li>Challenge 1: A fashion store needs a strong visual identity. The solution was a unified black-white-gray palette, serif headlines, large imagery, and minimal interactions.</li>
+              <li>Challenge 2: Order placement must avoid inventory mismatch. The solution was a database-side RPC for validation, order creation, and stock deduction.</li>
+              <li>Challenge 3: Building both client and admin modules can become messy. The solution was layered separation with routes, controllers, services, and models.</li>
+              <li>Challenge 4: Products need more than one image. The solution was a dedicated `product_images` table with ordering and primary-image support.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="quote-panel reveal"><blockquote>If this project were pushed one step further, the most valuable upgrades would be real payment integration, guest cart support, automated tests, and deeper operational analytics.</blockquote><p>Closing Note / Shows both current completeness and future thinking</p></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = Array.from(document.querySelectorAll('.slide'));
+        this.currentSlide = 0;
+        this.isThrottled = false;
+        this.touchStartY = 0;
+        this.progressBar = document.querySelector('.progress-bar');
+        this.navDots = document.querySelector('.nav-dots');
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupWheelNav();
+        this.setupTouchNav();
+        this.setupProgressBar();
+        this.setupNavDots();
+      }
+
+      goToSlide(index) {
+        const nextIndex = Math.max(0, Math.min(index, this.slides.length - 1));
+        this.currentSlide = nextIndex;
+        this.slides[nextIndex].scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.updateUI();
+      }
+
+      throttleNavigation() {
+        if (this.isThrottled) return true;
+        this.isThrottled = true;
+        window.setTimeout(() => { this.isThrottled = false; }, 750);
+        return false;
+      }
+
+      setupIntersectionObserver() {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+              this.currentSlide = this.slides.indexOf(entry.target);
+              this.updateUI();
+            }
+          });
+        }, { threshold: 0.55 });
+        this.slides.forEach((slide) => observer.observe(slide));
+      }
+
+      setupKeyboardNav() {
+        document.addEventListener('keydown', (event) => {
+          const nextKeys = ['ArrowDown', 'ArrowRight', 'PageDown', ' '];
+          const prevKeys = ['ArrowUp', 'ArrowLeft', 'PageUp'];
+          if (nextKeys.includes(event.key)) { event.preventDefault(); this.goToSlide(this.currentSlide + 1); }
+          if (prevKeys.includes(event.key)) { event.preventDefault(); this.goToSlide(this.currentSlide - 1); }
+          if (event.key === 'Home') { event.preventDefault(); this.goToSlide(0); }
+          if (event.key === 'End') { event.preventDefault(); this.goToSlide(this.slides.length - 1); }
+        });
+      }
+
+      setupWheelNav() {
+        window.addEventListener('wheel', (event) => {
+          if (Math.abs(event.deltaY) < 35) return;
+          if (this.throttleNavigation()) return;
+          if (event.deltaY > 0) this.goToSlide(this.currentSlide + 1);
+          if (event.deltaY < 0) this.goToSlide(this.currentSlide - 1);
+        }, { passive: true });
+      }
+
+      setupTouchNav() {
+        window.addEventListener('touchstart', (event) => { this.touchStartY = event.touches[0].clientY; }, { passive: true });
+        window.addEventListener('touchend', (event) => {
+          const delta = this.touchStartY - event.changedTouches[0].clientY;
+          if (Math.abs(delta) < 45 || this.throttleNavigation()) return;
+          if (delta > 0) this.goToSlide(this.currentSlide + 1);
+          if (delta < 0) this.goToSlide(this.currentSlide - 1);
+        }, { passive: true });
+      }
+
+      setupProgressBar() {
+        const updateProgress = () => {
+          const scrollTop = window.scrollY;
+          const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+          const ratio = maxScroll > 0 ? scrollTop / maxScroll : 0;
+          if (this.progressBar) this.progressBar.style.width = `${ratio * 100}%`;
+        };
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress();
+      }
+
+      setupNavDots() {
+        if (!this.navDots) return;
+        this.navDots.innerHTML = '';
+        this.slides.forEach((slide, index) => {
+          const button = document.createElement('button');
+          button.className = 'nav-dot';
+          button.type = 'button';
+          button.setAttribute('aria-label', slide.dataset.title || `Slide ${index + 1}`);
+          button.addEventListener('click', () => this.goToSlide(index));
+          this.navDots.appendChild(button);
+        });
+        this.updateUI();
+      }
+
+      updateUI() {
+        if (!this.navDots) return;
+        Array.from(this.navDots.children).forEach((dot, index) => {
+          dot.classList.toggle('active', index === this.currentSlide);
+        });
+      }
+    }
+
+    new SlidePresentation();
+  </script>
+</body>
+</html>

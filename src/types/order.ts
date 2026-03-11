@@ -1,4 +1,16 @@
-export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export interface OrderAddressSnapshot {
+  label?: string | null;
+  full_name: string;
+  phone?: string | null;
+  address_line1: string;
+  address_line2?: string | null;
+  city: string;
+  state?: string | null;
+  postal_code: string;
+  country: string;
+}
+
+export type OrderStatus = 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface Order {
   id: string;
@@ -9,10 +21,20 @@ export interface Order {
   del_flg: boolean;
   created_at?: string;
   updated_at?: string;
+  shipping_label?: string | null;
+  shipping_full_name?: string | null;
+  shipping_phone?: string | null;
+  shipping_address_line1?: string | null;
+  shipping_address_line2?: string | null;
+  shipping_city?: string | null;
+  shipping_state?: string | null;
+  shipping_postal_code?: string | null;
+  shipping_country?: string | null;
   // joined
   items?: OrderItem[];
   user_email?: string;
   user_name?: string;
+  shipping_address?: OrderAddressSnapshot | null;
 }
 
 export interface OrderItem {

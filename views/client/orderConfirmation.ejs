@@ -18,12 +18,26 @@
   <!-- Main Content -->
   <main class="mx-auto max-w-[1440px] px-5 py-20 lg:px-[140px] lg:py-[100px]">
     <div class="text-center max-w-[600px] mx-auto">
-      <h1 class="text-[28px] lg:text-[40px] font-normal mb-6 uppercase font-serif">Order Confirmed</h1>
+      <h1 class="text-[28px] lg:text-[40px] font-normal mb-6 uppercase font-serif">Payment Successful</h1>
       <div class="h-px w-[100px] bg-[#e0e0e0] mx-auto mb-8"></div>
 
-      <p class="text-[14px] text-[#737373] mb-4">Thank you for shopping with MAISON.</p>
+      <p class="text-[14px] text-[#737373] mb-4">Your order has been confirmed and marked as paid.</p>
       <p class="text-[14px] font-bold mb-2 uppercase">Order Number: #<%= order.id.slice(0, 8).toUpperCase() %></p>
-      <p class="text-[11px] lg:text-[12px] text-[#737373] mb-12">A confirmation has been sent to your email address.</p>
+      <p class="text-[11px] lg:text-[12px] text-[#737373] mb-6">A confirmation has been sent to your email address.</p>
+
+      <% if (order.shipping_address) { %>
+        <div class="mx-auto mb-12 max-w-[420px] border border-[#e0e0e0] bg-[#fafafa] p-5 text-left">
+          <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#737373]">Shipping Address</p>
+          <p class="mt-3 text-[12px] font-bold uppercase tracking-[0.14em]"><%= order.shipping_address.label %></p>
+          <p class="mt-3 text-[12px]"><%= order.shipping_address.full_name %></p>
+          <p class="mt-2 text-[12px] leading-6 text-[#737373]">
+            <%= order.shipping_address.address_line1 %><br>
+            <% if (order.shipping_address.address_line2) { %><%= order.shipping_address.address_line2 %><br><% } %>
+            <%= order.shipping_address.city %><% if (order.shipping_address.state) { %>, <%= order.shipping_address.state %><% } %> <%= order.shipping_address.postal_code %><br>
+            <%= order.shipping_address.country %>
+          </p>
+        </div>
+      <% } %>
 
       <div class="flex flex-col gap-4 items-center">
         <a href="/products" class="w-full sm:w-[240px] h-[52px] bg-black text-white flex items-center justify-center text-[11px] font-bold hover:bg-zinc-800 transition-colors duration-200 uppercase tracking-widest">
@@ -41,27 +55,33 @@
     <div class="mx-auto max-w-[1440px] px-5 py-12 lg:px-[140px]">
       <div class="flex flex-col lg:flex-row justify-between gap-12">
         <div class="lg:w-1/3">
-          <p class="font-serif text-[16px] font-normal mb-4">MAISON</p>
-          <p class="text-[11px] text-[#737373]">Luxury since 2026</p>
+          <p class="font-serif text-[16px] font-normal">MAISON</p>
+          <p class="mt-2 text-[11px] text-[#737373]">Luxury since 2026</p>
         </div>
-        <div class="lg:w-1/3">
-          <p class="text-[11px] font-bold mb-4 uppercase">Explore</p>
-          <div class="flex gap-4">
-            <a href="/products?category=women" class="text-[11px] text-[#737373] hover:text-black">Women</a>
-            <a href="/products?category=men" class="text-[11px] text-[#737373] hover:text-black">Men</a>
-            <a href="/products?category=kids" class="text-[11px] text-[#737373] hover:text-black">Kids</a>
+        <div>
+          <p class="text-[11px] font-bold uppercase">Explore</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <a href="/products?category=women" class="block hover:text-black">Women</a>
+            <a href="/products?category=men" class="block hover:text-black">Men</a>
+            <a href="/products?category=kids" class="block hover:text-black">Kids</a>
           </div>
         </div>
-        <div class="lg:w-1/3 text-left lg:text-right">
-          <p class="text-[11px] font-bold mb-4 uppercase">Account</p>
-          <div class="flex gap-4 lg:justify-end">
-            <a href="/login" class="text-[11px] text-[#737373] hover:text-black">Sign In</a>
-            <a href="/register" class="text-[11px] text-[#737373] hover:text-black">Register</a>
-            <a href="/profile" class="text-[11px] text-[#737373] hover:text-black">My Account</a>
+        <div>
+          <p class="text-[11px] font-bold uppercase">Account</p>
+          <div class="mt-2 space-y-1 text-[11px] text-[#737373]">
+            <% if (user) { %>
+              <a href="/profile" class="block hover:text-black">My Account</a>
+              <a href="/wishlist" class="block hover:text-black">Wishlist</a>
+              <a href="/orders" class="block hover:text-black">Orders</a>
+              <a href="/logout" class="block hover:text-black">Sign Out</a>
+            <% } else { %>
+              <a href="/login" class="block hover:text-black">Sign In</a>
+              <a href="/register" class="block hover:text-black">Register</a>
+            <% } %>
           </div>
         </div>
       </div>
-      <div class="mt-16 pt-8 border-t border-[#e0e0e0]">
+      <div class="mt-8 pt-6 border-t border-[#e0e0e0]">
         <p class="text-[10px] text-[#737373]">© 2026 MAISON. All rights reserved.</p>
       </div>
     </div>

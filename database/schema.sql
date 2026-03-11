@@ -97,13 +97,22 @@ CREATE TABLE IF NOT EXISTS user_addresses (
 );
 
 -- ── 6. ORDERS ────────────────────────────────────────────────
--- status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+-- status: 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled'
 CREATE TABLE IF NOT EXISTS orders (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  address_id   UUID REFERENCES user_addresses(id) ON DELETE SET NULL,  -- shipping address snapshot
+  address_id   UUID REFERENCES user_addresses(id) ON DELETE SET NULL,
+  shipping_label TEXT,
+  shipping_full_name TEXT,
+  shipping_phone TEXT,
+  shipping_address_line1 TEXT,
+  shipping_address_line2 TEXT,
+  shipping_city TEXT,
+  shipping_state TEXT,
+  shipping_postal_code TEXT,
+  shipping_country TEXT,
   status       TEXT NOT NULL DEFAULT 'pending'
-               CHECK (status IN ('pending','processing','shipped','delivered','cancelled')),
+               CHECK (status IN ('pending','processing','payed','shipped','delivered','cancelled')),
   total_amount NUMERIC(10,2) NOT NULL CHECK (total_amount >= 0),
   del_flg      BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -216,7 +225,8 @@ CREATE OR REPLACE FUNCTION get_demo_revenue_total()
 RETURNS NUMERIC AS $$
   SELECT COALESCE(SUM(total_amount), 0)
   FROM orders
-  WHERE del_flg = FALSE;
+  WHERE del_flg = FALSE
+    AND status NOT IN ('processing', 'cancelled');
 $$ LANGUAGE SQL STABLE;
 
 CREATE OR REPLACE FUNCTION create_demo_order_with_inventory(
@@ -371,12 +381,22 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 -- ── 4. ORDERS ────────────────────────────────────────────────
--- status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled'
+-- status: 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled'
 CREATE TABLE IF NOT EXISTS orders (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  address_id   UUID REFERENCES user_addresses(id) ON DELETE SET NULL,
+  shipping_label TEXT,
+  shipping_full_name TEXT,
+  shipping_phone TEXT,
+  shipping_address_line1 TEXT,
+  shipping_address_line2 TEXT,
+  shipping_city TEXT,
+  shipping_state TEXT,
+  shipping_postal_code TEXT,
+  shipping_country TEXT,
   status       TEXT NOT NULL DEFAULT 'pending'
-               CHECK (status IN ('pending','processing','shipped','delivered','cancelled')),
+               CHECK (status IN ('pending','processing','payed','shipped','delivered','cancelled')),
   total_amount NUMERIC(10,2) NOT NULL CHECK (total_amount >= 0),
   del_flg      BOOLEAN NOT NULL DEFAULT FALSE,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
