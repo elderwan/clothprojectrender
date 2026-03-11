@@ -22,8 +22,8 @@ const router = Router();
 // ── Home ──────────────────────────────────────────────────────
 router.get('/', async (req: Request, res: Response) => {
   let cartCount = 0;
-  if (req.session.user) {
-    const cart = await getCart(req.session.user.id);
+  if (req.authUser) {
+    const cart = await getCart(req.authUser.id);
     cartCount = cart.items.length;
   }
 

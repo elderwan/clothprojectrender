@@ -3,20 +3,20 @@ import { getCart, addToCart, updateQty, removeItem, emptyCart } from '../service
 
 export async function showCart(req: Request, res: Response): Promise<void> {
   const error = typeof req.query.error === 'string' ? req.query.error : null;
-  if (!req.session.user) {
+  if (!req.authUser) {
     res.render('client/cart', { title: 'Shopping Bag', cart: null, error });
     return;
   }
-  const cart = await getCart(req.session.user.id);
+  const cart = await getCart(req.authUser.id);
   res.render('client/cart', { title: 'Shopping Bag', cart, error });
 }
 
 export async function postAddToCart(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const { product_id, quantity, size } = req.body;
     const qty = Math.max(1, Number(quantity) || 1);
-    await addToCart(req.session.user.id, product_id, qty, size);
+    await addToCart(req.authUser.id, product_id, qty, size);
     res.redirect('/cart');
   } catch (err: any) {
     res.redirect('/cart?error=' + encodeURIComponent(err.message));
@@ -24,7 +24,7 @@ export async function postAddToCart(req: Request, res: Response): Promise<void> 
 }
 
 export async function postUpdateQty(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const ids = Array.isArray(req.body?.id) ? req.body.id : [req.body?.id];
     const quantities = Array.isArray(req.body?.quantity) ? req.body.quantity : [req.body?.quantity];
@@ -39,9 +39,9 @@ export async function postUpdateQty(req: Request, res: Response): Promise<void> 
       if (!id) throw new Error('Missing cart item id.');
       if (!Number.isFinite(qty)) throw new Error('Invalid quantity.');
       if (qty <= 0) {
-        await removeItem(req.session.user.id, id);
+        await removeItem(req.authUser.id, id);
       } else {
-        await updateQty(req.session.user.id, id, qty);
+        await updateQty(req.authUser.id, id, qty);
       }
     }
 
@@ -52,9 +52,9 @@ export async function postUpdateQty(req: Request, res: Response): Promise<void> 
 }
 
 export async function postRemoveItem(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
-    await removeItem(req.session.user.id, req.params.id);
+    await removeItem(req.authUser.id, req.params.id);
     res.redirect('/cart');
   } catch (err: any) {
     res.redirect('/cart?error=' + encodeURIComponent(err.message));

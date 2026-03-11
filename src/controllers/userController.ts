@@ -6,15 +6,16 @@ import {
 } from '../models/addressModel.js';
 import { getOrdersByUser } from '../models/orderModel.js';
 import bcrypt from 'bcryptjs';
+import { setAuthCookie } from '../services/jwtService.js';
 
 // ── Profile ──────────────────────────────────────────────────
 
 export async function showProfile(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   const [user, addresses, orders] = await Promise.all([
-    findUserById(req.session.user.id),
-    getAddressesByUser(req.session.user.id),
-    getOrdersByUser(req.session.user.id, 5),
+    findUserById(req.authUser.id),
+    getAddressesByUser(req.authUser.id),
+    getOrdersByUser(req.authUser.id, 5),
   ]);
   res.render('client/profile', {
     title: 'My Account',
@@ -27,8 +28,8 @@ export async function showProfile(req: Request, res: Response): Promise<void> {
 }
 
 export async function showEditProfile(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
-  const user = await findUserById(req.session.user.id);
+  if (!req.authUser) return void res.redirect('/login');
+  const user = await findUserById(req.authUser.id);
   res.render('client/editProfile', {
     title: 'Edit Profile',
     user,
@@ -38,10 +39,10 @@ export async function showEditProfile(req: Request, res: Response): Promise<void
 }
 
 export async function showAddressBook(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   const [user, addresses] = await Promise.all([
-    findUserById(req.session.user.id),
-    getAddressesByUser(req.session.user.id),
+    findUserById(req.authUser.id),
+    getAddressesByUser(req.authUser.id),
   ]);
   res.render('client/addressBook', {
     title: 'Address Book',
@@ -53,32 +54,32 @@ export async function showAddressBook(req: Request, res: Response): Promise<void
 }
 
 export async function postUpdateProfile(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const { full_name, phone } = req.body;
     const updates: Record<string, string> = { full_name, phone };
 
-    const updated = await updateUser(req.session.user.id, updates);
-    req.session.user = { ...req.session.user, ...updated };
+    const updated = await updateUser(req.authUser.id, updates);
+    setAuthCookie(res, { ...req.authUser, ...updated });
 
     res.redirect('/profile');
   } catch (err: any) {
-    const user = await findUserById(req.session.user.id);
+    const user = await findUserById(req.authUser.id);
     res.render('client/editProfile', { title: 'Edit Profile', user, error: err.message, success: null });
   }
 }
 
 export async function showChangePassword(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   res.render('client/changePassword', { title: 'Change Password', error: null, success: null });
 }
 
 export async function postChangePassword(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const { current_password, new_password, confirm_password } = req.body;
     
-    const user = await findUserByIdFull(req.session.user.id);
+    const user = await findUserByIdFull(req.authUser.id);
     if (!user) throw new Error('User not found.');
 
     const isMatch = await bcrypt.compare(current_password, user.password_hash);
@@ -87,7 +88,7 @@ export async function postChangePassword(req: Request, res: Response): Promise<v
     if (new_password !== confirm_password) throw new Error('New passwords do not match.');
     
     const password_hash = await bcrypt.hash(new_password, 10);
-    await updateUser(req.session.user.id, { password_hash });
+    await updateUser(req.authUser.id, { password_hash });
 
     res.render('client/changePassword', { title: 'Change Password', error: null, success: 'Password updated successfully.' });
   } catch (err: any) {
@@ -98,11 +99,11 @@ export async function postChangePassword(req: Request, res: Response): Promise<v
 // ── Addresses ────────────────────────────────────────────────
 
 export async function postAddAddress(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const { label, full_name, phone, address_line1, address_line2, city, state, postal_code, country, is_default } = req.body;
     await createAddress({
-      user_id:      req.session.user.id,
+      user_id:      req.authUser.id,
       label:        label || 'Home',
       full_name,
       phone:        phone || null,
@@ -121,10 +122,10 @@ export async function postAddAddress(req: Request, res: Response): Promise<void>
 }
 
 export async function postEditAddress(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
     const { label, full_name, phone, address_line1, address_line2, city, state, postal_code, country, is_default } = req.body;
-    await updateAddress(req.params.id, req.session.user.id, {
+    await updateAddress(req.params.id, req.authUser.id, {
       label:        label || 'Home',
       full_name,
       phone:        phone || null,
@@ -143,7 +144,7 @@ export async function postEditAddress(req: Request, res: Response): Promise<void
 }
 
 export async function postDeleteAddress(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
-  await deleteAddress(req.params.id, req.session.user.id);
+  if (!req.authUser) return void res.redirect('/login');
+  await deleteAddress(req.params.id, req.authUser.id);
   res.redirect('/profile/addresses?success=' + encodeURIComponent('Address deleted successfully.'));
 }

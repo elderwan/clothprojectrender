@@ -63,7 +63,10 @@ app.use((_req: Request, res: Response) => {
 // Error handler
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(err.stack);
-  res.status(500).send('500 - Internal Server Error');
+  if (res.headersSent) {
+    return;
+  }
+  res.status(500).render('500', { title: 'Service Unavailable' });
 });
 
 export default app;

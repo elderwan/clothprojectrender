@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import { register, login } from '../services/authService.js';
+import { clearAuthCookie, setAuthCookie } from '../services/jwtService.js';
 
 function getSafeRedirectPath(raw: unknown): string {
   const value = typeof raw === 'string' ? raw.trim() : '';
@@ -10,7 +11,7 @@ function getSafeRedirectPath(raw: unknown): string {
 }
 
 export async function showLogin(req: Request, res: Response): Promise<void> {
-  if (req.session.user) return void res.redirect('/');
+  if (req.authUser) return void res.redirect('/');
   res.render('client/login', { title: 'Sign In', error: null });
 }
 
@@ -20,7 +21,7 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
       throw new Error('Email and password are required.');
     }
     const user = await login(req.body);
-    req.session.user = user;
+    setAuthCookie(res, user);
     res.redirect(getSafeRedirectPath(req.body.redirect));
   } catch (err: any) {
     res.render('client/login', { title: 'Sign In', error: err.message });
@@ -28,7 +29,7 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
 }
 
 export async function showRegister(req: Request, res: Response): Promise<void> {
-  if (req.session.user) return void res.redirect('/');
+  if (req.authUser) return void res.redirect('/');
   res.render('client/register', { title: 'Create Account', error: null });
 }
 
@@ -38,7 +39,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       throw new Error('Name, email, and password are required.');
     }
     const user = await register(req.body);
-    req.session.user = user;
+    setAuthCookie(res, user);
     res.redirect('/');
   } catch (err: any) {
     res.render('client/register', { title: 'Create Account', error: err.message });
@@ -46,5 +47,6 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 }
 
 export function handleLogout(req: Request, res: Response): void {
+  clearAuthCookie(res);
   req.session.destroy(() => res.redirect('/'));
 }

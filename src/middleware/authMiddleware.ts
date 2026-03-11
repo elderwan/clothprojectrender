@@ -1,8 +1,10 @@
 import type { Request, Response, NextFunction } from 'express';
+import { clearAuthCookie, getAuthUserFromRequest } from '../services/jwtService.js';
+import { getCart } from '../services/cartService.js';
 
 /** Requires an authenticated client session. Redirects to /login if not. */
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
-  if (req.session?.user) {
+  if (req.authUser) {
     next();
   } else {
     res.redirect('/login');
@@ -11,7 +13,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
 
 /** API variant: returns JSON instead of redirecting. */
 export function requireAuthApi(req: Request, res: Response, next: NextFunction): void {
-  if (req.session?.user) {
+  if (req.authUser) {
     next();
   } else {
     res.status(401).json({ message: 'Authentication required.' });
@@ -19,15 +21,15 @@ export function requireAuthApi(req: Request, res: Response, next: NextFunction):
 }
 
 /** Attaches user to res.locals for use in all EJS templates. */
-import { getCart } from '../services/cartService.js';
-
 export async function injectUser(req: Request, res: Response, next: NextFunction): Promise<void> {
-  res.locals.user = req.session?.user ?? null;
+  const authUser = getAuthUserFromRequest(req);
+  req.authUser = authUser;
+  res.locals.user = authUser;
 
   // compute cart count for logged-in users so header can show item number
-  if (req.session?.user) {
+  if (authUser) {
     try {
-      const cart = await getCart(req.session.user.id);
+      const cart = await getCart(authUser.id);
       res.locals.cartCount = cart?.items?.length ?? 0;
     } catch (err) {
       console.error('failed to load cart count', err);
@@ -35,6 +37,10 @@ export async function injectUser(req: Request, res: Response, next: NextFunction
     }
   } else {
     res.locals.cartCount = 0;
+  }
+
+  if (!authUser && getAuthUserFromRequest(req) === null && req.headers.cookie?.includes('maison_auth=')) {
+    clearAuthCookie(res);
   }
 
   next();

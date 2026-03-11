@@ -4,24 +4,24 @@ import { getCart } from '../services/cartService.js';
 import { getAddressById, getDefaultAddress } from '../models/addressModel.js';
 
 export async function postPlaceOrder(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   try {
-    const cart = await getCart(req.session.user.id);
+    const cart = await getCart(req.authUser.id);
     if (!cart.items.length) return void res.redirect('/cart');
     const rawAddressId = typeof req.body?.address_id === 'string' ? req.body.address_id : '';
 
     let addressId: string | undefined;
     if (rawAddressId) {
-      const addr = await getAddressById(rawAddressId, req.session.user.id);
+      const addr = await getAddressById(rawAddressId, req.authUser.id);
       if (!addr) throw new Error('Selected address is invalid.');
       addressId = addr.id;
     } else {
-      const defaultAddr = await getDefaultAddress(req.session.user.id);
+      const defaultAddr = await getDefaultAddress(req.authUser.id);
       addressId = defaultAddr?.id;
     }
 
     const order = await placeOrder({
-      user_id: req.session.user.id,
+      user_id: req.authUser.id,
       address_id: addressId,
       items: cart.items.map(i => ({
         product_id: i.product_id,
@@ -37,24 +37,24 @@ export async function postPlaceOrder(req: Request, res: Response): Promise<void>
 }
 
 export async function showOrderConfirm(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   const order = await getOrderDetail(req.params.id);
-  if (!order || order.user_id !== req.session.user.id) {
+  if (!order || order.user_id !== req.authUser.id) {
     return void res.redirect('/');
   }
   res.render('client/orderConfirmation', { title: 'Order Confirmed', order });
 }
 
 export async function showOrderHistory(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   
   const page = Math.max(1, Number(req.query.page) || 1);
   const limit = 10;
   const offset = (page - 1) * limit;
 
   const [orders, total] = await Promise.all([
-    getUserOrders(req.session.user.id, limit, offset),
-    countUserOrders(req.session.user.id),
+    getUserOrders(req.authUser.id, limit, offset),
+    countUserOrders(req.authUser.id),
   ]);
 
   const totalPages = Math.ceil(total / limit);
@@ -68,19 +68,19 @@ export async function showOrderHistory(req: Request, res: Response): Promise<voi
 }
 
 export async function showOrderDetail(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
   const order = await getOrderDetail(req.params.id);
-  if (!order || order.user_id !== req.session.user.id) {
+  if (!order || order.user_id !== req.authUser.id) {
     return void res.status(404).render('404', { title: 'Not Found' });
   }
   res.render('client/orderDetail', { title: 'Order ' + order.id, order });
 }
 
 export async function postSimulatePayment(req: Request, res: Response): Promise<void> {
-  if (!req.session.user) return void res.redirect('/login');
+  if (!req.authUser) return void res.redirect('/login');
 
   const order = await getOrderDetail(req.params.id);
-  if (!order || order.user_id !== req.session.user.id) {
+  if (!order || order.user_id !== req.authUser.id) {
     return void res.status(404).render('404', { title: 'Not Found' });
   }
 
