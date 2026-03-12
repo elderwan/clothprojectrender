@@ -2,7 +2,16 @@ import type { Request, Response } from 'express';
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import type { PublicUser } from '../types/user.js';
 
-const AUTH_COOKIE_NAME = 'maison_auth';
+export type AuthScope = 'client' | 'admin';
+
+const AUTH_COOKIE_NAMES: Record<AuthScope, string> = {
+  client: 'maison_client_auth',
+  admin: 'maison_admin_auth',
+};
+const AUTH_COOKIE_PATHS: Record<AuthScope, string> = {
+  client: '/',
+  admin: '/admin',
+};
 const JWT_ALG = 'HS256';
 const JWT_TTL_SECONDS = 60 * 60 * 24;
 
@@ -77,11 +86,21 @@ export function verifyAuthToken(token: string): PublicUser | null {
   }
 }
 
-export function readAuthToken(req: Request): string | null {
+function getAuthScopeFromRequest(req: Request): AuthScope {
+  return req.path.startsWith('/admin') || req.originalUrl.startsWith('/admin') ? 'admin' : 'client';
+}
+
+function hasCookie(req: Request, scope: AuthScope): boolean {
+  const rawCookie = req.headers.cookie;
+  if (!rawCookie) return false;
+  return rawCookie.split(';').some((chunk) => chunk.trim().startsWith(`${AUTH_COOKIE_NAMES[scope]}=`));
+}
+
+export function readAuthToken(req: Request, scope = getAuthScopeFromRequest(req)): string | null {
   const rawCookie = req.headers.cookie;
   if (!rawCookie) return null;
 
-  const target = `${AUTH_COOKIE_NAME}=`;
+  const target = `${AUTH_COOKIE_NAMES[scope]}=`;
   for (const chunk of rawCookie.split(';')) {
     const value = chunk.trim();
     if (!value.startsWith(target)) continue;
@@ -97,22 +116,26 @@ export function getAuthUserFromRequest(req: Request): PublicUser | null {
   return verifyAuthToken(token);
 }
 
-export function setAuthCookie(res: Response, user: PublicUser): void {
-  res.cookie(AUTH_COOKIE_NAME, signAuthToken(user), {
+export function setAuthCookie(res: Response, user: PublicUser, scope: AuthScope): void {
+  res.cookie(AUTH_COOKIE_NAMES[scope], signAuthToken(user), {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     //24 expires in 24 hours, expressed in milliseconds
     maxAge: JWT_TTL_SECONDS * 1000, 
-    path: '/',
+    path: AUTH_COOKIE_PATHS[scope],
   });
 }
 
-export function clearAuthCookie(res: Response): void {
-  res.clearCookie(AUTH_COOKIE_NAME, {
+export function clearAuthCookie(res: Response, scope: AuthScope): void {
+  res.clearCookie(AUTH_COOKIE_NAMES[scope], {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
-    path: '/',
+    path: AUTH_COOKIE_PATHS[scope],
   });
+}
+
+export function hasAuthCookie(req: Request, scope = getAuthScopeFromRequest(req)): boolean {
+  return hasCookie(req, scope);
 }

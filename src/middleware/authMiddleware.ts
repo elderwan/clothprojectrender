@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { clearAuthCookie, getAuthUserFromRequest } from '../services/jwtService.js';
+import { clearAuthCookie, getAuthUserFromRequest, hasAuthCookie } from '../services/jwtService.js';
 import { getCart } from '../services/cartService.js';
 
 /** Requires an authenticated client session. Redirects to /login if not. */
@@ -39,8 +39,9 @@ export async function injectUser(req: Request, res: Response, next: NextFunction
     res.locals.cartCount = 0;
   }
 
-  if (!authUser && getAuthUserFromRequest(req) === null && req.headers.cookie?.includes('maison_auth=')) {
-    clearAuthCookie(res);
+  const activeScope = req.path.startsWith('/admin') || req.originalUrl.startsWith('/admin') ? 'admin' : 'client';
+  if (!authUser && hasAuthCookie(req, activeScope)) {
+    clearAuthCookie(res, activeScope);
   }
 
   next();

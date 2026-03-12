@@ -60,7 +60,7 @@ export async function postUpdateProfile(req: Request, res: Response): Promise<vo
     const updates: Record<string, string> = { full_name, phone };
 
     const updated = await updateUser(req.authUser.id, updates);
-    setAuthCookie(res, { ...req.authUser, ...updated });
+    setAuthCookie(res, { ...req.authUser, ...updated }, 'client');
 
     res.redirect('/profile');
   } catch (err: any) {

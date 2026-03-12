@@ -21,7 +21,7 @@ export async function handleLogin(req: Request, res: Response): Promise<void> {
       throw new Error('Email and password are required.');
     }
     const user = await login(req.body);
-    setAuthCookie(res, user);
+    setAuthCookie(res, user, 'client');
     res.redirect(getSafeRedirectPath(req.body.redirect));
   } catch (err: any) {
     res.render('client/login', { title: 'Sign In', error: err.message });
@@ -39,7 +39,7 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
       throw new Error('Name, email, and password are required.');
     }
     const user = await register(req.body);
-    setAuthCookie(res, user);
+    setAuthCookie(res, user, 'client');
     res.redirect('/');
   } catch (err: any) {
     res.render('client/register', { title: 'Create Account', error: err.message });
@@ -47,6 +47,6 @@ export async function handleRegister(req: Request, res: Response): Promise<void>
 }
 
 export function handleLogout(req: Request, res: Response): void {
-  clearAuthCookie(res);
+  clearAuthCookie(res, 'client');
   req.session.destroy(() => res.redirect('/'));
 }
