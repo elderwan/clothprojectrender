@@ -3,6 +3,7 @@ import type { CreateOrderInput, Order, OrderAddressSnapshot, OrderItem } from '.
 import { getPrimaryImagesBulk } from './productImageModel.js';
 
 const VALID_ORDER_STATUS = new Set(['pending', 'processing', 'payed', 'shipped', 'delivered', 'cancelled']);
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export type AdminOrderStatus = 'all' | 'pending' | 'processing' | 'payed' | 'shipped' | 'delivered' | 'cancelled';
 export interface AdminOrderSearchFilters {
   order_no?: string;
@@ -142,6 +143,7 @@ export async function getOrderRevenueTotal(): Promise<number> {
 }
 
 export async function searchOrdersForAdmin(filters: AdminOrderSearchFilters): Promise<Order[]> {
+  const orderNo = (filters.order_no ?? '').trim();
   let query = supabase
     .from('orders')
     .select('*, users(email, full_name)')
@@ -151,8 +153,8 @@ export async function searchOrdersForAdmin(filters: AdminOrderSearchFilters): Pr
   if (filters.status && filters.status !== 'all') {
     query = query.eq('status', filters.status) as typeof query;
   }
-  if (filters.order_no) {
-    query = query.ilike('id', `%${filters.order_no}%`) as typeof query;
+  if (orderNo && UUID_PATTERN.test(orderNo)) {
+    query = query.eq('id', orderNo) as typeof query;
   }
   if (filters.date_from) {
     query = query.gte('created_at', `${filters.date_from}T00:00:00.000Z`) as typeof query;
@@ -175,6 +177,11 @@ export async function searchOrdersForAdmin(filters: AdminOrderSearchFilters): Pr
     user_email: row.users?.email,
     user_name: row.users?.full_name,
   }));
+
+  if (orderNo && !UUID_PATTERN.test(orderNo)) {
+    const needle = orderNo.toLowerCase();
+    rows = rows.filter((row: any) => String(row.id ?? '').toLowerCase().includes(needle));
+  }
 
   const customer = (filters.customer ?? '').trim().toLowerCase();
   if (customer) {
